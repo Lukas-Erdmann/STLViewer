@@ -1,82 +1,176 @@
 package com.example.stlviewer.util;
 
-import com.example.stlviewer.model.ConsoleMessages;
+import com.example.stlviewer.res.Strings;
 
 import java.util.concurrent.Callable;
 
+/**
+ * This class contains methods that handle exceptions and runtime errors. Additionally, it contains methods
+ * that measure the runtime of a function. <br>
+ *
+ * @author  Lukas Erdmann
+ */
 public class RuntimeHandler
 {
     /**
+     * Stores the start time of a function.
+     */
+    private static long startTime;
+    /**
+     * Stores the end time of a function.
+     */
+    private static long endTime;
+
+    /**
      * Accepts a non-void function as parameter and tries to execute it. If the function throws an exception,
-     * it displays the correct error message and tries to execute the operation again. If the number operation
-     * fails exceeds maxTries, the program exits. <br>
+     * it displays the correct error message and tries to execute the operation again. If the operation
+     * fails 5 times, the program exits. <br>
      * Pre-condition: none <br>
      * Post-condition: none
      *
-     * @param <T>      Type of the function
-     * @param function Function to execute
-     * @param maxTries Maximum number of tries
-     * @return Result of the function
-     * @author Lukas Erdmann
+     * @author  Lukas Erdmann
+     * @param <T>           Type of the function
+     * @param function      Function to execute
+     * @param maxTries      Maximum number of tries
+     * @return              Result of the function
      */
-    public static <T> T exceptionHandler (Callable<T> function, int maxTries)
-    {
+    public static <T> T exceptionHandler (Callable<T> function, int maxTries) {
         int tries = 0;
         // Try to execute the function until it succeeds or the maximum number of tries is reached
-        while (tries++ <= maxTries)
-        {
-            try
-            {
+        while (tries++ <= maxTries) {
+            try {
                 return function.call();
-            } catch (Throwable e)
-            {
+            } catch (Throwable e) {
                 System.out.println(e.getMessage());
                 if (tries <= maxTries)
                 {
                     // If the maximum number of tries is not reached, display the number of tries
-                    System.out.printf(ConsoleMessages.EXCEPTION_HANDLER_LOOP, tries, maxTries);
+                    System.out.printf(Strings.EXCEPTION_HANDLER_LOOP, tries, maxTries);
                 }
             }
         }
         // If the maximum number of tries is reached, display the exit message and exit the program
-        System.out.println(ConsoleMessages.EXCEPTION_HANDLER_EXIT);
+        System.out.println(Strings.EXCEPTION_HANDLER_EXIT);
         System.exit(1);
         return null;
     }
 
     /**
      * Accepts a void function as parameter and tries to execute it. If the function throws an exception,
-     * the correct error message is displayed and the function is executed again. If the number operation
-     * fails exceeds maxTries, the program exits. <br>
+     * the correct error message is displayed and the function is executed again. If the operation
+     * fails 5 times, the program exits. <br>
      * Pre-condition: none <br>
      * Post-condition: none
-     *
-     * @param function Function to execute
-     * @param maxTries Maximum number of tries
-     * @author Lukas Erdmann
+     * @author  Lukas Erdmann
+     * @param function      Function to execute
+     * @param maxTries      Maximum number of tries
      */
-    public static void exceptionHandler (Runnable function, int maxTries)
-    {
+    public static void exceptionHandler (Runnable function, int maxTries) {
         int tries = 0;
         // Try to execute the function until it succeeds or the maximum number of tries is reached
-        while (tries++ <= maxTries)
-        {
-            try
-            {
+        while (tries++ <= maxTries) {
+            try {
                 function.run();
                 return;
-            } catch (Throwable e)
-            {
+            } catch (Throwable e) {
                 System.out.println(e.getMessage());
                 if (tries <= maxTries)
                 {
                     // If the maximum number of tries is not reached, display the number of tries
-                    System.out.printf(ConsoleMessages.EXCEPTION_HANDLER_LOOP, tries, maxTries);
+                    System.out.printf(Strings.EXCEPTION_HANDLER_LOOP, tries, maxTries);
                 }
             }
         }
         // If the maximum number of tries is reached, display the exit message and exit the program
-        System.out.println(ConsoleMessages.EXCEPTION_HANDLER_EXIT);
+        System.out.println(Strings.EXCEPTION_HANDLER_EXIT);
         System.exit(1);
+    }
+
+    /**
+     * Measures the current time in milliseconds and stores it in the startTime variable. This method
+     * is used in conjunction with the stopTimer() method to measure the execution time of a function. <br>
+     * Pre-condition: System.currentTimeMillis() must be available. <br>
+     * Post-condition: none
+     *
+     * @author  Lukas Erdmann
+     * @see #stopTimer()
+     */
+    public static void startTimer()
+    {
+        startTime = System.currentTimeMillis();
+    }
+
+    /**
+     * Measures the current time in milliseconds and stores it in the endTime variable. This method
+     * is used in conjunction with the startTimer() method to measure the execution time of a function. <br>
+     * Pre-condition: System.currentTimeMillis() must be available. <br>
+     * Post-condition: none
+     *
+     * @author  Lukas Erdmann
+     * @see #startTimer()
+     */
+    public static void stopTimer()
+    {
+        endTime = System.currentTimeMillis();
+    }
+
+    /**
+     * Returns the difference between the endTime and startTime variables. This method is used in conjunction with the
+     * startTimer() and stopTimer() methods to measure the execution time of a function. <br>
+     * Pre-condition: The startTimer() and stopTimer() methods must be called before this method. <br>
+     * Post-condition: none
+     *
+     * @author  Lukas Erdmann
+     * @return  The difference between the endTime and startTime variables.
+     * @see #stopTimer()
+     * @see #startTimer()
+     */
+    public static long getElapsedTime()
+    {
+        return endTime - startTime;
+    }
+
+    /**
+     * Displays the execution time of a void function. The function is executed inside the exceptionHandler() method.
+     * After a successful execution, the execution time is displayed using the getElapsedTime() method. <br>
+     * Pre-condition: none <br>
+     * Post-condition: none
+     *
+     * @author  Lukas Erdmann
+     * @param function  Function to execute
+     * @param maxTries  Maximum number of tries
+     * @see #exceptionHandler(Runnable, int)
+     * @see #getElapsedTime()
+     */
+    public static void displayExecutionTime (Runnable function, int maxTries)
+    {
+        startTimer();
+        exceptionHandler(function, maxTries);
+        stopTimer();
+        System.out.printf(Strings.EXECUTION_TIME, getElapsedTime());
+    }
+
+    /**
+     * Displays the execution time of a non-void function. The function is executed inside the exceptionHandler() method.
+     * After a successful execution, the execution time is displayed using the getElapsedTime() method and the result
+     * of the function is returned. <br>
+     * Pre-condition: none <br>
+     * Post-condition: none
+     *
+     * @author  Lukas Erdmann
+     * @param <T>       Type of the function
+     * @param function  Function to execute
+     * @param maxTries  Maximum number of tries
+     * @return          Result of the function
+     * @see #exceptionHandler(Callable, int)
+     * @see #getElapsedTime()
+     */
+    public static <T> T displayExecutionTime (Callable<T> function, int maxTries)
+    {
+        startTimer();
+        T result = exceptionHandler(function, maxTries);
+        stopTimer();
+        System.out.printf(Strings.EXECUTION_TIME, getElapsedTime());
+        return result;
     }
 }

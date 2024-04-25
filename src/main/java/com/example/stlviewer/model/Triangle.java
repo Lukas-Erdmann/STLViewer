@@ -2,11 +2,12 @@ package com.example.stlviewer.model;
 
 import javax.vecmath.Vector3d;
 
-public class Triangle
+public class Triangle implements Comparable<Triangle>
 {
     private Vertex[] vertices = new Vertex[3];
     private Vector3d[] edges = new Vector3d[3];
     private Vector3d normal = new Vector3d(0, 0, 0);
+    private double area;
 
     public Triangle (Vertex v1, Vertex v2, Vertex v3, Vector3d normal)
     {
@@ -29,14 +30,14 @@ public class Triangle
         this.normal.normalize();
     }
 
-    public double calculateArea ()
+    public void calculateArea ()
     {
         // Calculate the area of the triangle using Heron's formula
         double a = edges[0].length();
         double b = edges[1].length();
         double c = edges[2].length();
         double s = (a + b + c) / 2;
-        return Math.sqrt(s * (s - a) * (s - b) * (s - c));
+        this.area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
     }
 
     public Vertex[] getVertices ()
@@ -74,6 +75,11 @@ public class Triangle
         return edges[index];
     }
 
+    public double getArea ()
+    {
+        return area;
+    }
+
     @Override
     public String toString ()
     {
@@ -81,5 +87,22 @@ public class Triangle
                 "vertices=" + vertices[0] + ", " + vertices[1] + ", " + vertices[2] +
                 ", normal=" + normal +
                 '}';
+    }
+
+    @Override
+    public int compareTo (Triangle other)
+    {
+        if (this.area < other.area)
+        {
+            return -1;
+        }
+        else if (this.area > other.area)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
     }
 }
