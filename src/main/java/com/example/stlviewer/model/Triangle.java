@@ -7,7 +7,9 @@ public class Triangle implements Comparable<Triangle>
     private Vertex[] vertices = new Vertex[3];
     private Vector3d[] edges = new Vector3d[3];
     private Vector3d normal = new Vector3d(0, 0, 0);
+    private Vector3d unitNormal = new Vector3d(0, 0, 0);
     private double area;
+    private int id;
 
     public Triangle (Vertex v1, Vertex v2, Vertex v3, Vector3d normal)
     {
@@ -15,6 +17,7 @@ public class Triangle implements Comparable<Triangle>
         vertices[0] = v1;
         vertices[1] = v2;
         vertices[2] = v3;
+        // TODO: Check if the vertices are unique
 
         // Set the normal
         edges[0] = new Vector3d(v2.getPosX() - v1.getPosX(), v2.getPosY() - v1.getPosY(), v2.getPosZ() - v1.getPosZ());
@@ -27,17 +30,14 @@ public class Triangle implements Comparable<Triangle>
         // The normal is the cross product of two edges in counter-clockwise order
         this.normal.cross(edges[0], edges[1]);
         // Normalize the normal, bringing it to unit length (length = 1)
-        this.normal.normalize();
+        this.unitNormal = this.normal;
+        this.unitNormal.normalize();
     }
 
     public void calculateArea ()
     {
-        // Calculate the area of the triangle using Heron's formula
-        double a = edges[0].length();
-        double b = edges[1].length();
-        double c = edges[2].length();
-        double s = (a + b + c) / 2;
-        this.area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+        // Calculate the area of the triangle using the cross product of two edges
+        area = 0.5 * normal.length();
     }
 
     public Vertex[] getVertices ()
@@ -78,6 +78,16 @@ public class Triangle implements Comparable<Triangle>
     public double getArea ()
     {
         return area;
+    }
+
+    public int getId ()
+    {
+        return id;
+    }
+
+    public void setId (int id)
+    {
+        this.id = id;
     }
 
     @Override

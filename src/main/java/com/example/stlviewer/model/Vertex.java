@@ -1,6 +1,6 @@
 package com.example.stlviewer.model;
 
-public class Vertex
+public class Vertex implements Comparable<Vertex>
 {
     private double posX;
     private double posY;
@@ -51,5 +51,31 @@ public class Vertex
                 ", y=" + posY +
                 ", z=" + posZ +
                 '}';
+    }
+
+    @Override
+    public int compareTo (Vertex refVertex)
+    {
+        //Compare the two vertices based on their distance from the origin
+        double distance1 = Math.sqrt(posX * posX + posY * posY + posZ * posZ);
+        double distance2 = Math.sqrt(refVertex.posX * refVertex.posX + refVertex.posY * refVertex.posY + refVertex.posZ * refVertex.posZ);
+        return Double.compare(distance1, distance2);
+    }
+
+    @Override
+    public boolean equals (Object refVertex)
+    {
+        if (this == refVertex)
+        {
+            return true;
+        }
+        if (refVertex == null || getClass() != refVertex.getClass())
+        {
+            return false;
+        }
+        Vertex vertex = (Vertex) refVertex;
+        return Double.compare(vertex.posX, posX) == 0 &&
+                Double.compare(vertex.posY, posY) == 0 &&
+                Double.compare(vertex.posZ, posZ) == 0;
     }
 }
