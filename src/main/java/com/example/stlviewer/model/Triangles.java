@@ -7,6 +7,12 @@ public class Triangles extends ArrayList<Triangle>
     private ArrayList<ArrayList<Integer>> adjacencyList;
     private int idCounter = 0;
 
+    public Triangles ()
+    {
+        super();
+        adjacencyList = new ArrayList<>();
+    }
+
     public Triangles (int initialCapacity)
     {
         super(initialCapacity);
@@ -93,9 +99,8 @@ public class Triangles extends ArrayList<Triangle>
     }
 
     public ArrayList<Integer> checkNormals () {
-        ArrayList<Integer> wrongNormals = new ArrayList<>();
-        // Check if each edge has a corresponding edge with the value but opposite sign
+        // Check if each edge has a corresponding edge with the same value but opposite sign
         // TODO: Implement this method
-        return wrongNormals;
+        return new ArrayList<>();
     }
 }
