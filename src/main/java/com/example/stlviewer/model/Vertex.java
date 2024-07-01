@@ -46,11 +46,7 @@ public class Vertex implements Comparable<Vertex>
     @Override
     public String toString ()
     {
-        return "Vertex{" +
-                "x=" + posX +
-                ", y=" + posY +
-                ", z=" + posZ +
-                '}';
+        return "Vertex{" + posX + ", " + posY + ", " + posZ + "}";
     }
 
     @Override
@@ -65,17 +61,12 @@ public class Vertex implements Comparable<Vertex>
     @Override
     public boolean equals (Object refVertex)
     {
-        if (this == refVertex)
+        if (refVertex instanceof Vertex vertex)
         {
-            return true;
+            return Double.compare(vertex.posX, posX) == 0 &&
+                    Double.compare(vertex.posY, posY) == 0 &&
+                    Double.compare(vertex.posZ, posZ) == 0;
         }
-        if (refVertex == null || getClass() != refVertex.getClass())
-        {
-            return false;
-        }
-        Vertex vertex = (Vertex) refVertex;
-        return Double.compare(vertex.posX, posX) == 0 &&
-                Double.compare(vertex.posY, posY) == 0 &&
-                Double.compare(vertex.posZ, posZ) == 0;
+        return false;
     }
 }

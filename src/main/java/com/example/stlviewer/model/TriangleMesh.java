@@ -2,18 +2,18 @@ package com.example.stlviewer.model;
 
 import java.util.ArrayList;
 
-public class Triangles extends ArrayList<Triangle>
+public class TriangleMesh extends ArrayList<Triangle>
 {
     private ArrayList<ArrayList<Integer>> adjacencyList;
     private int idCounter = 0;
 
-    public Triangles ()
+    public TriangleMesh ()
     {
         super();
         adjacencyList = new ArrayList<>();
     }
 
-    public Triangles (int initialCapacity)
+    public TriangleMesh (int initialCapacity)
     {
         super(initialCapacity);
         adjacencyList = new ArrayList<>();
@@ -36,7 +36,7 @@ public class Triangles extends ArrayList<Triangle>
             int sameVertices = 0;
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    if (t.getVertices()[i].equals(triangle.getVertices()[j])) {
+                    if (t.getVertices().get(i).equals(triangle.getVertices().get(j))) {
                         sameVertices++;
                     }
                 }

@@ -2,77 +2,90 @@ package com.example.stlviewer.model;
 
 import javax.vecmath.Vector3d;
 
-public class Triangle implements Comparable<Triangle>
+public class Triangle extends Face implements Comparable<Triangle>
 {
-    private Vertex[] vertices = new Vertex[3];
-    private Vector3d[] edges = new Vector3d[3];
-    private Vector3d normal = new Vector3d(0, 0, 0);
-    private Vector3d unitNormal = new Vector3d(0, 0, 0);
+    private Vertex centroid;
     private double area;
     private int id;
 
     public Triangle (Vertex v1, Vertex v2, Vertex v3, Vector3d normal)
     {
+        super(3);
         // Set the vertices
-        vertices[0] = v1;
-        vertices[1] = v2;
-        vertices[2] = v3;
-        // TODO: Check if the vertices are unique
+        vertices.set(0, v1);
+        vertices.set(1, v2);
+        vertices.set(2, v3);
 
         // Set the normal
-        edges[0] = new Vector3d(v2.getPosX() - v1.getPosX(), v2.getPosY() - v1.getPosY(), v2.getPosZ() - v1.getPosZ());
-        edges[1] = new Vector3d(v3.getPosX() - v2.getPosX(), v3.getPosY() - v2.getPosY(), v3.getPosZ() - v2.getPosZ());
-        edges[2] = new Vector3d(v1.getPosX() - v3.getPosX(), v1.getPosY() - v3.getPosY(), v1.getPosZ() - v3.getPosZ());
-
-        // Validate the normal
-        // TODO: This should be done numerically, but for now we will just recalculate it
+        edges.set(0, new Edge(v2, v1));
+        edges.set(1, new Edge(v3, v2));
+        edges.set(2, new Edge(v1, v3));
 
         // The normal is the cross product of two edges in counter-clockwise order
-        this.normal.cross(edges[0], edges[1]);
+        this.getNormal().cross(edges.get(0), edges.get(1));
         // Normalize the normal, bringing it to unit length (length = 1)
-        this.unitNormal = this.normal;
-        this.unitNormal.normalize();
+        this.getNormal().normalize();
+        // Calculate the area of the triangle
+        this.calculateArea();
     }
 
-    public void calculateArea ()
+    private void calculateArea ()
     {
-        // Calculate the area of the triangle using the cross product of two edges
-        area = 0.5 * normal.length();
+        // Calculate the area of the triangle using Heron's formula
+        double a = edges.get(0).length();
+        double b = edges.get(1).length();
+        double c = edges.get(2).length();
+
+        // Calculate the semi-perimeter
+        double s = (a + b + c) / 2;
+
+        // Calculate the area
+        this.area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
     }
 
-    public Vertex[] getVertices ()
-    {
-        return vertices;
+    public double calculateVolumeWithReferenceVertex (Vertex refVertex) {
+        // The volume of a tetrahedron is given by the formula:
+        // V = 1/6 * |(a - d) . ((b - d) x (c - d))|
+        // where a, b, c are the vertices of the triangle and d is the reference vertex
+        Vector3d a = new Vector3d(vertices.get(0).getPosX() - refVertex.getPosX(),
+                                  vertices.get(0).getPosY() - refVertex.getPosY(),
+                                  vertices.get(0).getPosZ() - refVertex.getPosZ());
+        Vector3d b = new Vector3d(vertices.get(1).getPosX() - refVertex.getPosX(),
+                                  vertices.get(1).getPosY() - refVertex.getPosY(),
+                                  vertices.get(1).getPosZ() - refVertex.getPosZ());
+        Vector3d c = new Vector3d(vertices.get(2).getPosX() - refVertex.getPosX(),
+                                  vertices.get(2).getPosY() - refVertex.getPosY(),
+                                  vertices.get(2).getPosZ() - refVertex.getPosZ());
+        // Calculate the cross product of b and c
+        Vector3d crossProduct = new Vector3d();
+        crossProduct.cross(b, c);
+        // Calculate the scalar triple product of a, b, and c
+        double scalarTripleProduct = a.dot(crossProduct);
+        // Divide the absolute value of the scalar triple product by 6 to get the volume of the tetrahedron
+        return Math.abs(scalarTripleProduct) / 6;
     }
 
-    public Vector3d[] getEdges ()
+    public Vertex getCentroid ()
     {
-        return edges;
+        if (centroid == null)
+        {
+            double x = (vertices.get(0).getPosX() + vertices.get(1).getPosX() + vertices.get(2).getPosX()) / 3;
+            double y = (vertices.get(0).getPosY() + vertices.get(1).getPosY() + vertices.get(2).getPosY()) / 3;
+            double z = (vertices.get(0).getPosZ() + vertices.get(1).getPosZ() + vertices.get(2).getPosZ()) / 3;
+            centroid = new Vertex(x, y, z);
+        }
+        return centroid;
     }
 
-    public Vector3d getNormal ()
-    {
-        return normal;
-    }
-
-    /**
-     * Get the vertex at the specified index. The index should be between 0 and 2.
-     * @param index
-     * @return
-     */
-    public Vertex getVertex (int index)
-    {
-        return vertices[index];
-    }
-
-    /**
-     * Get the edge at the specified index. The index should be between 0 and 2.
-     * @param index
-     * @return
-     */
-    public Vector3d getEdge (int index)
-    {
-        return edges[index];
+    public boolean pointsAwayFromReferenceVertex (Vertex refVertex) {
+        // Calculate the dot product of the normal of the triangle and the vector from the reference vertex to the centroid
+        Vertex centroid = getCentroid();
+        Vector3d referenceToCentroid = new Vector3d(refVertex.getPosX() - centroid.getPosX(),
+                                                    refVertex.getPosY() - centroid.getPosY(),
+                                                    refVertex.getPosZ() - centroid.getPosZ());
+        double dotProduct = getNormal().dot(referenceToCentroid);
+        // If the dot product is positive, the normal points away from the reference vertex
+        return dotProduct > 0;
     }
 
     public double getArea ()
@@ -93,26 +106,25 @@ public class Triangle implements Comparable<Triangle>
     @Override
     public String toString ()
     {
-        return "Triangle{" +
-                "vertices=" + vertices[0] + ", " + vertices[1] + ", " + vertices[2] +
-                ", normal=" + normal +
-                '}';
+        // Return the vertices of the triangle with a string builder
+        StringBuilder builder = new StringBuilder();
+        builder.append("Triangle{");
+        for (Edge edge : edges)
+        {
+            builder.append(edge.toString());
+            builder.append(", ");
+        }
+        builder.append("normal = ");
+        builder.append(getNormal().toString());
+        builder.append(", area = ");
+        builder.append(area);
+        builder.append("}");
+        return builder.toString();
     }
 
     @Override
     public int compareTo (Triangle other)
     {
-        if (this.area < other.area)
-        {
-            return -1;
-        }
-        else if (this.area > other.area)
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
+        return Double.compare(this.area, other.area);
     }
 }

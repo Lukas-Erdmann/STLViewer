@@ -24,4 +24,8 @@ public interface Constants
      * The number 2.
      */
     int NUMBER_TWO = 2;
+    int TRIANGLE_VERTEX_COUNT = 3;
+    int TRIANGLE_VERTEX1_INDEX = 0;
+    int TRIANGLE_VERTEX2_INDEX = 1;
+    int TRIANGLE_VERTEX3_INDEX = 2;
 }
