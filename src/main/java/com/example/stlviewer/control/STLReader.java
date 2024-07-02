@@ -14,7 +14,7 @@ public class STLReader
 {
 
     public static final String STL_ASCII_START_TAG = "solid";
-    public static final String STL_ASCII_FACET_START_TAG = "facet normal";
+    public static final String STL_ASCII_FACET_START_TAG = "facet";
     public static final String STL_ASCII_NORMAL_TAG = "normal";
     public static final String STL_ASCII_TRIANGLE_START_TAG = "outer loop";
     public static final String STL_ASCII_VERTEX_START_TAG = "vertex";
@@ -46,8 +46,10 @@ public class STLReader
         readerThread.start();
 
         if (isASCII(filePath)) {
+            System.out.println("Reading ASCII file");
             readSTLASCII(filePath, controller);
         } else {
+            System.out.println("Reading binary file");
             readSTLBinary(filePath, controller);
         }
 
@@ -94,7 +96,7 @@ public class STLReader
                     Vector3d normal = readNormalASCII(line);
                     Triangle triangle = readTriangleASCII(reader, normal);
                     // Send the triangle to the controller
-                    controller.addTriangle(triangle);
+                    controller.addTriangleToQueue(triangle);
                 }
             }
             // Set the reading finished flag to true
@@ -177,7 +179,7 @@ public class STLReader
             int triangleCount = ByteBuffer.wrap(triangleCountBytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
 
             for (int i = 0; i < triangleCount; i++) {
-                controller.addTriangle(readTriangleBinary(fileInputStream));
+                controller.addTriangleToQueue(readTriangleBinary(fileInputStream));
             }
             // Set the reading finished flag to true
             controller.setReadingFinished(true);

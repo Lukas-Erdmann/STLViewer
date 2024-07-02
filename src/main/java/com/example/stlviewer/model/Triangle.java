@@ -12,14 +12,14 @@ public class Triangle extends Face implements Comparable<Triangle>
     {
         super(3);
         // Set the vertices
-        vertices.set(0, v1);
-        vertices.set(1, v2);
-        vertices.set(2, v3);
+        vertices.add(0, v1);
+        vertices.add(1, v2);
+        vertices.add(2, v3);
 
         // Set the normal
-        edges.set(0, new Edge(v2, v1));
-        edges.set(1, new Edge(v3, v2));
-        edges.set(2, new Edge(v1, v3));
+        edges.add(0, new Edge(v2, v1));
+        edges.add(1, new Edge(v3, v2));
+        edges.add(2, new Edge(v1, v3));
 
         // The normal is the cross product of two edges in counter-clockwise order
         this.getNormal().cross(edges.get(0), edges.get(1));
@@ -27,6 +27,8 @@ public class Triangle extends Face implements Comparable<Triangle>
         this.getNormal().normalize();
         // Calculate the area of the triangle
         this.calculateArea();
+
+        //System.out.println("Triangle created: " + this);
     }
 
     private void calculateArea ()

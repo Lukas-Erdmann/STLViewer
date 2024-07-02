@@ -9,6 +9,7 @@ public class Edge extends Vector3d
 
     public Edge(Vertex start, Vertex end)
     {
+        super(end.getPosX() - start.getPosX(), end.getPosY() - start.getPosY(), end.getPosZ() - start.getPosZ());
         this.startVertex = start;
         this.endVertex = end;
     }

@@ -121,4 +121,8 @@ public interface Strings
     String ERROR_WHILE_READING_TRIANGLE = "Error while reading triangle: ";
     String INVALID_VERTEX_LINE = "Invalid vertex line: ";
     String ERROR_PARSING_VERTEX = "Error parsing vertex: ";
+    String AXIS_X = "x";
+    String AXIS_Y = "y";
+    String AXIS_Z = "z";
+    String INVALID_AXIS = "Invalid axis!";
 }
