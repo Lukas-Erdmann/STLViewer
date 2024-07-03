@@ -189,4 +189,7 @@ public interface Strings
     String P2PPACKAGE_TOSTRING_6 = ", anchorAngles=";
     String INVALID_P2P_PACKAGE = "Invalid P2P package.";
     String UNABLE_TO_START_P2P_CONNECTION = "Unable to start P2P connection.";
+    String TRIANGLE_TOSTRING = "Triangle{";
+    String TRIANGLE_TOSTRING_2 = "area = ";
+    String TRIANGLE_TOSTRING_3 = "normal = ";
 }

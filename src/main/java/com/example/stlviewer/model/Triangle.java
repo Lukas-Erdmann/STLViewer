@@ -1,5 +1,7 @@
 package com.example.stlviewer.model;
 
+import com.example.stlviewer.res.Strings;
+
 import javax.vecmath.Vector3d;
 import java.io.Serializable;
 
@@ -189,17 +191,17 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
     {
         // Return the vertices of the triangle with a string builder
         StringBuilder builder = new StringBuilder();
-        builder.append("Triangle{");
+        builder.append(Strings.TRIANGLE_TOSTRING);
+        builder.append(Strings.TRIANGLE_TOSTRING_2);
+        builder.append(area).append(Strings.COMMA_SPACE);
         for (Edge edge : edges)
         {
             builder.append(edge.toString());
-            builder.append(", ");
+            builder.append(Strings.COMMA_SPACE);
         }
-        builder.append("normal = ");
+        builder.append(Strings.TRIANGLE_TOSTRING_3);
         builder.append(getNormal().toString());
-        builder.append(", area = ");
-        builder.append(area);
-        builder.append("}");
+        builder.append(Strings.CURLY_BRACKET_RIGHT);
         return builder.toString();
     }
 

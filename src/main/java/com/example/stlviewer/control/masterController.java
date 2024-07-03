@@ -237,5 +237,11 @@ public class masterController
     public void sortTriangles ()
     {
         polyhedronController.getPolyhedron().getTriangles().sort(Triangle::compareTo);
+
+        // Print the sorted triangles to the console
+        for (Triangle triangle : polyhedronController.getPolyhedron().getTriangles())
+        {
+            System.out.println(triangle);
+        }
     }
 }
