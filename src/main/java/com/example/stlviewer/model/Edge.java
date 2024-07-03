@@ -1,11 +1,12 @@
 package com.example.stlviewer.model;
 
 import javax.vecmath.Vector3d;
+import java.io.Serializable;
 
 /**
  * The Edge class represents an edge in a 3D space.
  */
-public class Edge extends Vector3d
+public class Edge extends Vector3d implements Serializable
 {
     /**
      * The start vertex of the edge.
@@ -21,9 +22,9 @@ public class Edge extends Vector3d
      * Also calls the super constructor of the Vector3d class to make it a 3D vector.
      *
      * @param start - The start vertex of the edge.
-     * @param end - The end vertex of the edge.
+     * @param end   - The end vertex of the edge.
      */
-    public Edge(Vertex start, Vertex end)
+    public Edge (Vertex start, Vertex end)
     {
         super(end.getPosX() - start.getPosX(), end.getPosY() - start.getPosY(), end.getPosZ() - start.getPosZ());
         this.startVertex = start;
@@ -60,7 +61,7 @@ public class Edge extends Vector3d
      * @return True if the edges are equal, false otherwise.
      */
     @Override
-    public boolean equals(Object refEdge)
+    public boolean equals (Object refEdge)
     {
         if (refEdge instanceof Edge)
         {
@@ -76,7 +77,7 @@ public class Edge extends Vector3d
      * @return The string representation of the edge.
      */
     @Override
-    public String toString()
+    public String toString ()
     {
         return "Edge{" + startVertex + " -> " + endVertex + "}";
     }

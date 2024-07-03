@@ -1,4 +1,4 @@
-package com.example.stlviewer.util;
+package com.example.stlviewer.util.network;
 
 import com.example.stlviewer.control.STLViewerController;
 import com.example.stlviewer.res.Strings;
@@ -27,10 +27,11 @@ public class TCPServer
      * Precondition: The port should be a valid port number, and the controller should be initialized.
      * Postcondition: A TCPServer instance is created with the given port and controller.
      *
-     * @param port - The port number on which the server listens for connections.
+     * @param port                - The port number on which the server listens for connections.
      * @param stlViewerController - The controller for the STL viewer application.
      */
-    public TCPServer(int port, STLViewerController stlViewerController) {
+    public TCPServer (int port, STLViewerController stlViewerController)
+    {
         this.port = port;
         this.stlViewerController = stlViewerController;
     }
@@ -42,12 +43,14 @@ public class TCPServer
      *
      * @throws IOException - Thrown if an I/O error occurs when opening the server socket.
      */
-    public void start() throws IOException
+    public void start () throws IOException
     {
-        try (ServerSocket serverSocket = createSocket()) {
+        try (ServerSocket serverSocket = createSocket())
+        {
             System.out.println(Strings.SERVER_IS_AVAILABLE_ON_PORT + port);
             acceptClients(serverSocket);
-        } catch (IOException exception) {
+        } catch (IOException exception)
+        {
             System.err.printf(Strings.EXCEPTION_SERVER_START, port, exception.getMessage());
             throw exception;
         }
@@ -61,7 +64,8 @@ public class TCPServer
      * @return The created ServerSocket.
      * @throws IOException - Thrown if an I/O error occurs when creating the server socket.
      */
-    private ServerSocket createSocket() throws IOException {
+    private ServerSocket createSocket () throws IOException
+    {
         return new ServerSocket(port);
     }
 
@@ -72,11 +76,15 @@ public class TCPServer
      *
      * @param serverSocket - The ServerSocket instance.
      */
-    private void acceptClients(ServerSocket serverSocket) {
-        while (true) {
-            try {
+    private void acceptClients (ServerSocket serverSocket)
+    {
+        while (true)
+        {
+            try
+            {
                 handleClient(serverSocket.accept());
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 System.err.println("Error accepting client connection: " + e.getMessage());
             }
         }
@@ -89,7 +97,8 @@ public class TCPServer
      *
      * @param clientSocket - The client socket for communication with the client.
      */
-    private void handleClient(Socket clientSocket) {
+    private void handleClient (Socket clientSocket)
+    {
         new TCPClientHandler(clientSocket, stlViewerController).start();
     }
 }

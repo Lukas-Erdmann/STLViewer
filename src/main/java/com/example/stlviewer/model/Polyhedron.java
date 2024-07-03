@@ -2,6 +2,7 @@ package com.example.stlviewer.model;
 
 import com.example.stlviewer.res.Strings;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -10,7 +11,7 @@ import java.util.Arrays;
  * polygons. In this case, the polygons are triangles. The class contains a list of triangles that make up the polyhedron.
  * The class also contains the volume, surface area, bounding box, and center of the polyhedron.
  */
-public class Polyhedron
+public class Polyhedron implements Serializable
 {
     /**
      * The list of triangles that make up the polyhedron.
@@ -39,113 +40,127 @@ public class Polyhedron
      *
      * @param triangleArrayList - The list of triangles that make up the polyhedron.
      */
-    public Polyhedron (ArrayList<Triangle> triangleArrayList) {
+    public Polyhedron (ArrayList<Triangle> triangleArrayList)
+    {
         this.triangles = triangleArrayList;
     }
 
     /**
      * Creates a new polyhedron with an empty list of triangles.
      */
-    public Polyhedron () {
+    public Polyhedron ()
+    {
         this.triangles = new ArrayList<Triangle>();
     }
 
     /**
      * Gets the list of triangles that make up the polyhedron.
      *
-     * @return  The list of triangles that make up the polyhedron.
+     * @return The list of triangles that make up the polyhedron.
      */
-    public ArrayList<Triangle> getTriangles () {
+    public ArrayList<Triangle> getTriangles ()
+    {
         return triangles;
-    }
-
-    /**
-     * Sets the volume of the polyhedron.
-     *
-     * @param volume    The volume of the polyhedron.
-     */
-    public void setVolume (double volume) {
-        this.volume = volume;
     }
 
     /**
      * Gets the volume of the polyhedron.
      *
-     * @return  The volume of the polyhedron.
+     * @return The volume of the polyhedron.
      */
-    public double getVolume () {
+    public double getVolume ()
+    {
         return volume;
     }
 
     /**
-     * Sets the surface area of the polyhedron.
+     * Sets the volume of the polyhedron.
      *
-     * @param surfaceArea   The surface area of the polyhedron.
+     * @param volume The volume of the polyhedron.
      */
-    public void setSurfaceArea (double surfaceArea) {
-        this.surfaceArea = surfaceArea;
+    public void setVolume (double volume)
+    {
+        this.volume = volume;
     }
 
     /**
      * Gets the surface area of the polyhedron.
      *
-     * @return  The surface area of the polyhedron.
+     * @return The surface area of the polyhedron.
      */
-    public double getSurfaceArea () {
+    public double getSurfaceArea ()
+    {
         return surfaceArea;
     }
 
     /**
-     * Sets the bounding box of the polyhedron.
+     * Sets the surface area of the polyhedron.
      *
-     * @param boundingBox   The bounding box of the polyhedron.
+     * @param surfaceArea The surface area of the polyhedron.
      */
-    public void setBoundingBox (double[] boundingBox) {
-        this.boundingBox = boundingBox;
+    public void setSurfaceArea (double surfaceArea)
+    {
+        this.surfaceArea = surfaceArea;
     }
 
     /**
      * Gets the bounding box of the polyhedron.
      *
-     * @return  The bounding box of the polyhedron.
+     * @return The bounding box of the polyhedron.
      */
-    public double[] getBoundingBox () {
+    public double[] getBoundingBox ()
+    {
         return boundingBox;
     }
 
     /**
-     * Sets the center of the polyhedron.
+     * Sets the bounding box of the polyhedron.
      *
-     * @param center    The center of the polyhedron.
+     * @param boundingBox The bounding box of the polyhedron.
      */
-    public void setCenter (Vertex center) {
-        this.center = center;
+    public void setBoundingBox (double[] boundingBox)
+    {
+        this.boundingBox = boundingBox;
     }
 
     /**
      * Gets the center of the polyhedron.
      *
-     * @return  The center of the polyhedron.
+     * @return The center of the polyhedron.
      */
-    public Vertex getCenter () {
+    public Vertex getCenter ()
+    {
         return center;
     }
 
     /**
-     * Adds a triangle to the list of triangles that make up the polyhedron.
+     * Sets the center of the polyhedron.
      *
-     * @param triangle  The triangle to be added.
+     * @param center The center of the polyhedron.
      */
-    public int getTriangleCount() {
+    public void setCenter (Vertex center)
+    {
+        this.center = center;
+    }
+
+    /**
+     * Gets the number of triangles in the polyhedron.
+     *
+     * @return The number of triangles in the polyhedron.
+     */
+    public int getTriangleCount ()
+    {
         return triangles.size();
     }
 
     /**
      * Returns the string representation of the polyhedron.
+     *
      * @return
      */
     @Override
-    public String toString () {
+    public String toString ()
+    {
         return Strings.POLYHEDRON_TOSTRING +
                 Strings.POLYHEDRON_TOSTRING_2 + volume +
                 Strings.POLYHEDRON_TOSTRING_3 + surfaceArea +

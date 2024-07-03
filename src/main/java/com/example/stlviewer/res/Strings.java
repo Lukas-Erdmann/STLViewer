@@ -3,7 +3,7 @@ package com.example.stlviewer.res;
 /**
  * Class Strings. Contains all strings used in the program. <br>
  *
- * @author  Lukas Erdmann
+ * @author Lukas Erdmann
  */
 public interface Strings
 {
@@ -181,4 +181,12 @@ public interface Strings
     String STLV_VIEWPROP_TRANSLATE = "X: %.2f, Y: %.2f";
     String ARIAL = "Arial";
     String FORMAT_STRING_2F = "%.2f";
+    String P2PPACKAGE_TOSTRING = "P2PPackage{";
+    String P2PPACKAGE_TOSTRING_2 = "polyhedron=";
+    String P2PPACKAGE_TOSTRING_3 = ", translate=";
+    String P2PPACKAGE_TOSTRING_4 = ", rotate=";
+    String P2PPACKAGE_TOSTRING_5 = ", zoom=";
+    String P2PPACKAGE_TOSTRING_6 = ", anchorAngles=";
+    String INVALID_P2P_PACKAGE = "Invalid P2P package.";
+    String UNABLE_TO_START_P2P_CONNECTION = "Unable to start P2P connection.";
 }

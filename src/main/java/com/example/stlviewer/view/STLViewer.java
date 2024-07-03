@@ -28,11 +28,6 @@ import java.io.File;
 public class STLViewer extends Application
 {
     /**
-     * The controller for the STL viewer application.
-     */
-    private STLViewerController stlViewerController;
-
-    /**
      * The MeshView object for displaying the 3D model.
      */
     private final MeshView meshView = new MeshView();
@@ -65,6 +60,10 @@ public class STLViewer extends Application
      */
     private final PerspectiveCamera perspectiveCamera = new PerspectiveCamera(false);
     /**
+     * The controller for the STL viewer application.
+     */
+    private STLViewerController stlViewerController;
+    /**
      * The SubScene object for the 3D view.
      */
     private SubScene threeDView;
@@ -76,7 +75,8 @@ public class STLViewer extends Application
      *
      * @param stlViewerController - The controller for the STL viewer application.
      */
-    public STLViewer(STLViewerController stlViewerController) {
+    public STLViewer (STLViewerController stlViewerController)
+    {
         this.stlViewerController = stlViewerController;
     }
 
@@ -102,7 +102,7 @@ public class STLViewer extends Application
      *
      * @param stage - The primary stage for the application.
      */
-    private void configureStage(Stage stage)
+    private void configureStage (Stage stage)
     {
         stage.setTitle(Strings.WINDOW_TITLE);
 
@@ -128,7 +128,7 @@ public class STLViewer extends Application
      * @param stage - The primary stage for the application.
      * @return The configured menu bar.
      */
-    private MenuBar configureMenuBar(Stage stage)
+    private MenuBar configureMenuBar (Stage stage)
     {
         MenuBar topMenuBar = new MenuBar();
         // Add menu items
@@ -144,7 +144,7 @@ public class STLViewer extends Application
      * @param stage - The primary stage for the application.
      * @return The configured File menu.
      */
-    private Menu configureMenuFile(Stage stage)
+    private Menu configureMenuFile (Stage stage)
     {
         Menu menuFile = new Menu(Strings.STLV_MENU);
         // Add menu items
@@ -179,7 +179,7 @@ public class STLViewer extends Application
      *
      * @return The configured Edit menu.
      */
-    private Menu configureMenuEdit()
+    private Menu configureMenuEdit ()
     {
         Menu menuEdit = new Menu(Strings.STLV_EDIT);
         // Add menu items
@@ -194,7 +194,7 @@ public class STLViewer extends Application
      * Precondition: None.
      * Postcondition: The color dialog is displayed and the selected colors are applied to the model and background.
      */
-    private void openColorDialog()
+    private void openColorDialog ()
     {
         Dialog<ButtonType> colorDialog = new Dialog<>();
         colorDialog.setTitle(Strings.STLV_SET_COLORS);
@@ -209,7 +209,7 @@ public class STLViewer extends Application
         colorDialog.showAndWait();
     }
 
-    private VBox configureColorDialogVBox()
+    private VBox configureColorDialogVBox ()
     {
         VBox dialogVBox = new VBox();
         // Add the color picker for the 3D model
@@ -233,7 +233,7 @@ public class STLViewer extends Application
      *
      * @return The configured color picker for the 3D model.
      */
-    private ColorPicker configureModelColorPicker()
+    private ColorPicker configureModelColorPicker ()
     {
         ColorPicker modelColorPicker = new ColorPicker(((PhongMaterial) meshView.getMaterial()).getDiffuseColor());
         modelColorPicker.setOnAction(e -> {
@@ -250,7 +250,7 @@ public class STLViewer extends Application
      *
      * @return The configured color picker for the background.
      */
-    private ColorPicker configureBackgroundColorPicker()
+    private ColorPicker configureBackgroundColorPicker ()
     {
         // Create a color picker with the current background color
         ColorPicker backgroundColorPicker = new ColorPicker((javafx.scene.paint.Color) threeDView.getFill());
@@ -266,7 +266,7 @@ public class STLViewer extends Application
      *
      * @return The configured View menu.
      */
-    private Menu configureMenuView()
+    private Menu configureMenuView ()
     {
         Menu menuView = new Menu(Strings.STLV_VIEW);
         // Add menu items
@@ -288,7 +288,7 @@ public class STLViewer extends Application
      * Precondition: The supermenu item was selected.
      * Postcondition: The translation dialog is displayed and the new translation values are applied to the model.
      */
-    private void openTranslateDialog()
+    private void openTranslateDialog ()
     {
         Dialog<ButtonType> translateDialog = new Dialog<>();
         translateDialog.setTitle(Strings.STLV_TRANSLATE_MODEL);
@@ -310,7 +310,7 @@ public class STLViewer extends Application
      *
      * @return The configured VBox for the translation dialog.
      */
-    private VBox configureTranslateDialogVBox()
+    private VBox configureTranslateDialogVBox ()
     {
         VBox dialogVBox = new VBox();
         // Add the text fields for the translation values
@@ -334,7 +334,7 @@ public class STLViewer extends Application
      * Precondition: The supermenu item was selected.
      * Postcondition: The rotation dialog is displayed and the new rotation angles are applied to the model.
      */
-    private void openRotateDialog()
+    private void openRotateDialog ()
     {
         Dialog<ButtonType> rotateDialog = new Dialog<>();
         rotateDialog.setTitle(Strings.STLV_ROTATE_MODEL);
@@ -356,7 +356,7 @@ public class STLViewer extends Application
      *
      * @return The configured VBox for the rotation dialog.
      */
-    private VBox configureRotateDialogVBox()
+    private VBox configureRotateDialogVBox ()
     {
         VBox dialogVBox = new VBox();
         // Add the text fields for the rotation values
@@ -379,7 +379,7 @@ public class STLViewer extends Application
      * Precondition: The supermenu item was selected.
      * Postcondition: The zoom dialog is displayed and the new zoom factor is applied to the 3D view.
      */
-    private void openZoomDialog()
+    private void openZoomDialog ()
     {
         Dialog<ButtonType> zoomDialog = new Dialog<>();
         zoomDialog.setTitle(Strings.STLV_SET_ZOOM_2);
@@ -401,7 +401,7 @@ public class STLViewer extends Application
      *
      * @return The configured VBox for the zoom dialog.
      */
-    private VBox configureZoomDialogVBox()
+    private VBox configureZoomDialogVBox ()
     {
         VBox dialogVBox = new VBox();
         // Add the text field for the zoom value
@@ -426,7 +426,7 @@ public class STLViewer extends Application
      *
      * @return The configured VBox for the information labels.
      */
-    private VBox configureInfoLabels()
+    private VBox configureInfoLabels ()
     {
         VBox infoLabels = new VBox();
         // Set dimensions and padding for the VBox
@@ -452,7 +452,7 @@ public class STLViewer extends Application
      * Precondition: The controller must be initialized.
      * Postcondition: The labels are updated with the current rotation and translation values.
      */
-    public void updateViewProperties()
+    public void updateViewProperties ()
     {
         rotationLabel.setText(String.format(Strings.STLV_VIEWPROP_ROTATE, stlViewerController.getRotationX().getAngle(), stlViewerController.getRotationY().getAngle()));
         translationLabel.setText(String.format(Strings.STLV_VIEWPROP_TRANSLATE, stlViewerController.getTranslation().getX(), stlViewerController.getTranslation().getY()));
@@ -463,12 +463,12 @@ public class STLViewer extends Application
      * Precondition: None.
      * Postcondition: A new Label is created with the specified text, font weight, and font size.
      *
-     * @param labelText - The text to display on the label.
+     * @param labelText  - The text to display on the label.
      * @param fontWeight - The font weight for the label text.
-     * @param fontSize - The font size for the label text.
+     * @param fontSize   - The font size for the label text.
      * @return The new Label with the specified text, font weight, and font size.
      */
-    private Label makeLabelArial(String labelText, FontWeight fontWeight, int fontSize)
+    private Label makeLabelArial (String labelText, FontWeight fontWeight, int fontSize)
     {
         Label label = new Label(labelText);
         label.setFont(Font.font(Strings.ARIAL, fontWeight, fontSize));
@@ -483,7 +483,7 @@ public class STLViewer extends Application
      *
      * @return The configured 3D view.
      */
-    private SubScene configure3DView()
+    private SubScene configure3DView ()
     {
         threeDView = new SubScene(threeDGroup, Constants.WINDOW_WIDTH - Constants.INFOBAR_WIDTH, Constants.WINDOW_HEIGHT, true, javafx.scene.SceneAntialiasing.BALANCED);
         threeDView.setFill(javafx.scene.paint.Color.LIGHTGREY);
@@ -500,9 +500,8 @@ public class STLViewer extends Application
      *
      * @param polyhedron - The 3D model to display.
      */
-    public void displayModel(Polyhedron polyhedron)
+    public void displayModel (Polyhedron polyhedron)
     {
-
         // Set the number of triangles, surface area, and volume labels
         numberOfTrianglesLabel.setText(String.valueOf(polyhedron.getTriangleCount()));
         surfaceAreaLabel.setText(String.format(Strings.FORMAT_STRING_2F, polyhedron.getSurfaceArea()));
@@ -517,7 +516,8 @@ public class STLViewer extends Application
      *
      * @return The MeshView object for the 3D model.
      */
-    public MeshView getMeshView() {
+    public MeshView getMeshView ()
+    {
         return meshView;
     }
 
@@ -526,7 +526,8 @@ public class STLViewer extends Application
      *
      * @return The PerspectiveCamera object for the 3D view.
      */
-    public Camera getPerspectiveCamera () {
+    public Camera getPerspectiveCamera ()
+    {
         return perspectiveCamera;
     }
 
@@ -535,7 +536,8 @@ public class STLViewer extends Application
      *
      * @return The SubScene object for the 3D view.
      */
-    public SubScene getThreeDView() {
+    public SubScene getThreeDView ()
+    {
         return threeDView;
     }
 
@@ -544,7 +546,8 @@ public class STLViewer extends Application
      *
      * @return The Group object for the 3D scene.
      */
-    public Group getThreeDGroup () {
+    public Group getThreeDGroup ()
+    {
         return threeDGroup;
     }
 }

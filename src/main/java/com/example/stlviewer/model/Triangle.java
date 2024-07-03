@@ -1,13 +1,14 @@
 package com.example.stlviewer.model;
 
 import javax.vecmath.Vector3d;
+import java.io.Serializable;
 
 /**
  * The Triangle class represents a triangle in a 3D space. It is a polygon that lies in a plane and has 3 vertices and
  * 3 edges. Perpendicular to the plane of the triangle is the normal vector. The class extends the Face class.
  * It also implements the Comparable interface to compare the area of two triangles.
  */
-public class Triangle extends Face implements Comparable<Triangle>
+public class Triangle extends Face implements Comparable<Triangle>, Serializable
 {
     /**
      * The centroid of the triangle. The centroid is the point where the medians of the triangle intersect.
@@ -27,9 +28,9 @@ public class Triangle extends Face implements Comparable<Triangle>
      * product of two edges in counter-clockwise order. The normal vector is then normalized to unit length.
      * The area of the triangle is calculated using Heron's formula.
      *
-     * @param v1 - The first vertex of the triangle.
-     * @param v2 - The second vertex of the triangle.
-     * @param v3 - The third vertex of the triangle.
+     * @param v1     - The first vertex of the triangle.
+     * @param v2     - The second vertex of the triangle.
+     * @param v3     - The third vertex of the triangle.
      * @param normal - The normal vector of the triangle.
      */
     public Triangle (Vertex v1, Vertex v2, Vertex v3, Vector3d normal)
@@ -85,17 +86,18 @@ public class Triangle extends Face implements Comparable<Triangle>
      * @param refVertex - The reference vertex.
      * @return The volume of the tetrahedron.
      */
-    public double calculateVolumeWithReferenceVertex (Vertex refVertex) {
+    public double calculateVolumeWithReferenceVertex (Vertex refVertex)
+    {
         // where a, b, c are the vertices of the triangle and d is the reference vertex
         Vector3d a = new Vector3d(vertices.get(0).getPosX() - refVertex.getPosX(),
-                                  vertices.get(0).getPosY() - refVertex.getPosY(),
-                                  vertices.get(0).getPosZ() - refVertex.getPosZ());
+                vertices.get(0).getPosY() - refVertex.getPosY(),
+                vertices.get(0).getPosZ() - refVertex.getPosZ());
         Vector3d b = new Vector3d(vertices.get(1).getPosX() - refVertex.getPosX(),
-                                  vertices.get(1).getPosY() - refVertex.getPosY(),
-                                  vertices.get(1).getPosZ() - refVertex.getPosZ());
+                vertices.get(1).getPosY() - refVertex.getPosY(),
+                vertices.get(1).getPosZ() - refVertex.getPosZ());
         Vector3d c = new Vector3d(vertices.get(2).getPosX() - refVertex.getPosX(),
-                                  vertices.get(2).getPosY() - refVertex.getPosY(),
-                                  vertices.get(2).getPosZ() - refVertex.getPosZ());
+                vertices.get(2).getPosY() - refVertex.getPosY(),
+                vertices.get(2).getPosZ() - refVertex.getPosZ());
         // Calculate the cross product of b and c
         Vector3d crossProduct = new Vector3d();
         crossProduct.cross(b, c);
@@ -135,12 +137,13 @@ public class Triangle extends Face implements Comparable<Triangle>
      * @param refVertex - The reference vertex.
      * @return True if the normal points away from the reference vertex, false otherwise.
      */
-    public boolean pointsAwayFromReferenceVertex (Vertex refVertex) {
+    public boolean pointsAwayFromReferenceVertex (Vertex refVertex)
+    {
         // Calculate the dot product of the normal of the triangle and the vector from the reference vertex to the centroid
         Vertex centroid = getCentroid();
         Vector3d referenceToCentroid = new Vector3d(refVertex.getPosX() - centroid.getPosX(),
-                                                    refVertex.getPosY() - centroid.getPosY(),
-                                                    refVertex.getPosZ() - centroid.getPosZ());
+                refVertex.getPosY() - centroid.getPosY(),
+                refVertex.getPosZ() - centroid.getPosZ());
         double dotProduct = getNormal().dot(referenceToCentroid);
         // If the dot product is positive, the normal points away from the reference vertex
         return dotProduct > 0;

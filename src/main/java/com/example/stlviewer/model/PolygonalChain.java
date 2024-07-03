@@ -35,7 +35,7 @@ public class PolygonalChain
     /**
      * Creates a new polygonal chain with the given size of edges and vertices.
      *
-     * @param sizeEdges - The size of the list of edges.
+     * @param sizeEdges    - The size of the list of edges.
      * @param sizeVertices - The size of the list of vertices.
      */
     public PolygonalChain (int sizeEdges, int sizeVertices)
@@ -53,7 +53,7 @@ public class PolygonalChain
      *
      * @param edge - The edge to add.
      */
-    public void addEdge(Edge edge)
+    public void addEdge (Edge edge)
     {
         if (vertices.isEmpty())
         {
@@ -88,7 +88,7 @@ public class PolygonalChain
      * @param index - The index of the edge.
      * @return The edge at the given index.
      */
-    public Edge getEdge(int index)
+    public Edge getEdge (int index)
     {
         return edges.get(index);
     }
@@ -98,7 +98,7 @@ public class PolygonalChain
      *
      * @return The list of edges that make up the chain.
      */
-    public ArrayList<Edge> getEdges()
+    public ArrayList<Edge> getEdges ()
     {
         return edges;
     }
@@ -109,7 +109,7 @@ public class PolygonalChain
      * @param index - The index of the vertex.
      * @return The vertex at the given index.
      */
-    public Vertex getVertex(int index)
+    public Vertex getVertex (int index)
     {
         return vertices.get(index);
     }
@@ -129,7 +129,7 @@ public class PolygonalChain
      *
      * @return The number of vertices in the chain.
      */
-    public int getVertexCount()
+    public int getVertexCount ()
     {
         return vertices.size();
     }
@@ -139,7 +139,7 @@ public class PolygonalChain
      *
      * @return The number of edges in the chain.
      */
-    public int getEdgeCount()
+    public int getEdgeCount ()
     {
         return edges.size();
     }
@@ -149,7 +149,7 @@ public class PolygonalChain
      *
      * @return True if the chain is closed, false otherwise.
      */
-    public boolean isClosed()
+    public boolean isClosed ()
     {
         return isClosed;
     }
@@ -159,7 +159,7 @@ public class PolygonalChain
      *
      * @return A string representation of the polygonal chain.
      */
-    public String toString()
+    public String toString ()
     {
         StringBuilder builder = new StringBuilder();
         builder.append(Strings.POLYGONAL_CHAIN_TOSTRING);

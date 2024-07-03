@@ -2,11 +2,13 @@ package com.example.stlviewer.model;
 
 import com.example.stlviewer.res.Strings;
 
+import java.io.Serializable;
+
 /**
  * The Vertex class represents a vertex in a 3D space. The class implements the Comparable interface to compare
  * vertices based on their distance from the origin.
  */
-public class Vertex implements Comparable<Vertex>
+public class Vertex implements Comparable<Vertex>, Serializable
 {
     /**
      * The x-coordinate of the vertex.
@@ -46,26 +48,6 @@ public class Vertex implements Comparable<Vertex>
     }
 
     /**
-     * Returns the y-coordinate of the vertex.
-     *
-     * @return The y-coordinate of the vertex.
-     */
-    public double getPosY ()
-    {
-        return posY;
-    }
-
-    /**
-     * Returns the z-coordinate of the vertex.
-     *
-     * @return The z-coordinate of the vertex.
-     */
-    public double getPosZ ()
-    {
-        return posZ;
-    }
-
-    /**
      * Sets the x-coordinate of the vertex.
      *
      * @param posX - The x-coordinate of the vertex.
@@ -76,6 +58,16 @@ public class Vertex implements Comparable<Vertex>
     }
 
     /**
+     * Returns the y-coordinate of the vertex.
+     *
+     * @return The y-coordinate of the vertex.
+     */
+    public double getPosY ()
+    {
+        return posY;
+    }
+
+    /**
      * Sets the y-coordinate of the vertex.
      *
      * @param posY - The y-coordinate of the vertex.
@@ -83,6 +75,16 @@ public class Vertex implements Comparable<Vertex>
     public void setPosY (double posY)
     {
         this.posY = posY;
+    }
+
+    /**
+     * Returns the z-coordinate of the vertex.
+     *
+     * @return The z-coordinate of the vertex.
+     */
+    public double getPosZ ()
+    {
+        return posZ;
     }
 
     /**

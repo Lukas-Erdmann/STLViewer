@@ -23,16 +23,18 @@ public class STLReader
      * Precondition: The file path must be valid. The controller must be initialized.
      * Postcondition: The triangles are read from the file and sent to the controller.
      *
-     * @param filePath    - The file path of the STL file.
-     * @param controller  - The PolyhedronController instance to send the triangles to.
+     * @param filePath     - The file path of the STL file.
+     * @param controller   - The PolyhedronController instance to send the triangles to.
      * @param parallelized - True if the file should be read in parallel, false otherwise.
      * @throws IOException - If an error occurs while reading the file.
      */
     public void readSTLFile (String filePath, PolyhedronController controller, boolean parallelized) throws IOException
     {
-        if (parallelized) {
+        if (parallelized)
+        {
             readSTLFileParallelized(filePath, controller);
-        } else {
+        } else
+        {
             readSTLFileSequential(filePath, controller);
         }
     }
@@ -51,10 +53,12 @@ public class STLReader
     {
         RuntimeHandler runtimeHandler = new RuntimeHandler();
         runtimeHandler.startTimer();
-        if (isASCII(filePath)) {
+        if (isASCII(filePath))
+        {
             System.out.println(Strings.SOUT_READING_ASCII_FILE);
             readSTLASCII(filePath, controller, false);
-        } else {
+        } else
+        {
             System.out.println(Strings.SOUT_READING_BINARY_FILE);
             readSTLBinary(filePath, controller, false);
         }
@@ -79,17 +83,21 @@ public class STLReader
         Thread readerThread = new Thread(controller);
         readerThread.start();
 
-        if (isASCII(filePath)) {
+        if (isASCII(filePath))
+        {
             System.out.println(Strings.SOUT_READING_ASCII_FILE);
             readSTLASCII(filePath, controller, true);
-        } else {
+        } else
+        {
             System.out.println(Strings.SOUT_READING_BINARY_FILE);
             readSTLBinary(filePath, controller, true);
         }
 
-        try {
+        try
+        {
             readerThread.join();
-        } catch (InterruptedException interruptedException) {
+        } catch (InterruptedException interruptedException)
+        {
             Thread.currentThread().interrupt();
             throw new IOException(Strings.THREAD_WAS_INTERRUPTED, interruptedException);
         }
@@ -110,22 +118,27 @@ public class STLReader
     {
         File stlFile = new File(filePath);
         // Check if the file exists
-        if (!stlFile.exists()) {
+        if (!stlFile.exists())
+        {
             throw new FileNotFoundException(Strings.FILE_NOT_FOUND + filePath);
         }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(stlFile))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(stlFile)))
+        {
             // Read the first line of the file
             String headerLine = reader.readLine();
             // Check if the file is empty
-            if (headerLine == null) {
+            if (headerLine == null)
+            {
                 throw new IOException(Strings.FILE_IS_EMPTY + filePath);
             }
             // Return true if the first line starts with "solid"
             return headerLine.trim().startsWith(Strings.STL_ASCII_START_TAG);
-        } catch (FileNotFoundException fileNotFoundException) {
+        } catch (FileNotFoundException fileNotFoundException)
+        {
             throw new FileNotFoundException(Strings.FILE_NOT_FOUND + filePath);
-        } catch (IOException ioException) {
+        } catch (IOException ioException)
+        {
             throw new IOException(Strings.ERROR_WHILE_READING_FILE + filePath);
         }
     }
@@ -142,25 +155,31 @@ public class STLReader
      */
     public void readSTLASCII (String filePath, PolyhedronController controller, boolean parallelized) throws IOException
     {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath)))
+        {
             String line;
-            while ((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null)
+            {
                 // Check for the start of a new triangle struct
-                if (line.trim().startsWith(Strings.STL_ASCII_FACET_START_TAG)) {
+                if (line.trim().startsWith(Strings.STL_ASCII_FACET_START_TAG))
+                {
                     // Read the normal and the triangle
                     Vector3d normal = readNormalASCII(line);
                     Triangle triangle = readTriangleASCII(reader, normal);
                     // Send the triangle to the controller
-                    if (parallelized) {
+                    if (parallelized)
+                    {
                         controller.addTriangleToQueue(triangle);
-                    } else {
+                    } else
+                    {
                         controller.addTriangle(triangle);
                     }
                 }
             }
             // Set the reading finished flag to true
             controller.setReadingFinished(true);
-        } catch (IOException ioException) {
+        } catch (IOException ioException)
+        {
             throw new IOException(Strings.ERROR_WHILE_READING_FILE + filePath);
         }
     }
@@ -173,21 +192,25 @@ public class STLReader
      * @param line - The line containing the normal of the triangle.
      * @return The normal of the triangle as a Vector3d.
      */
-    public Vector3d readNormalASCII (String line) {
+    public Vector3d readNormalASCII (String line)
+    {
         // Split the line into words by whitespaces (\\s+ is a regex for one or more whitespaces)
         // and remove leading and trailing whitespaces
         String[] words = line.trim().split(Strings.ANY_NUMBER_OF_WHITESPACES);
         // Check if the line has the correct number of words and starts with "facet normal"
-        if (words.length != Constants.STL_ASCII_FACET_WORDCOUNT || !words[Constants.STL_ASCII_FACET_START_TAG_POS].equals(Strings.STL_ASCII_FACET_START_TAG) || !words[Constants.STL_ASCII_NORMAL_TAG_POS].equals(Strings.STL_ASCII_NORMAL_TAG)) {
+        if (words.length != Constants.STL_ASCII_FACET_WORDCOUNT || !words[Constants.STL_ASCII_FACET_START_TAG_POS].equals(Strings.STL_ASCII_FACET_START_TAG) || !words[Constants.STL_ASCII_NORMAL_TAG_POS].equals(Strings.STL_ASCII_NORMAL_TAG))
+        {
             throw new IllegalArgumentException(Strings.INVALID_NORMAL_LINE + line);
         }
         // Read the normal from the words
-        try {
+        try
+        {
             double x = Double.parseDouble(words[Constants.STL_ASCII_NORMAL_WORD_POS_X]);
             double y = Double.parseDouble(words[Constants.STL_ASCII_NORMAL_WORD_POS_Y]);
             double z = Double.parseDouble(words[Constants.STL_ASCII_NORMAL_WORD_POS_Z]);
             return new Vector3d(x, y, z);
-        } catch (NumberFormatException numberFormatException) {
+        } catch (NumberFormatException numberFormatException)
+        {
             throw new IllegalArgumentException(Strings.ERROR_PARSING_NORMAL + line);
         }
     }
@@ -208,17 +231,21 @@ public class STLReader
         String line;
 
         // Skip the "outer loop" line
-        try {
+        try
+        {
             line = reader.readLine();
-            if (line == null || !line.trim().equals(Strings.STL_ASCII_TRIANGLE_START_TAG)) {
+            if (line == null || !line.trim().equals(Strings.STL_ASCII_TRIANGLE_START_TAG))
+            {
                 throw new IllegalArgumentException(Strings.INVALID_TRIANGLE_LINE + line);
             }
-        } catch (IOException ioException) {
+        } catch (IOException ioException)
+        {
             throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + ioException.getMessage());
         }
 
         // Read the three vertices of the triangle
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++)
+        {
             line = reader.readLine();
             vertices[i] = readVertexASCII(line);
         }
@@ -234,22 +261,26 @@ public class STLReader
      * @param line - The line containing the vertex.
      * @return The vertex read from the line.
      */
-    public Vertex readVertexASCII (String line) {
+    public Vertex readVertexASCII (String line)
+    {
         // Split the line into words by whitespaces (\\s+ is a regex for one or more whitespaces)
         // and remove leading and trailing whitespaces
         String[] words = line.trim().split(Strings.ANY_NUMBER_OF_WHITESPACES);
         // Check if the line has the correct number of words and starts with "vertex"
-        if (words.length != Constants.STL_ASCII_NORMAL_WORDCOUNT || !words[Constants.STL_ASCII_VERTEX_START_TAG_POS].equals(Constants.STL_ASCII_VERTEX_START_TAG)) {
+        if (words.length != Constants.STL_ASCII_NORMAL_WORDCOUNT || !words[Constants.STL_ASCII_VERTEX_START_TAG_POS].equals(Constants.STL_ASCII_VERTEX_START_TAG))
+        {
             throw new IllegalArgumentException(Strings.INVALID_VERTEX_LINE + line);
         }
 
         // Read the vertex from the words
-        try {
+        try
+        {
             double x = Double.parseDouble(words[Constants.STL_ASCII_VERTEX_WORD_POS_X]);
             double y = Double.parseDouble(words[Constants.STL_ASCII_VERTEX_WORD_POS_Y]);
             double z = Double.parseDouble(words[Constants.STL_ASCII_VERTEX_WORD_POS_Z]);
             return new Vertex(x, y, z);
-        } catch (NumberFormatException numberFormatException) {
+        } catch (NumberFormatException numberFormatException)
+        {
             throw new IllegalArgumentException(Strings.ERROR_PARSING_VERTEX + line);
         }
     }
@@ -260,12 +291,14 @@ public class STLReader
      * Precondition: The file path must be valid. The controller must be initialized.
      * Postcondition: The triangles are read from the file and sent to the controller.
      *
-     * @param filePath   - The file path of the STL file.
-     * @param controller - The PolyhedronController instance to send the triangles to.
+     * @param filePath     - The file path of the STL file.
+     * @param controller   - The PolyhedronController instance to send the triangles to.
      * @param parallelized - True if the file should be read in parallel, false otherwise.
      */
-    public void readSTLBinary (String filePath, PolyhedronController controller, boolean parallelized) {
-        try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+    public void readSTLBinary (String filePath, PolyhedronController controller, boolean parallelized)
+    {
+        try (FileInputStream fileInputStream = new FileInputStream(filePath))
+        {
             // Skip the header of the file and read the number of triangleMesh
             fileInputStream.skip(Constants.STL_BINARY_HEADER_BYTE_SIZE);
             byte[] triangleCountBytes = new byte[Constants.STL_BINARY_TRIANGLE_COUNT_BYTE_SIZE];
@@ -273,16 +306,20 @@ public class STLReader
             // Convert the byte array to an integer using little endian byte order
             int triangleCount = ByteBuffer.wrap(triangleCountBytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
 
-            for (int i = 0; i < triangleCount; i++) {
-                if (parallelized) {
+            for (int i = 0; i < triangleCount; i++)
+            {
+                if (parallelized)
+                {
                     controller.addTriangleToQueue(readTriangleBinary(fileInputStream));
-                } else {
+                } else
+                {
                     controller.addTriangle(readTriangleBinary(fileInputStream));
                 }
             }
             // Set the reading finished flag to true
             controller.setReadingFinished(true);
-        } catch (IOException ioException) {
+        } catch (IOException ioException)
+        {
             throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_FILE + filePath);
         }
     }
@@ -295,8 +332,10 @@ public class STLReader
      * @param fileInputStream - The FileInputStream to read the triangle from.
      * @return The triangle read from the file input stream.
      */
-    public Triangle readTriangleBinary (FileInputStream fileInputStream) {
-        try {
+    public Triangle readTriangleBinary (FileInputStream fileInputStream)
+    {
+        try
+        {
             // Read the normal of the triangle
             byte[] normalBytes = new byte[Constants.STL_BINARY_NORMAL_BYTE_SIZE];
             fileInputStream.read(normalBytes, Constants.NUMBER_ZERO, Constants.STL_BINARY_NORMAL_BYTE_SIZE);
@@ -304,7 +343,8 @@ public class STLReader
 
             // Read the three vertices of the triangle
             Vertex[] vertices = new Vertex[Constants.TRIANGLE_VERTEX_COUNT];
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 3; i++)
+            {
                 byte[] vertexBytes = new byte[Constants.STL_BINARY_TRIANGLES_BYTE_SIZE];
                 fileInputStream.read(vertexBytes, Constants.NUMBER_ZERO, Constants.STL_BINARY_TRIANGLES_BYTE_SIZE);
                 vertices[i] = readVertexBinary(vertexBytes);
@@ -314,7 +354,8 @@ public class STLReader
             fileInputStream.skip(Constants.STL_BINARY_ATTR_BYTE_SIZE);
 
             return new Triangle(vertices[Constants.TRIANGLE_VERTEX1_INDEX], vertices[Constants.TRIANGLE_VERTEX2_INDEX], vertices[Constants.TRIANGLE_VERTEX3_INDEX], normal);
-        } catch (IOException ioException) {
+        } catch (IOException ioException)
+        {
             throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + ioException.getMessage());
         }
 

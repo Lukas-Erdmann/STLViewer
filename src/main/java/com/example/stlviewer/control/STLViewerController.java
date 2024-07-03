@@ -1,11 +1,13 @@
 package com.example.stlviewer.control;
 
+import com.example.stlviewer.model.P2PPackage;
 import com.example.stlviewer.model.Polyhedron;
 import com.example.stlviewer.model.Triangle;
 import com.example.stlviewer.model.Vertex;
 import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 import com.example.stlviewer.view.STLViewer;
+import javafx.application.Platform;
 import javafx.collections.ObservableFloatArray;
 import javafx.collections.ObservableIntegerArray;
 import javafx.scene.Group;
@@ -17,6 +19,7 @@ import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+
 import java.io.File;
 
 import static com.example.stlviewer.util.Math.findMaxDouble;
@@ -28,13 +31,13 @@ public class STLViewerController
      */
     public static final double ZOOM_MULTIPLIER = 0.1;
     /**
+     * The masterController instance to manage the application.
+     */
+    private final masterController masterController;
+    /**
      * The STLViewer instance to display the STL model.
      */
     private final STLViewer stlViewer;
-    /**
-     * The ApplicationController instance to manage the application.
-     */
-    private final ApplicationController applicationController;
     /**
      * The Rotate instance for the X axis.
      */
@@ -51,6 +54,14 @@ public class STLViewerController
      * The Group instance to store the objects to transform.
      */
     private final Group objectsToTransform = new Group();
+    /**
+     * The P2PController instance to manage the peer-to-peer connection.
+     */
+    private P2PController p2pController;
+    /**
+     * The boolean to check if the model is new.
+     */
+    private boolean newModel = true;
     /**
      * The anchor position for the mouse.
      */
@@ -75,11 +86,11 @@ public class STLViewerController
     /**
      * Constructs a new STLViewerController instance.
      *
-     * @param applicationController - The ApplicationController instance to manage the application.
+     * @param masterController - The masterController instance to manage the application.
      */
-    public STLViewerController(ApplicationController applicationController)
+    public STLViewerController (masterController masterController)
     {
-        this.applicationController = applicationController;
+        this.masterController = masterController;
         this.stlViewer = new STLViewer(this);
     }
 
@@ -90,9 +101,89 @@ public class STLViewerController
      *
      * @param stage - The stage to start the viewer on.
      */
-    public void startSTLViewer(Stage stage)
+    public void startSTLViewer (Stage stage)
     {
         stlViewer.start(stage);
+    }
+
+    public void setP2PController (P2PController p2pController)
+    {
+        this.p2pController = p2pController;
+    }
+
+    public void processP2PData (Object data)
+    {
+        // If the data is a P2PPackage, process the package
+        if (data instanceof P2PPackage)
+        {
+            // Cast the data to a P2PPackage
+            P2PPackage p2pPackage = (P2PPackage) data;
+            // runLater is used to update the JavaFX application thread and avoid concurrency issues
+            Platform.runLater(() -> {
+                // Only update the model if new
+                if (newModel)
+                {
+                    // Set the new model flag to false
+                    newModel = false;
+                    // Display the model
+                    stlViewer.displayModel(p2pPackage.getPolyhedron());
+                }
+                // Update translations if necessary
+                if (p2pPackage.getTranslationX() != translation.getX())
+                {
+                    translation.setX(p2pPackage.getTranslationX());
+                }
+                if (p2pPackage.getTranslationY() != translation.getY())
+                {
+                    translation.setY(p2pPackage.getTranslationY());
+                }
+                if (p2pPackage.getTranslationZ() != translation.getZ())
+                {
+                    translation.setZ(p2pPackage.getTranslationZ());
+                }
+
+                // Update rotations if necessary
+                if (p2pPackage.getRotationX() != rotationX.getAngle())
+                {
+                    rotationX.setAngle(p2pPackage.getRotationX());
+                }
+                if (p2pPackage.getRotationY() != rotationY.getAngle())
+                {
+                    rotationY.setAngle(p2pPackage.getRotationY());
+                }
+
+                // Update the zoom if necessary
+                if (p2pPackage.getZoom() != stlViewer.getPerspectiveCamera().getTranslateZ())
+                {
+                    stlViewer.getPerspectiveCamera().setTranslateZ(p2pPackage.getZoom());
+                }
+
+                // Update the view properties
+                stlViewer.updateViewProperties();
+            });
+        } else
+        {
+            System.out.println(Strings.INVALID_P2P_PACKAGE);
+        }
+    }
+
+    public void sendP2PData (P2PPackage p2pPackage)
+    {
+        if (p2pController != null)
+        {
+            p2pController.sendData(p2pPackage);
+        }
+    }
+
+    public P2PPackage collectP2PData ()
+    {
+        return new P2PPackage(
+                masterController.getPolyhedronController().getPolyhedron(),
+                translation.getX(), translation.getY(), translation.getZ(),
+                rotationX.getAngle(), rotationY.getAngle(),
+                stlViewer.getPerspectiveCamera().getTranslateZ(),
+                anchorAngleX, anchorAngleY
+        );
     }
 
     /**
@@ -103,13 +194,21 @@ public class STLViewerController
      *
      * @param stage - The stage to open the file dialog on.
      */
-    public void openFile(Stage stage) {
+    public void openFile (Stage stage)
+    {
         File stlFile = stlViewer.openFile(stage);
 
-        if (stlFile != null) {
+        // If a file is selected, open the file and display the model
+        if (stlFile != null)
+        {
             filePath = stlFile.getAbsolutePath();
-            applicationController.openFile(filePath);
-            stlViewer.displayModel(applicationController.getPolyhedronController().getPolyhedron());
+            masterController.openFile(filePath);
+            stlViewer.displayModel(masterController.getPolyhedronController().getPolyhedron());
+            // If the P2P controller is running, send the file path to the connected peer
+            if (p2pController != null)
+            {
+                sendP2PData(collectP2PData());
+            }
         }
     }
 
@@ -121,7 +220,8 @@ public class STLViewerController
      *
      * @param polyhedron - The Polyhedron object to render.
      */
-    public void renderModel (Polyhedron polyhedron) {
+    public void renderModel (Polyhedron polyhedron)
+    {
         // Clear the scene
         clearScene();
 
@@ -144,11 +244,12 @@ public class STLViewerController
      * Precondition: The stlViewer and its components must be initialized.
      * Postcondition: The scene is cleared.
      */
-    public void clearScene() {
+    public void clearScene ()
+    {
         // Reset the mesh view
         stlViewer.getMeshView().getTransforms().clear();
-        stlViewer.getThreeDGroup().getChildren().clear();
-        objectsToTransform.getChildren().clear();
+        stlViewer.getThreeDGroup().getChildren().removeAll();
+        objectsToTransform.getChildren().removeAll();
     }
 
     /**
@@ -160,7 +261,8 @@ public class STLViewerController
      * @param polyhedron - The Polyhedron object to create the mesh from.
      * @return The created TriangleMesh.
      */
-    public TriangleMesh createMesh(Polyhedron polyhedron) {
+    public TriangleMesh createMesh (Polyhedron polyhedron)
+    {
         // Create a new TriangleMesh
         TriangleMesh mesh = new TriangleMesh();
         ObservableFloatArray points = mesh.getPoints();
@@ -168,12 +270,14 @@ public class STLViewerController
         ObservableFloatArray texCoords = mesh.getTexCoords();
 
         // Add the vertices to the mesh
-        for (Triangle triangle : polyhedron.getTriangles()) {
-            for (Vertex vertex : triangle.getVertices()) {
+        for (Triangle triangle : polyhedron.getTriangles())
+        {
+            for (Vertex vertex : triangle.getVertices())
+            {
                 points.addAll(
                         (float) (vertex.getPosX() - polyhedron.getCenter().getPosX()),
                         (float) (vertex.getPosY() - polyhedron.getCenter().getPosY()),
-                        (float) (vertex.getPosZ()- polyhedron.getCenter().getPosZ())
+                        (float) (vertex.getPosZ() - polyhedron.getCenter().getPosZ())
                 );
                 // Add texture coordinates
                 texCoords.addAll(0, 0);
@@ -181,7 +285,8 @@ public class STLViewerController
         }
 
         // Add the faces to the mesh
-        for (int i = 0; i < polyhedron.getTriangleCount() * 3; i += 3) {
+        for (int i = 0; i < polyhedron.getTriangleCount() * 3; i += 3)
+        {
             faces.addAll(
                     i + Constants.FACE_FIRST, Constants.FACE_FIRST,
                     i + Constants.FACE_SECOND, Constants.FACE_SECOND,
@@ -199,7 +304,8 @@ public class STLViewerController
      * Precondition: The mesh view and the camera must be initialized.
      * Postcondition: The mesh is placed in the scene and the camera is set to look at the mesh.
      */
-    public void applyInitialTransformations() {
+    public void applyInitialTransformations ()
+    {
         // Get the scene center from subscene dimensions
         int centerX = (Constants.WINDOW_WIDTH - Constants.INFOBAR_WIDTH) / 2;
         int centerY = Constants.WINDOW_HEIGHT / 2;
@@ -227,12 +333,13 @@ public class STLViewerController
      * Precondition: The camera must be initialized.
      * Postcondition: The camera is placed to look at the mesh.
      */
-    public void placeCamera() {
+    public void placeCamera ()
+    {
         // Reset the camera position
         stlViewer.getPerspectiveCamera().getTransforms().clear();
 
         // Calculate distance to the mesh based on the mesh size
-        longestSide = findMaxDouble(applicationController.getPolyhedronController().getPolyhedron().getBoundingBox());
+        longestSide = findMaxDouble(masterController.getPolyhedronController().getPolyhedron().getBoundingBox());
 
         // Set the camera position
         stlViewer.getPerspectiveCamera().getTransforms().addAll(
@@ -249,7 +356,8 @@ public class STLViewerController
      * Precondition: The camera and mesh must be initialized.
      * Postcondition: The view is reset.
      */
-    public void resetView() {
+    public void resetView ()
+    {
         // Reset the transformations
         rotationX.setAngle(0);
         rotationY.setAngle(0);
@@ -258,6 +366,7 @@ public class STLViewerController
         translation.setZ(0);
         stlViewer.getPerspectiveCamera().setTranslateZ(-longestSide * 2);
         stlViewer.updateViewProperties();
+        sendP2PData(collectP2PData());
     }
 
     /**
@@ -265,7 +374,8 @@ public class STLViewerController
      * Precondition: The threeDView must be initialized.
      * Postcondition: The mesh is rotated, translated, or zoomed based on the mouse input.
      */
-    public void pollMouseInput() {
+    public void pollMouseInput ()
+    {
         stlViewer.getThreeDView().setOnMousePressed(this::onMousePressed);
         stlViewer.getThreeDView().setOnMouseDragged(this::onMouseDragged);
         stlViewer.getThreeDView().setOnScroll(this::zoom);
@@ -279,15 +389,18 @@ public class STLViewerController
      *
      * @param event - The mouse event.
      */
-    public void onMousePressed(MouseEvent event) {
+    public void onMousePressed (MouseEvent event)
+    {
         // Store the initial mouse position
         anchorX = event.getSceneX();
         anchorY = event.getSceneY();
         // If the left mouse button is pressed, rotate the mesh
-        if (event.isPrimaryButtonDown()) {
+        if (event.isPrimaryButtonDown())
+        {
             anchorAngleX = rotationX.getAngle();
             anchorAngleY = rotationY.getAngle();
-        } else if (event.isSecondaryButtonDown()) {
+        } else if (event.isSecondaryButtonDown())
+        {
             // If the right mouse button is pressed, translate the mesh
             anchorTranslateX = translation.getX();
             anchorTranslateY = translation.getY();
@@ -301,20 +414,24 @@ public class STLViewerController
      *
      * @param event - The mouse event.
      */
-    public void onMouseDragged(MouseEvent event) {
+    public void onMouseDragged (MouseEvent event)
+    {
         // Calculate the mouse movement
         double deltaX = event.getSceneX() - anchorX;
         double deltaY = anchorY - event.getSceneY();
         // If the left mouse button is pressed, rotate the mesh
-        if (event.isPrimaryButtonDown()) {
+        if (event.isPrimaryButtonDown())
+        {
             rotationX.setAngle(anchorAngleX - deltaY);
             rotationY.setAngle(anchorAngleY + deltaX);
-        } else if (event.isSecondaryButtonDown()) {
+        } else if (event.isSecondaryButtonDown())
+        {
             // If the right mouse button is pressed, translate the mesh
             translation.setX(anchorTranslateX + deltaX);
             translation.setY(anchorTranslateY + deltaY);
         }
         stlViewer.updateViewProperties();
+        sendP2PData(collectP2PData());
     }
 
     /**
@@ -325,28 +442,35 @@ public class STLViewerController
      *
      * @param event - The scroll event.
      */
-    public void zoom(ScrollEvent event) {
+    public void zoom (ScrollEvent event)
+    {
         // Zoom the mesh based on the scroll direction
         double delta = event.getDeltaY();
         // Scale the zoom speed based on the mesh size and the distance to the mesh
         double zoomSpeed = longestSide * ZOOM_MULTIPLIER;
 
-        if (delta > 0) {
+        if (delta > 0)
+        {
             stlViewer.getPerspectiveCamera().setTranslateZ(stlViewer.getPerspectiveCamera().getTranslateZ() + zoomSpeed);
-        } else {
+        } else
+        {
             stlViewer.getPerspectiveCamera().setTranslateZ(stlViewer.getPerspectiveCamera().getTranslateZ() - zoomSpeed);
         }
+        sendP2PData(collectP2PData());
     }
 
     /**
      * Translates the model based on the given axis and offset. Used by the TCP client to translate the model remotely.
      * Precondition: The axis must be valid and the offset must be a valid double.
      * Postcondition: The model is translated based on the axis and offset.
-     * @param axis    The axis to translate the model on.
-     * @param offset  The offset to translate the model by.
+     *
+     * @param axis   The axis to translate the model on.
+     * @param offset The offset to translate the model by.
      */
-    public void translateModel(String axis, double offset) {
-        switch (axis.toLowerCase()) {
+    public void translateModel (String axis, double offset)
+    {
+        switch (axis.toLowerCase())
+        {
             case Strings.AXIS_X:
                 translation.setX(translation.getX() + offset);
                 break;
@@ -360,17 +484,21 @@ public class STLViewerController
                 System.out.println(Strings.INVALID_AXIS + axis);
                 break;
         }
+        sendP2PData(collectP2PData());
     }
 
     /**
      * Rotates the model based on the given axis and degrees. Used by the TCP client to rotate the model remotely.
      * Precondition: The axis must be valid and the degrees must be a valid double.
      * Postcondition: The model is rotated based on the axis and degrees.
+     *
      * @param axis    The axis to rotate the model on.
      * @param degrees The degrees to rotate the model by.
      */
-    public void rotateModel(String axis, double degrees) {
-        switch (axis.toLowerCase()) {
+    public void rotateModel (String axis, double degrees)
+    {
+        switch (axis.toLowerCase())
+        {
             case Strings.AXIS_X:
                 rotationX.setAngle(rotationX.getAngle() + degrees);
                 break;
@@ -381,6 +509,7 @@ public class STLViewerController
                 System.out.println(Strings.INVALID_AXIS + axis);
                 break;
         }
+        sendP2PData(collectP2PData());
     }
 
     /**
@@ -390,7 +519,8 @@ public class STLViewerController
      *
      * @return The file path of the STL file.
      */
-    public String getFilePath() {
+    public String getFilePath ()
+    {
         return filePath;
     }
 

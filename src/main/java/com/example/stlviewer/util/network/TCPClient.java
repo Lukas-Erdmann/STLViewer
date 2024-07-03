@@ -1,4 +1,4 @@
-package com.example.stlviewer.util;
+package com.example.stlviewer.util.network;
 
 import com.example.stlviewer.res.Strings;
 
@@ -32,7 +32,8 @@ public class TCPClient
      * @param host - The host name or IP address of the server.
      * @param port - The port number of the server.
      */
-    public TCPClient(String host, int port) {
+    public TCPClient (String host, int port)
+    {
         this.host = host;
         this.port = port;
     }
@@ -42,15 +43,18 @@ public class TCPClient
      * Precondition: The server should be running and accessible.
      * Postcondition: Commands are sent to the server based on user input.
      */
-    public void start() {
+    public void start ()
+    {
         System.out.printf(Strings.CONNECTING_TO_SERVER_AT, host, port);
         try (Socket socket = new Socket(host, port);
              BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-             Scanner scanner = new Scanner(System.in)) {
+             Scanner scanner = new Scanner(System.in))
+        {
 
             handleUserInput(output, scanner);
-        } catch (IOException ioException) {
+        } catch (IOException ioException)
+        {
             System.err.println(Strings.FAILED_CONNECTING_TO_SERVER + ioException.getMessage());
         }
     }
@@ -63,8 +67,10 @@ public class TCPClient
      * @param output  - The PrintWriter for server output.
      * @param scanner - The Scanner for user input.
      */
-    private void handleUserInput(PrintWriter output, Scanner scanner) {
-        while (true) {
+    private void handleUserInput (PrintWriter output, Scanner scanner)
+    {
+        while (true)
+        {
             String commandType = fetchCommandType(scanner);
             String axis = fetchAxis(scanner, commandType);
             double amount = fetchAmount(scanner);
@@ -82,13 +88,17 @@ public class TCPClient
      * @param scanner - The Scanner for user input.
      * @return A valid command type.
      */
-    private String fetchCommandType(Scanner scanner) {
-        while (true) {
+    private String fetchCommandType (Scanner scanner)
+    {
+        while (true)
+        {
             System.out.print(Strings.ENTER_COMMAND_TYPE);
             String commandType = scanner.nextLine().trim().toLowerCase();
-            if (commandType.equals(Strings.COMMAND_TYPE_ROTATE) || commandType.equals(Strings.COMMAND_TYPE_TRANSLATE)) {
+            if (commandType.equals(Strings.COMMAND_TYPE_ROTATE) || commandType.equals(Strings.COMMAND_TYPE_TRANSLATE))
+            {
                 return commandType;
-            } else {
+            } else
+            {
                 System.out.println(Strings.INVALID_COMMAND_TYPE);
             }
         }
@@ -103,15 +113,20 @@ public class TCPClient
      * @param commandType - The type of command (rotate or translate).
      * @return A valid axis.
      */
-    private String fetchAxis(Scanner scanner, String commandType) {
-        while (true) {
+    private String fetchAxis (Scanner scanner, String commandType)
+    {
+        while (true)
+        {
             System.out.print(Strings.ENTER_AXIS);
             String axis = scanner.nextLine().trim().toLowerCase();
-            if (commandType.equals(Strings.COMMAND_TYPE_TRANSLATE) && (axis.equals(Strings.AXIS_X) || axis.equals(Strings.AXIS_Y) || axis.equals(Strings.AXIS_Z))) {
+            if (commandType.equals(Strings.COMMAND_TYPE_TRANSLATE) && (axis.equals(Strings.AXIS_X) || axis.equals(Strings.AXIS_Y) || axis.equals(Strings.AXIS_Z)))
+            {
                 return axis;
-            } else if (commandType.equals(Strings.COMMAND_TYPE_ROTATE) && (axis.equals(Strings.AXIS_X) || axis.equals(Strings.AXIS_Y))) {
+            } else if (commandType.equals(Strings.COMMAND_TYPE_ROTATE) && (axis.equals(Strings.AXIS_X) || axis.equals(Strings.AXIS_Y)))
+            {
                 return axis;
-            } else {
+            } else
+            {
                 System.out.println(Strings.INVALID_AXIS_REPEAT);
             }
         }
@@ -125,12 +140,16 @@ public class TCPClient
      * @param scanner - The Scanner for user input.
      * @return A valid amount.
      */
-    private double fetchAmount(Scanner scanner) {
-        while (true) {
+    private double fetchAmount (Scanner scanner)
+    {
+        while (true)
+        {
             System.out.print(Strings.ENTER_AMOUNT);
-            try {
+            try
+            {
                 return Double.parseDouble(scanner.nextLine().trim());
-            } catch (NumberFormatException numberFormatException) {
+            } catch (NumberFormatException numberFormatException)
+            {
                 System.out.println(Strings.INVALID_AMOUNT);
             }
         }

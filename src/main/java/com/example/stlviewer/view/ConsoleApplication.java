@@ -43,8 +43,7 @@ public class ConsoleApplication
         if (fileNameAndPath.endsWith(Strings.STL_FILE_SUFFIX))
         {
             return fileNameAndPath;
-        }
-        else
+        } else
         {
             System.out.println(Strings.CONSAPP_FILE_DOESNT_EXIST);
             // Recursively call the method to request the file name and path again
@@ -59,7 +58,7 @@ public class ConsoleApplication
      *
      * @param polyhedron - The Polyhedron object to print.
      */
-    public void printPolyhedronData(Polyhedron polyhedron)
+    public void printPolyhedronData (Polyhedron polyhedron)
     {
         System.out.println(polyhedron.toString());
     }

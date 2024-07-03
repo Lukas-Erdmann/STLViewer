@@ -1,26 +1,25 @@
 package com.example.stlviewer;
 
-import com.example.stlviewer.control.ApplicationController;
+import com.example.stlviewer.control.masterController;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class Main extends Application
 {
-    @Override
-    public void start (Stage stage) throws IOException
-    {
-        ApplicationController appController = new ApplicationController();
-
-        appController.readSTLFileInConsole(false);
-        //appController.startTCPConnection();
-    }
-
     public static void main (String[] args)
     {
         launch();
+    }
+
+    @Override
+    public void start (Stage stage) throws IOException
+    {
+        masterController appController = new masterController();
+
+        //appController.readSTLFileInConsole(false);
+        //appController.startTCPConnection();
+        appController.startP2PConnection();
     }
 }

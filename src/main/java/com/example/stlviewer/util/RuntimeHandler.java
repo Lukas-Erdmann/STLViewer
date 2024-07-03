@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
  * This class contains methods that handle exceptions and runtime errors. Additionally, it contains methods
  * that measure the runtime of a function. <br>
  *
- * @author  Lukas Erdmann
+ * @author Lukas Erdmann
  */
 public class RuntimeHandler
 {
@@ -28,19 +28,23 @@ public class RuntimeHandler
      * Pre-condition: none <br>
      * Post-condition: none
      *
-     * @author  Lukas Erdmann
-     * @param <T>           Type of the function
-     * @param function      Function to execute
-     * @param maxTries      Maximum number of tries
-     * @return              Result of the function
+     * @param <T>      Type of the function
+     * @param function Function to execute
+     * @param maxTries Maximum number of tries
+     * @return Result of the function
+     * @author Lukas Erdmann
      */
-    public static <T> T exceptionHandler (Callable<T> function, int maxTries) {
+    public static <T> T exceptionHandler (Callable<T> function, int maxTries)
+    {
         int tries = 0;
         // Try to execute the function until it succeeds or the maximum number of tries is reached
-        while (tries++ <= maxTries) {
-            try {
+        while (tries++ <= maxTries)
+        {
+            try
+            {
                 return function.call();
-            } catch (Throwable e) {
+            } catch (Throwable e)
+            {
                 System.out.println(e.getMessage());
                 if (tries <= maxTries)
                 {
@@ -61,18 +65,23 @@ public class RuntimeHandler
      * fails 5 times, the program exits. <br>
      * Pre-condition: none <br>
      * Post-condition: none
-     * @author  Lukas Erdmann
-     * @param function      Function to execute
-     * @param maxTries      Maximum number of tries
+     *
+     * @param function Function to execute
+     * @param maxTries Maximum number of tries
+     * @author Lukas Erdmann
      */
-    public static void exceptionHandler (Runnable function, int maxTries) {
+    public static void exceptionHandler (Runnable function, int maxTries)
+    {
         int tries = 0;
         // Try to execute the function until it succeeds or the maximum number of tries is reached
-        while (tries++ <= maxTries) {
-            try {
+        while (tries++ <= maxTries)
+        {
+            try
+            {
                 function.run();
                 return;
-            } catch (Throwable e) {
+            } catch (Throwable e)
+            {
                 System.out.println(e.getMessage());
                 if (tries <= maxTries)
                 {
@@ -92,10 +101,10 @@ public class RuntimeHandler
      * Pre-condition: System.currentTimeMillis() must be available. <br>
      * Post-condition: none
      *
-     * @author  Lukas Erdmann
+     * @author Lukas Erdmann
      * @see #stopTimer()
      */
-    public void startTimer()
+    public void startTimer ()
     {
         startTime = System.currentTimeMillis();
     }
@@ -106,10 +115,10 @@ public class RuntimeHandler
      * Pre-condition: System.currentTimeMillis() must be available. <br>
      * Post-condition: none
      *
-     * @author  Lukas Erdmann
+     * @author Lukas Erdmann
      * @see #startTimer()
      */
-    public void stopTimer()
+    public void stopTimer ()
     {
         endTime = System.currentTimeMillis();
     }
@@ -120,12 +129,12 @@ public class RuntimeHandler
      * Pre-condition: The startTimer() and stopTimer() methods must be called before this method. <br>
      * Post-condition: none
      *
-     * @author  Lukas Erdmann
-     * @return  The difference between the endTime and startTime variables.
+     * @return The difference between the endTime and startTime variables.
+     * @author Lukas Erdmann
      * @see #stopTimer()
      * @see #startTimer()
      */
-    public long getElapsedTime()
+    public long getElapsedTime ()
     {
         return endTime - startTime;
     }

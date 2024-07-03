@@ -1,19 +1,20 @@
 package com.example.stlviewer.control;
 
+import com.example.stlviewer.model.Triangle;
 import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
+import com.example.stlviewer.view.ConsoleApplication;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import com.example.stlviewer.view.ConsoleApplication;
 
 import java.io.IOException;
 
 /**
- * The ApplicationController class is the main controller class of the application.
+ * The masterController class is the main controller class of the application.
  * It is responsible for managing the different controllers and starting the application.
  * It also provides methods to open files, read STL files, start the TCP connection, and sort triangles.
  */
-public class ApplicationController
+public class masterController
 {
     /**
      * The STLReader instance to read STL files.
@@ -36,37 +37,75 @@ public class ApplicationController
      */
     private TCPController tcpController;
 
-    public ApplicationController() {
+    // -- P2P Controllers --
+    /**
+     * The P2PController instance to manage the first peer-to-peer process.
+     */
+    private P2PController p2pController1;
+    /**
+     * The P2PController instance to manage the second peer-to-peer process.
+     */
+    private P2PController p2pController2;
+    /**
+     * The STLViewerController instance to manage the first peer-to-peer STL viewer.
+     */
+    private STLViewerController stlViewerControllerP2P1;
+    /**
+     * The STLViewerController instance to manage the second peer-to-peer STL viewer.
+     */
+    private STLViewerController stlViewerControllerP2P2;
+
+    /**
+     * Constructs an masterController with the default controllers.
+     * Precondition: None
+     * Postcondition: An masterController instance is created.
+     */
+    public masterController ()
+    {
         this.stlReader = new STLReader();
         this.polyhedronController = new PolyhedronController();
         this.stlViewerController = new STLViewerController(this);
         this.tcpController = new TCPController();
         this.consoleApplication = new ConsoleApplication();
+
+        // -- P2P Controllers --
+        this.stlViewerControllerP2P1 = new STLViewerController(this);
+        this.stlViewerControllerP2P2 = new STLViewerController(this);
+        this.p2pController1 = new P2PController(stlViewerControllerP2P1);
+        this.p2pController2 = new P2PController(stlViewerControllerP2P2);
     }
 
     /**
-     * Starts the stl viewer application.
+     * Starts the stl viewer application on the provided stage.
      * Precondition: None
      * Postcondition: The viewer is started.
      *
      * @param stage - The stage to start the viewer on.
      */
-    public void startViewer(Stage stage) {
+    public void startViewer (Stage stage)
+    {
         stlViewerController.startSTLViewer(stage);
     }
 
     /**
-     * Opens a file and reads the STL data from it.
+     * Opens a file and reads the STL data from it. If a polyhedron already exists,
+     * it is cleared before reading the new data.
      * Precondition: The file path must be valid.
      * Postcondition: The STL data is read from the file and stored in the polyhedron controller.
      *
      * @param filepath - The path to the file to open.
      */
-    public void openFile(String filepath)
+    public void openFile (String filepath)
     {
-        try {
+        if (polyhedronController.getPolyhedron() != null)
+        {
+            polyhedronController.clearPolyhedron();
+        }
+        try
+        {
             this.stlReader.readSTLFileParallelized(filepath, polyhedronController);
-        } catch (Exception exception) {
+        } catch (Exception exception)
+        {
             exception.printStackTrace();
         }
     }
@@ -80,7 +119,7 @@ public class ApplicationController
      * @param parallelized - Whether to read the file in parallel.
      * @throws IOException - If an I/O error occurs.
      */
-    public void readSTLFileInConsole(boolean parallelized) throws IOException
+    public void readSTLFileInConsole (boolean parallelized) throws IOException
     {
         stlReader.readSTLFile(consoleApplication.askForFileName(), polyhedronController, parallelized);
         System.out.println(polyhedronController.getPolyhedron().toString());
@@ -92,19 +131,27 @@ public class ApplicationController
      * Precondition: The specified port should be available and not in use by another application.
      * Postcondition: The TCP connection is established and the STL viewer is started.
      */
-    public void startTCPConnection() {
-        try {
-            startServer(Constants.SERVER_PORT);
-            startClient(Strings.LOCALHOST, Constants.SERVER_PORT);
+    public void startTCPConnection ()
+    {
+        try
+        {
+            // Start the server and client
+            startTCPServer(Constants.SERVER_PORT);
+            startTCPClient(Strings.LOCALHOST, Constants.SERVER_PORT);
+
+            // Start the STL viewer without blocking the main thread
             Platform.runLater(() -> {
-                try {
+                try
+                {
                     Stage stageTCP = new Stage();
                     stlViewerController.startSTLViewer(stageTCP);
-                } catch (Exception exception) {
+                } catch (Exception exception)
+                {
                     throw new RuntimeException(Strings.EXCEPTION_WHEN_ATTEMPTING_TO_START_STL_VIEWER, exception);
                 }
             });
-        } catch (Exception exception) {
+        } catch (Exception exception)
+        {
             throw new RuntimeException(Strings.UNABLE_TO_START_TCP_CONNECTION, exception);
         }
     }
@@ -116,7 +163,8 @@ public class ApplicationController
      *
      * @param port - The port to start the server on.
      */
-    public void startServer(int port) {
+    public void startTCPServer (int port)
+    {
         tcpController.startServer(port, stlViewerController);
     }
 
@@ -128,9 +176,46 @@ public class ApplicationController
      * @param host - The host to connect to.
      * @param port - The port to connect to.
      */
-    public void startClient(String host, int port) {
+    public void startTCPClient (String host, int port)
+    {
         tcpController.startClient(host, port);
     }
+
+    /**
+     * Starts a peer-to-peer connection between two peers. Each peer acts as a server and a client.
+     * Precondition: The ip address and ports must be valid and not in use by another application.
+     * Postcondition: The peer-to-peer connection is established and the STL viewers are started.
+     */
+    public void startP2PConnection ()
+    {
+        try
+        {
+            // Peer 1: Server / Peer 2: Client
+            p2pController1.startServer(Constants.P2P_PORT_1);
+            p2pController2.startClient(Strings.LOCALHOST, Constants.P2P_PORT_1);
+
+            // Peer 2: Server / Peer 1: Client
+            p2pController2.startServer(Constants.P2P_PORT_2);
+            p2pController1.startClient(Strings.LOCALHOST, Constants.P2P_PORT_2);
+
+            Platform.runLater(() -> {
+                try
+                {
+                    Stage stageP2P1 = new Stage();
+                    stlViewerControllerP2P1.startSTLViewer(stageP2P1);
+                    Stage stageP2P2 = new Stage();
+                    stlViewerControllerP2P2.startSTLViewer(stageP2P2);
+                } catch (Exception exception)
+                {
+                    throw new RuntimeException(Strings.EXCEPTION_WHEN_ATTEMPTING_TO_START_STL_VIEWER, exception);
+                }
+            });
+        } catch (Exception exception)
+        {
+            throw new RuntimeException(Strings.UNABLE_TO_START_P2P_CONNECTION, exception);
+        }
+    }
+
 
     /**
      * Gets the polyhedron controller.
@@ -139,7 +224,8 @@ public class ApplicationController
      *
      * @return The polyhedron controller.
      */
-    public PolyhedronController getPolyhedronController() {
+    public PolyhedronController getPolyhedronController ()
+    {
         return polyhedronController;
     }
 
@@ -148,7 +234,8 @@ public class ApplicationController
      * Precondition: None
      * Postcondition: The triangles are sorted.
      */
-    public void sortTriangles() {
-        polyhedronController.getPolyhedron().getTriangles().sort(null);
+    public void sortTriangles ()
+    {
+        polyhedronController.getPolyhedron().getTriangles().sort(Triangle::compareTo);
     }
 }

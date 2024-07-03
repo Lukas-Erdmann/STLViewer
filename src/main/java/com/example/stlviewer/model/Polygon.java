@@ -1,17 +1,20 @@
 package com.example.stlviewer.model;
 
+import java.io.Serializable;
+
 /**
  * The Polygon class represents a polygon in a 3D space. It is a polygonal chain that is closed.
  * Because of this, the addEdge method is overridden to prevent adding more edges after the polygon is closed.
  * Because the start and end vertex of the polygon are the same, the number of vertices is equal to the number of edges.
  * The class extends the PolygonalChain class.
  */
-public class Polygon extends PolygonalChain
+public class Polygon extends PolygonalChain implements Serializable
 {
     /**
      * Creates a new polygon with the given size.
      */
-    public Polygon() {
+    public Polygon ()
+    {
         super();
     }
 
@@ -20,7 +23,8 @@ public class Polygon extends PolygonalChain
      *
      * @param size - The size of the polygon.
      */
-    public Polygon(int size) {
+    public Polygon (int size)
+    {
         super(size, size);
     }
 
@@ -32,10 +36,13 @@ public class Polygon extends PolygonalChain
      * @param edge - The edge to add.
      */
     @Override
-    public void addEdge(Edge edge) {
-        if (!isClosed()) {
+    public void addEdge (Edge edge)
+    {
+        if (!isClosed())
+        {
             super.addEdge(edge);
-        } else {
+        } else
+        {
             throw new IllegalArgumentException("The polygon is already closed.");
         }
     }

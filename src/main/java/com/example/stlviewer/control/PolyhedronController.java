@@ -14,7 +14,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Controller class for the Polyhedron object. This class is responsible for calculating the volume,
  * surface area, bounding box and center of the polyhedron.
  */
-public class PolyhedronController implements Runnable{
+public class PolyhedronController implements Runnable
+{
 
     /**
      * The Polyhedron object to be controlled.
@@ -40,6 +41,7 @@ public class PolyhedronController implements Runnable{
 
     /**
      * Constructor for the PolyhedronController class.
+     *
      * @param polyhedron - The Polyhedron object to be controlled.
      */
     public PolyhedronController (Polyhedron polyhedron)
@@ -50,7 +52,8 @@ public class PolyhedronController implements Runnable{
     /**
      * Constructor for the PolyhedronController class.
      */
-    public PolyhedronController() {
+    public PolyhedronController ()
+    {
         this.polyhedron = new Polyhedron();
     }
 
@@ -62,23 +65,30 @@ public class PolyhedronController implements Runnable{
      * Post-condition: The polyhedron is complete and all the attributes are calculated.
      */
     @Override
-    public void run() {
-        while (true) {
-            try {
-                if(isReadingFinished && blockingQueue.isEmpty()){
+    public void run ()
+    {
+        while (true)
+        {
+            try
+            {
+                if (isReadingFinished && blockingQueue.isEmpty())
+                {
                     // When the polyhedron is complete, calculate the volume, surface area, bounding box and center
                     calculateVolume();
                     calculateSurfaceArea();
                     defineBoundingBox();
                     defineCenter();
                     break;
-                } else if (!blockingQueue.isEmpty()) {
+                } else if (!blockingQueue.isEmpty())
+                {
                     Triangle triangle = blockingQueue.take();
                     addTriangle(triangle);
-                }else{
+                } else
+                {
                     Thread.sleep(10);
                 }
-            } catch (InterruptedException e) {
+            } catch (InterruptedException e)
+            {
                 Thread.currentThread().interrupt();
                 break;
             }
@@ -87,9 +97,11 @@ public class PolyhedronController implements Runnable{
 
     /**
      * Set the readingFinished flag to true.
+     *
      * @param readingFinished - The flag to indicate that the reading is finished.
      */
-    public void setReadingFinished(boolean readingFinished){
+    public void setReadingFinished (boolean readingFinished)
+    {
         System.out.println(Strings.SOUT_READING_FINISHED);
         this.isReadingFinished = readingFinished;
     }
@@ -100,6 +112,7 @@ public class PolyhedronController implements Runnable{
      * the polyhedron.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The volume of the polyhedron is calculated.
+     *
      * @return - The volume of the polyhedron.
      */
     public double calculateVolume ()
@@ -107,12 +120,15 @@ public class PolyhedronController implements Runnable{
         // The arbitrary point is the origin
         Vertex arbitraryPoint = polyhedron.getTriangles().get(0).getVertices().get(0);
         // For each triangle in the polyhedron, calculate the volume of the tetrahedron formed
-        for (Triangle triangle : polyhedron.getTriangles()) {
-            if (triangle.pointsAwayFromReferenceVertex(arbitraryPoint)) {
+        for (Triangle triangle : polyhedron.getTriangles())
+        {
+            if (triangle.pointsAwayFromReferenceVertex(arbitraryPoint))
+            {
                 // If the triangle points away from the reference vertex, add the volume
                 double newVolume = polyhedron.getVolume() - triangle.calculateVolumeWithReferenceVertex(arbitraryPoint);
                 polyhedron.setVolume(newVolume);
-            } else {
+            } else
+            {
                 // If the triangle points towards the reference vertex, subtract the volume
                 double newVolume = polyhedron.getVolume() + triangle.calculateVolumeWithReferenceVertex(arbitraryPoint);
                 polyhedron.setVolume(newVolume);
@@ -126,10 +142,13 @@ public class PolyhedronController implements Runnable{
      * triangleMesh in the polyhedron.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The surface area of the polyhedron is calculated.
+     *
      * @return - The surface area of the polyhedron.
      */
-    public double calculateSurfaceArea () {
-        for (Triangle triangle : polyhedron.getTriangles()) {
+    public double calculateSurfaceArea ()
+    {
+        for (Triangle triangle : polyhedron.getTriangles())
+        {
             polyhedron.setSurfaceArea(triangle.getArea() + polyhedron.getSurfaceArea());
         }
         return polyhedron.getSurfaceArea();
@@ -141,44 +160,58 @@ public class PolyhedronController implements Runnable{
      * it is returned without recalculating it.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The bounding box of the polyhedron is defined.
+     *
      * @return - The bounding box of the polyhedron.
      */
-    public double[] defineBoundingBox () {
-        if (polyhedron.getBoundingBox() == null) {
+    public double[] defineBoundingBox ()
+    {
+        if (polyhedron.getBoundingBox() == null)
+        {
             polyhedron.setBoundingBox(new double[6]);
             // Initialize the bounding box with the maximum possible values
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 3; i++)
+            {
                 polyhedron.getBoundingBox()[i] = Double.MAX_VALUE;
             }
-            for (int i = 3; i < 6; i++) {
+            for (int i = 3; i < 6; i++)
+            {
                 polyhedron.getBoundingBox()[i] = Double.MIN_VALUE;
             }
             // For each triangle in the polyhedron, check if the vertices are within the bounding box
             // If they are not, update the bounding box
-            for (Triangle triangle : polyhedron.getTriangles()) {
-                for (Vertex vertex : triangle.getVertices()) {
-                    if (vertex.getPosX() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_X_INDEX]) {
+            for (Triangle triangle : polyhedron.getTriangles())
+            {
+                for (Vertex vertex : triangle.getVertices())
+                {
+                    if (vertex.getPosX() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_X_INDEX])
+                    {
                         polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_X_INDEX] = vertex.getPosX();
                     }
-                    if (vertex.getPosY() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Y_INDEX]) {
+                    if (vertex.getPosY() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Y_INDEX])
+                    {
                         polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Y_INDEX] = vertex.getPosY();
                     }
-                    if (vertex.getPosZ() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Z_INDEX]) {
+                    if (vertex.getPosZ() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Z_INDEX])
+                    {
                         polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Z_INDEX] = vertex.getPosZ();
                     }
-                    if (vertex.getPosX() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX]) {
+                    if (vertex.getPosX() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX])
+                    {
                         polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX] = vertex.getPosX();
                     }
-                    if (vertex.getPosY() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Y_INDEX]) {
+                    if (vertex.getPosY() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Y_INDEX])
+                    {
                         polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Y_INDEX] = vertex.getPosY();
                     }
-                    if (vertex.getPosZ() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX]) {
+                    if (vertex.getPosZ() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX])
+                    {
                         polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX] = vertex.getPosZ();
                     }
                 }
             }
             return polyhedron.getBoundingBox();
-        } else {
+        } else
+        {
             // If the bounding box has already been defined, return it
             return polyhedron.getBoundingBox();
         }
@@ -189,10 +222,13 @@ public class PolyhedronController implements Runnable{
      * If the center has already been defined, it is returned without recalculating it.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The center of the polyhedron is defined.
+     *
      * @return - The center of the polyhedron.
      */
-    public Vertex defineCenter () {
-        if (polyhedron.getCenter() == null) {
+    public Vertex defineCenter ()
+    {
+        if (polyhedron.getCenter() == null)
+        {
             // Calculate the center of the bounding box
             double centerX = (polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_X_INDEX] +
                     polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX]) / Constants.NUMBER_TWO;
@@ -202,7 +238,8 @@ public class PolyhedronController implements Runnable{
                     polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX]) / Constants.NUMBER_TWO;
             polyhedron.setCenter(new Vertex(centerX, centerY, centerZ));
             return polyhedron.getCenter();
-        } else {
+        } else
+        {
             // If the center has already been defined, return it
             return polyhedron.getCenter();
         }
@@ -212,6 +249,7 @@ public class PolyhedronController implements Runnable{
      * Add a triangle to the polyhedron.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The triangle is added to the polyhedron.
+     *
      * @param triangle - The triangle to be added to the polyhedron.
      */
     public void addTriangle (Triangle triangle)
@@ -223,18 +261,31 @@ public class PolyhedronController implements Runnable{
      * Add a triangle to the blocking queue.
      * Pre-condition: The blocking queue is not null.
      * Post-condition: The triangle is added to the blocking queue.
+     *
      * @param triangle - The triangle to be added to the blocking queue.
      */
-    public void addTriangleToQueue (Triangle triangle) {
+    public void addTriangleToQueue (Triangle triangle)
+    {
         blockingQueue.add(triangle);
     }
 
     /**
      * Getter for the polyhedron.
+     *
      * @return - The polyhedron.
      */
     public Polyhedron getPolyhedron ()
     {
         return polyhedron;
+    }
+
+    /**
+     * Reinstantiate the polyhedron. Used to clear the polyhedron.
+     * <p>
+     * Post-condition: The polyhedron is reinstantiated.
+     */
+    public void clearPolyhedron ()
+    {
+        polyhedron = new Polyhedron();
     }
 }

@@ -3,7 +3,7 @@ package com.example.stlviewer.res;
 /**
  * Class Constants. Contains numerical constants used in the program. <br>
  *
- * @author  Lukas Erdmann
+ * @author Lukas Erdmann
  */
 public interface Constants
 {
@@ -66,4 +66,9 @@ public interface Constants
     int COMMAND_TYPE_INDEX = 0;
     int COMMAND_AXIS_INDEX = 1;
     int COMMAND_AMOUNT_INDEX = 2;
+    int AXIS_X_INDEX = 0;
+    int AXIS_Y_INDEX = 1;
+    int AXIS_Z_INDEX = 2;
+    int P2P_PORT_1 = 9757;
+    int P2P_PORT_2 = 9758;
 }

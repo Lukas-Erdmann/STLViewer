@@ -1,13 +1,14 @@
-package com.example.stlviewer.util;
+package com.example.stlviewer.util.network;
+
+import com.example.stlviewer.control.STLViewerController;
+import com.example.stlviewer.res.Constants;
+import com.example.stlviewer.res.Strings;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import com.example.stlviewer.control.STLViewerController;
-import com.example.stlviewer.res.Constants;
-import com.example.stlviewer.res.Strings;
 
 /**
  * The TCPClientHandler class handles the processing of client commands for the TCP server.
@@ -29,10 +30,11 @@ public class TCPClientHandler extends Thread
      * Precondition: The client socket and controller should be initialized.
      * Postcondition: A TCPClientHandler instance is created with the given client socket and controller.
      *
-     * @param clientSocket - The client socket for communication with the client.
+     * @param clientSocket        - The client socket for communication with the client.
      * @param stlViewerController - The controller for the STL viewer application.
      */
-    public TCPClientHandler(Socket clientSocket, STLViewerController stlViewerController) {
+    public TCPClientHandler (Socket clientSocket, STLViewerController stlViewerController)
+    {
         this.clientSocket = clientSocket;
         this.stlViewerController = stlViewerController;
     }
@@ -43,21 +45,25 @@ public class TCPClientHandler extends Thread
      * Postcondition: The client commands are processed and the client socket is closed.
      */
     @Override
-    public void run() {
-        System.out.println(Strings.CLIENT_CONNECTED + clientSocket.getInetAddress());
-
+    public void run ()
+    {
         try (BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-             PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true)) {
+             PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true))
+        {
 
             processCommands(input, output);
 
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             System.err.println(Strings.AN_EXCEPTION_OCCURRED_PROCESSING_CLIENT_COMMANDS + e.getMessage());
             e.printStackTrace();
-        } finally {
-            try {
+        } finally
+        {
+            try
+            {
                 clientSocket.close();
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 System.err.println(Strings.AN_EXCEPTION_OCCURRED_CLOSING_CLIENT_SOCKET + e.getMessage());
             }
         }
@@ -68,23 +74,29 @@ public class TCPClientHandler extends Thread
      * Precondition: The input stream should be initialized.
      * Postcondition: Commands are processed and executed.
      *
-     * @param input - The BufferedReader for client input.
+     * @param input  - The BufferedReader for client input.
      * @param output - The PrintWriter for client output.
      * @throws IOException - Thrown if an I/O error occurs when reading or writing to the client.
      */
-    private void processCommands(BufferedReader input, PrintWriter output) throws IOException {
+    private void processCommands (BufferedReader input, PrintWriter output) throws IOException
+    {
         String command;
-        while ((command = input.readLine()) != null) {
+        while ((command = input.readLine()) != null)
+        {
             String[] commandParts = command.split(Strings.SPACE);
-            if (commandParts.length == Constants.COMMAND_WORDCOUNT) {
-                try {
+            if (commandParts.length == Constants.COMMAND_WORDCOUNT)
+            {
+                try
+                {
                     executeCommand(commandParts, output);
                     output.println(Strings.EXECUTED_COMMAND + command);
-                } catch (Exception exception) {
+                } catch (Exception exception)
+                {
                     output.println(Strings.AN_EXCEPTION_OCCURRED_EXECUTING_THE_COMMAND + exception.getMessage());
                     exception.printStackTrace();
                 }
-            } else {
+            } else
+            {
                 output.printf(Strings.INVALID_COMMAND_EXPECTED_FORMAT, command);
             }
         }
@@ -96,21 +108,25 @@ public class TCPClientHandler extends Thread
      * Postcondition: The command is executed if valid, otherwise an error message is sent.
      *
      * @param commandParts - The parts of the command string from the client.
-     * @param output - The PrintWriter for client output.
+     * @param output       - The PrintWriter for client output.
      */
-    private void executeCommand(String[] commandParts, PrintWriter output) {
+    private void executeCommand (String[] commandParts, PrintWriter output)
+    {
         String commandType = commandParts[Constants.COMMAND_TYPE_INDEX];
         String axis = commandParts[Constants.COMMAND_AXIS_INDEX];
         double amount;
 
-        try {
+        try
+        {
             amount = Double.parseDouble(commandParts[Constants.COMMAND_AMOUNT_INDEX]);
-        } catch (NumberFormatException numberFormatException) {
+        } catch (NumberFormatException numberFormatException)
+        {
             output.println(Strings.INVALID_VALUE_FOR_AMOUNT + commandParts[Constants.COMMAND_AMOUNT_INDEX]);
             return;
         }
 
-        switch (commandType) {
+        switch (commandType)
+        {
             case Strings.COMMAND_TYPE_TRANSLATE:
                 stlViewerController.translateModel(axis, amount);
                 break;
