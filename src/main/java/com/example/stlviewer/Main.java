@@ -15,7 +15,8 @@ public class Main extends Application
     {
         ApplicationController appController = new ApplicationController();
 
-        appController.startViewer(stage);
+        appController.readSTLFileInConsole(false);
+        //appController.startTCPConnection();
     }
 
     public static void main (String[] args)

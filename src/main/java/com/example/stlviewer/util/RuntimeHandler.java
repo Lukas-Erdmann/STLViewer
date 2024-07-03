@@ -95,7 +95,7 @@ public class RuntimeHandler
      * @author  Lukas Erdmann
      * @see #stopTimer()
      */
-    public static void startTimer()
+    public void startTimer()
     {
         startTime = System.currentTimeMillis();
     }
@@ -109,7 +109,7 @@ public class RuntimeHandler
      * @author  Lukas Erdmann
      * @see #startTimer()
      */
-    public static void stopTimer()
+    public void stopTimer()
     {
         endTime = System.currentTimeMillis();
     }
@@ -125,52 +125,8 @@ public class RuntimeHandler
      * @see #stopTimer()
      * @see #startTimer()
      */
-    public static long getElapsedTime()
+    public long getElapsedTime()
     {
         return endTime - startTime;
-    }
-
-    /**
-     * Displays the execution time of a void function. The function is executed inside the exceptionHandler() method.
-     * After a successful execution, the execution time is displayed using the getElapsedTime() method. <br>
-     * Pre-condition: none <br>
-     * Post-condition: none
-     *
-     * @author  Lukas Erdmann
-     * @param function  Function to execute
-     * @param maxTries  Maximum number of tries
-     * @see #exceptionHandler(Runnable, int)
-     * @see #getElapsedTime()
-     */
-    public static void displayExecutionTime (Runnable function, int maxTries)
-    {
-        startTimer();
-        exceptionHandler(function, maxTries);
-        stopTimer();
-        System.out.printf(Strings.EXECUTION_TIME, getElapsedTime());
-    }
-
-    /**
-     * Displays the execution time of a non-void function. The function is executed inside the exceptionHandler() method.
-     * After a successful execution, the execution time is displayed using the getElapsedTime() method and the result
-     * of the function is returned. <br>
-     * Pre-condition: none <br>
-     * Post-condition: none
-     *
-     * @author  Lukas Erdmann
-     * @param <T>       Type of the function
-     * @param function  Function to execute
-     * @param maxTries  Maximum number of tries
-     * @return          Result of the function
-     * @see #exceptionHandler(Callable, int)
-     * @see #getElapsedTime()
-     */
-    public static <T> T displayExecutionTime (Callable<T> function, int maxTries)
-    {
-        startTimer();
-        T result = exceptionHandler(function, maxTries);
-        stopTimer();
-        System.out.printf(Strings.EXECUTION_TIME, getElapsedTime());
-        return result;
     }
 }

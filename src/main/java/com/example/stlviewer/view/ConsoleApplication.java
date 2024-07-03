@@ -1,52 +1,66 @@
 package com.example.stlviewer.view;
 
 import com.example.stlviewer.model.Polyhedron;
+import com.example.stlviewer.res.Strings;
 
 import java.util.Scanner;
 
+/**
+ * The ConsoleApplication class provides a console-based interface for interacting with Polyhedron objects.
+ * It allows the user to input the path to an STL file, and print information about the Polyhedron and its triangles.
+ */
 public class ConsoleApplication
 {
+    /**
+     * The Scanner object for reading user input.
+     */
     private Scanner scanner;
 
+    /**
+     * Constructs a ConsoleApplication with a new Scanner for user input.
+     * Precondition: None.
+     * Postcondition: A ConsoleApplication instance is created with a new Scanner.
+     */
     public ConsoleApplication ()
     {
         this.scanner = new Scanner(System.in);
     }
 
-    public String requestFileNameAndPath()
+    /**
+     * Prompts the user to enter the path to an STL file. Checks if the file exists and is an STL file.
+     * Precondition: Scanner object should be initialized.
+     * Postcondition: Returns a valid STL file path entered by the user.
+     *
+     * @return A valid STL file path.
+     */
+    public String askForFileName ()
     {
         // Request the file name and path from the user
-        System.out.println("Please enter the file name and path:");
+        System.out.println(Strings.CONSAPP_PLEASE_ENTER_THE_FILE_NAME_AND_PATH);
         String fileNameAndPath = scanner.nextLine();
 
         // Check if the file exists and is an STL file
-        if (fileNameAndPath.endsWith(".stl"))
+        if (fileNameAndPath.endsWith(Strings.STL_FILE_SUFFIX))
         {
             return fileNameAndPath;
         }
         else
         {
-            System.out.println("The file does not exist or is not an STL file. Please enter a valid STL file path.");
+            System.out.println(Strings.CONSAPP_FILE_DOESNT_EXIST);
             // Recursively call the method to request the file name and path again
-            return requestFileNameAndPath();
+            return askForFileName();
         }
     }
 
+    /**
+     * Prints the details of the given Polyhedron to the console.
+     * Precondition: The Polyhedron object should be initialized.
+     * Postcondition: The Polyhedron details are printed to the console.
+     *
+     * @param polyhedron - The Polyhedron object to print.
+     */
     public void printPolyhedronData(Polyhedron polyhedron)
     {
         System.out.println(polyhedron.toString());
-    }
-
-    public void printTriangleSingleData(Polyhedron polyhedron, int index)
-    {
-        System.out.println(polyhedron.getTriangles().get(index));
-    }
-
-    public void printTriangleAllData(Polyhedron polyhedron)
-    {
-        for (int i = 0; i < polyhedron.getTriangles().size(); i++)
-        {
-            System.out.println(polyhedron.getTriangles().get(i));
-        }
     }
 }

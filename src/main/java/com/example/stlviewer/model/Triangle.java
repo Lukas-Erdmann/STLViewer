@@ -2,12 +2,36 @@ package com.example.stlviewer.model;
 
 import javax.vecmath.Vector3d;
 
+/**
+ * The Triangle class represents a triangle in a 3D space. It is a polygon that lies in a plane and has 3 vertices and
+ * 3 edges. Perpendicular to the plane of the triangle is the normal vector. The class extends the Face class.
+ * It also implements the Comparable interface to compare the area of two triangles.
+ */
 public class Triangle extends Face implements Comparable<Triangle>
 {
+    /**
+     * The centroid of the triangle. The centroid is the point where the medians of the triangle intersect.
+     */
     private Vertex centroid;
+    /**
+     * The area of the triangle.
+     */
     private double area;
+    /**
+     * The ID of the triangle unique to the list of triangles in the polyhedron.
+     */
     private int id;
 
+    /**
+     * Creates a new triangle with the given vertices and normal vector. The normal vector is calculated as the cross
+     * product of two edges in counter-clockwise order. The normal vector is then normalized to unit length.
+     * The area of the triangle is calculated using Heron's formula.
+     *
+     * @param v1 - The first vertex of the triangle.
+     * @param v2 - The second vertex of the triangle.
+     * @param v3 - The third vertex of the triangle.
+     * @param normal - The normal vector of the triangle.
+     */
     public Triangle (Vertex v1, Vertex v2, Vertex v3, Vector3d normal)
     {
         super(3);
@@ -31,6 +55,11 @@ public class Triangle extends Face implements Comparable<Triangle>
         //System.out.println("Triangle created: " + this);
     }
 
+    /**
+     * Calculates the area of the triangle using Heron's formula.
+     * Precondition: The triangle must exist.
+     * Postcondition: The area of the triangle is calculated.
+     */
     private void calculateArea ()
     {
         // Calculate the area of the triangle using Heron's formula
@@ -45,9 +74,18 @@ public class Triangle extends Face implements Comparable<Triangle>
         this.area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
     }
 
+    /**
+     * Calculates the volume of the tetrahedron formed by the triangle and a reference vertex.
+     * The volume of a tetrahedron is given by the formula:
+     * V = 1/6 * |(a - d) . ((b - d) x (c - d))|
+     * where a, b, c are the vertices of the triangle and d is the reference vertex.
+     * Precondition: The triangle and reference vertex must exist.
+     * Postcondition: The volume of the tetrahedron is calculated.
+     *
+     * @param refVertex - The reference vertex.
+     * @return The volume of the tetrahedron.
+     */
     public double calculateVolumeWithReferenceVertex (Vertex refVertex) {
-        // The volume of a tetrahedron is given by the formula:
-        // V = 1/6 * |(a - d) . ((b - d) x (c - d))|
         // where a, b, c are the vertices of the triangle and d is the reference vertex
         Vector3d a = new Vector3d(vertices.get(0).getPosX() - refVertex.getPosX(),
                                   vertices.get(0).getPosY() - refVertex.getPosY(),
@@ -67,6 +105,14 @@ public class Triangle extends Face implements Comparable<Triangle>
         return Math.abs(scalarTripleProduct) / 6;
     }
 
+    /**
+     * Returns the centroid of the triangle. The centroid is the point where the medians of the triangle intersect.
+     * The centroid is calculated as the average of the x, y, and z coordinates of the vertices.
+     * Precondition: The triangle must exist.
+     * Postcondition: The centroid of the triangle is returned.
+     *
+     * @return The centroid of the triangle.
+     */
     public Vertex getCentroid ()
     {
         if (centroid == null)
@@ -79,6 +125,16 @@ public class Triangle extends Face implements Comparable<Triangle>
         return centroid;
     }
 
+    /**
+     * Checks if the normal of the triangle points away from a reference vertex.
+     * The normal of the triangle points away from the reference vertex if the dot product of the normal and the vector
+     * from the reference vertex to the centroid of the triangle is positive.
+     * Precondition: The triangle and reference vertex must exist.
+     * Postcondition: True is returned if the normal points away from the reference vertex, false otherwise.
+     *
+     * @param refVertex - The reference vertex.
+     * @return True if the normal points away from the reference vertex, false otherwise.
+     */
     public boolean pointsAwayFromReferenceVertex (Vertex refVertex) {
         // Calculate the dot product of the normal of the triangle and the vector from the reference vertex to the centroid
         Vertex centroid = getCentroid();
@@ -90,21 +146,41 @@ public class Triangle extends Face implements Comparable<Triangle>
         return dotProduct > 0;
     }
 
+    /**
+     * Returns the area of the triangle.
+     *
+     * @return The area of the triangle.
+     */
     public double getArea ()
     {
         return area;
     }
 
+    /**
+     * Returns the ID of the triangle.
+     *
+     * @return The ID of the triangle.
+     */
     public int getId ()
     {
         return id;
     }
 
+    /**
+     * Sets the ID of the triangle.
+     *
+     * @param id - The ID of the triangle.
+     */
     public void setId (int id)
     {
         this.id = id;
     }
 
+    /**
+     * Returns the string representation of the triangle.
+     *
+     * @return The string representation of the triangle.
+     */
     @Override
     public String toString ()
     {
