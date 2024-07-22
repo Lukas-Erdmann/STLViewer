@@ -455,7 +455,7 @@ public class STLViewer extends Application
     public void updateViewProperties ()
     {
         rotationLabel.setText(String.format(Strings.STLV_VIEWPROP_ROTATE, stlViewerController.getRotationX().getAngle(), stlViewerController.getRotationY().getAngle()));
-        translationLabel.setText(String.format(Strings.STLV_VIEWPROP_TRANSLATE, stlViewerController.getTranslation().getX(), stlViewerController.getTranslation().getY()));
+        translationLabel.setText(String.format(Strings.STLV_VIEWPROP_TRANSLATE, stlViewerController.getTranslation().getX(), stlViewerController.getTranslation().getY(), stlViewerController.getTranslation().getZ()));
     }
 
     /**

@@ -178,7 +178,7 @@ public interface Strings
     String STLC_ROTATION_LABEL = "Rotation: ";
     String STLV_TRANSLATION_LABEL = "Translation: ";
     String STLV_VIEWPROP_ROTATE = "X: %.2f, Y: %.2f";
-    String STLV_VIEWPROP_TRANSLATE = "X: %.2f, Y: %.2f";
+    String STLV_VIEWPROP_TRANSLATE = "X: %.2f, Y: %.2f, Z: %.2f";
     String ARIAL = "Arial";
     String FORMAT_STRING_2F = "%.2f";
     String P2PPACKAGE_TOSTRING = "P2PPackage{";
