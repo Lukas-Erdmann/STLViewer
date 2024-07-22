@@ -192,4 +192,7 @@ public interface Strings
     String TRIANGLE_TOSTRING = "Triangle{";
     String TRIANGLE_TOSTRING_2 = "area = ";
     String TRIANGLE_TOSTRING_3 = "normal = ";
+    String EDGE_TOSTRING = "Edge{";
+    String ARROW_RIGHT = " -> ";
+    String THE_POLYGON_IS_ALREADY_CLOSED = "The polygon is already closed.";
 }

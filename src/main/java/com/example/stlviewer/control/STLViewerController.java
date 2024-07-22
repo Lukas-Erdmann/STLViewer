@@ -106,11 +106,22 @@ public class STLViewerController
         stlViewer.start(stage);
     }
 
+    /**
+     * Setter for the P2PController instance.
+     * @param p2pController
+     */
     public void setP2PController (P2PController p2pController)
     {
         this.p2pController = p2pController;
     }
 
+    /**
+     * Processes the P2P data by updating the model and the transformations.
+     * Precondition: The data must be a P2PPackage.
+     * Postcondition: The model and transformations are updated based on the data.
+     *
+     * @param data - The data to process.
+     */
     public void processP2PData (Object data)
     {
         // If the data is a P2PPackage, process the package
@@ -167,6 +178,13 @@ public class STLViewerController
         }
     }
 
+    /**
+     * Sends the P2P data to the connected peer, if the P2P controller is running.
+     * Precondition: The P2P controller must be running.
+     * Postcondition: The data is sent to the connected peer.
+     *
+     * @param p2pPackage - The P2P package to send.
+     */
     public void sendP2PData (P2PPackage p2pPackage)
     {
         if (p2pController != null)
@@ -175,6 +193,13 @@ public class STLViewerController
         }
     }
 
+    /**
+     * Collects the P2P data to send to the connected peer.
+     * Precondition: None
+     * Postcondition: The P2P data is collected and returned.
+     *
+     * @return The collected P2P data.
+     */
     public P2PPackage collectP2PData ()
     {
         return new P2PPackage(
@@ -312,7 +337,7 @@ public class STLViewerController
 
         // Translate the mesh to the center of the scene
         objectsToTransform.getTransforms().addAll(
-                new Translate(centerX, centerY, 0),
+                new Translate(centerX, centerY, Constants.NUMBER_ZERO),
                 // Rotate the mesh to display it correctly
                 rotationX,
                 rotationY,
@@ -419,11 +444,18 @@ public class STLViewerController
         // Calculate the mouse movement
         double deltaX = event.getSceneX() - anchorX;
         double deltaY = anchorY - event.getSceneY();
+
+        // Invert the Y-axis for rotation, if the mesh is upside down
+        if (rotationX.getAngle() > 90 && rotationX.getAngle() < 270)
+        {
+            deltaX = -deltaX;
+        }
+
         // If the left mouse button is pressed, rotate the mesh
         if (event.isPrimaryButtonDown())
         {
-            rotationX.setAngle(anchorAngleX - deltaY);
-            rotationY.setAngle(anchorAngleY + deltaX);
+            rotationX.setAngle(limitAngle(anchorAngleX - deltaY));
+            rotationY.setAngle(limitAngle(anchorAngleY - deltaX));
         } else if (event.isSecondaryButtonDown())
         {
             // If the right mouse button is pressed, translate the mesh
@@ -432,6 +464,32 @@ public class STLViewerController
         }
         stlViewer.updateViewProperties();
         sendP2PData(collectP2PData());
+    }
+
+    /**
+     * Limits the possible rotation angle to 360 degrees. If the angle is less than 0, it is set to 360.
+     * If the angle is greater than 360, it is set to 0.
+     * Precondition: The angle must be a valid double.
+     * Postcondition: The angle is 0 <= angle <= 360.
+     *
+     * @param angle - The angle to limit.
+     * @return The limited angle.
+     */
+    public double limitAngle (double angle)
+    {
+        // Calculate how many times the angle is over 360 or under 0
+        int over = Math.abs((int) (angle / 360));
+        // Limit the angle to 0 <= angle <= 360
+        if (angle < 0)
+        {
+            // If the angle is less than 0, set it to 360. The factor needs to be increased by 1.
+            return 360 * (over + 1) + angle;
+        } else if (angle >= 360)
+        {
+            // If the angle is greater than 360, set it to 0.
+            return angle - 360 * over;
+        }
+        return angle;
     }
 
     /**

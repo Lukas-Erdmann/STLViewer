@@ -1,5 +1,7 @@
 package com.example.stlviewer.model;
 
+import com.example.stlviewer.res.Strings;
+
 import javax.vecmath.Vector3d;
 import java.io.Serializable;
 
@@ -79,6 +81,6 @@ public class Edge extends Vector3d implements Serializable
     @Override
     public String toString ()
     {
-        return "Edge{" + startVertex + " -> " + endVertex + "}";
+        return Strings.EDGE_TOSTRING + startVertex + Strings.ARROW_RIGHT + endVertex + Strings.CURLY_BRACKET_RIGHT;
     }
 }

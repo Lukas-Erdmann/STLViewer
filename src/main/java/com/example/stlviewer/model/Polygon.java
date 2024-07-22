@@ -1,5 +1,7 @@
 package com.example.stlviewer.model;
 
+import com.example.stlviewer.res.Strings;
+
 import java.io.Serializable;
 
 /**
@@ -10,6 +12,7 @@ import java.io.Serializable;
  */
 public class Polygon extends PolygonalChain implements Serializable
 {
+
     /**
      * Creates a new polygon with the given size.
      */
@@ -43,7 +46,7 @@ public class Polygon extends PolygonalChain implements Serializable
             super.addEdge(edge);
         } else
         {
-            throw new IllegalArgumentException("The polygon is already closed.");
+            throw new IllegalArgumentException(Strings.THE_POLYGON_IS_ALREADY_CLOSED);
         }
     }
 }

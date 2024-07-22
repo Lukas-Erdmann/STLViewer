@@ -19,7 +19,7 @@ public class Main extends Application
         masterController appController = new masterController();
 
         //appController.readSTLFileInConsole(false);
-        //appController.startTCPConnection();
-        appController.startP2PConnection();
+        appController.startTCPConnection();
+        //appController.startP2PConnection();
     }
 }
