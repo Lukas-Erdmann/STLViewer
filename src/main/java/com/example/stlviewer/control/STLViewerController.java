@@ -28,10 +28,6 @@ import static com.example.stlviewer.util.Math.findMaxDouble;
 
 public class STLViewerController
 {
-    public static final double ZOOM_MULTIPLIER = 0.1;
-    /**
-     * The masterController instance to manage the application.
-     */
     private final masterController masterController;
     /**
      * The STLViewer instance to display the STL model.
@@ -54,9 +50,9 @@ public class STLViewerController
      */
     private final Translate translation = new Translate();
     /**
-     * The Group instance to store the objects to transform.
+     * The Group instance to store the objects to rotate.
      */
-    private final Group objectsToTransform = new Group();
+    private final Group rotationGroup = new Group();
     /**
      * The P2PController instance to manage the peer-to-peer connection.
      */
@@ -85,6 +81,19 @@ public class STLViewerController
      * The file path of the STL file.
      */
     private String filePath;
+    /**
+     * The zoom factor for the camera.
+     */
+    private double zoomFactor = 0.01;
+    /**
+     * The initial distance between the camera and the mesh.
+     */
+    private double startingDistance;
+    /**
+     * The zoom scale describes the relation between the staring distance
+     * and the current distance between the camera and the mesh.
+     */
+    private double zoomScale = 1;
 
     /**
      * Constructs a new STLViewerController instance.
@@ -275,9 +284,9 @@ public class STLViewerController
     public void clearScene ()
     {
         // Reset the mesh view
-        stlViewer.getMeshView().getTransforms().clear();
+        stlViewer.getMeshView().setMesh(null);
         stlViewer.getThreeDGroup().getChildren().removeAll();
-        objectsToTransform.getChildren().removeAll();
+        rotationGroup.getChildren().removeAll();
     }
 
     /**
@@ -334,14 +343,19 @@ public class STLViewerController
      */
     public void applyInitialTransformations ()
     {
+        // Get the scene center from subscene dimensions
+        int centerX = (Constants.WINDOW_WIDTH - Constants.INFOBAR_WIDTH) / 2;
+        int centerY = Constants.WINDOW_HEIGHT / 2;
+
         // Place the mesh in the center of the scene
-        objectsToTransform.getTransforms().addAll(
+        rotationGroup.getTransforms().addAll(
+                new Translate(centerX, centerY, Constants.NUMBER_ZERO),
                 // Rotate the mesh to display it correctly
                 rotationX,
                 rotationY
         );
-        objectsToTransform.getChildren().add(stlViewer.getMeshView());
-        stlViewer.getThreeDGroup().getChildren().addAll(objectsToTransform, stlViewer.getPerspectiveCamera());
+        rotationGroup.getChildren().add(stlViewer.getMeshView());
+        stlViewer.getThreeDGroup().getChildren().addAll(rotationGroup, stlViewer.getPerspectiveCamera());
 
         stlViewer.updateViewProperties();
 
@@ -357,23 +371,18 @@ public class STLViewerController
      */
     public void placeCamera ()
     {
-        // Get the scene center from subscene dimensions
-        int centerX = (Constants.WINDOW_WIDTH - Constants.INFOBAR_WIDTH) / 2;
-        int centerY = Constants.WINDOW_HEIGHT / 2;
-
         // Reset the camera position
         stlViewer.getPerspectiveCamera().getTransforms().clear();
 
         // Calculate distance to the mesh based on the mesh size
         // TODO: Use Bounds class to get the size of the mesh and delete the custom method
         longestSide = findMaxDouble(masterController.getPolyhedronController().getPolyhedron().getBoundingBox());
+        // Set the initial distance
+        startingDistance = Math.abs(stlViewer.getMeshView().getBoundsInParent().getCenterZ() + 1500 - longestSide - stlViewer.getPerspectiveCamera().getTranslateZ());
 
         // Set the initial camera position
-        stlViewer.getPerspectiveCamera().setTranslateX(-centerX);
-        stlViewer.getPerspectiveCamera().setTranslateY(-centerY);
-        stlViewer.getPerspectiveCamera().setTranslateZ(-longestSide * 2);
+        stlViewer.getPerspectiveCamera().setTranslateZ(0);
         // Add the translation property to the camera
-        stlViewer.getPerspectiveCamera().getTransforms().add(translation);
 
         // Set camera properties
         stlViewer.getPerspectiveCamera().setNearClip(0.001);
@@ -390,9 +399,11 @@ public class STLViewerController
         // Reset the transformations
         rotationX.setAngle(0);
         rotationY.setAngle(0);
-        translation.setX(0);
-        translation.setY(0);
-        translation.setZ(-longestSide * 2);
+        stlViewer.getPerspectiveCamera().setTranslateX(0);
+        stlViewer.getPerspectiveCamera().setTranslateY(0);
+        stlViewer.getPerspectiveCamera().setTranslateZ(0);
+        zoomFactor = 0.01;
+        zoomScale = 1;
         stlViewer.updateViewProperties();
         sendP2PData(collectP2PData());
     }
@@ -432,8 +443,8 @@ public class STLViewerController
         } else if (event.isSecondaryButtonDown())
         {
             // If the right mouse button is pressed, translate the mesh
-            anchorTranslateX = translation.getX();
-            anchorTranslateY = translation.getY();
+            anchorTranslateX = stlViewer.getPerspectiveCamera().getTranslateX();
+            anchorTranslateY = stlViewer.getPerspectiveCamera().getTranslateY();
         }
     }
 
@@ -462,8 +473,8 @@ public class STLViewerController
             rotationY.setAngle(limitAngle(anchorAngleY - deltaX));
         } else if (event.isSecondaryButtonDown())
         {
-            translation.setX(anchorTranslateX - deltaX);
-            translation.setY(anchorTranslateY + deltaY);
+            stlViewer.getPerspectiveCamera().setTranslateX(anchorTranslateX - (deltaX / zoomScale));
+            stlViewer.getPerspectiveCamera().setTranslateY(anchorTranslateY + (deltaY / zoomScale));
         }
         stlViewer.updateViewProperties();
         sendP2PData(collectP2PData());
@@ -507,33 +518,21 @@ public class STLViewerController
     {
         // Zoom the mesh based on the scroll direction
         double delta = event.getDeltaY();
-        // Get the bounds of the mesh in the scene's coordinate system
-        Bounds meshBounds = stlViewer.getMeshView().localToScene(stlViewer.getMeshView().getBoundsInLocal());
-        // Calculate the center point of the mesh
-        Point3D meshCenter = new Point3D(
-                (meshBounds.getMinX() + meshBounds.getMaxX()) / 2,
-                (meshBounds.getMinY() + meshBounds.getMaxY()) / 2,
-                (meshBounds.getMinZ() + meshBounds.getMaxZ()) / 2
-        );
-        // Calculate the distance between the camera and the mesh's center
-        Point3D cameraPosition = new Point3D(
-                translation.getX(),
-                translation.getY(),
-                translation.getZ()
-        );
-        double distance = meshCenter.distance(cameraPosition);
-        double zoomFactor = 0.2 + distance / 1000;
-        System.out.println("Distance: " + distance + "; MeshCenter: " + meshCenter + "; CameraPosition: " + cameraPosition);
-        double zoomSpeed = longestSide * zoomFactor;
+        double distance = Math.abs(stlViewer.getMeshView().getBoundsInParent().getCenterZ() + 1500 - longestSide - stlViewer.getPerspectiveCamera().getTranslateZ());
+        double zoomSpeed = Math.pow(zoomFactor * distance, 2);
+        System.out.println("Zoom factor: " + zoomFactor + "; Zoom speed: " + zoomSpeed + "; Distance: " + distance);
 
         if (delta > 0)
         {
-            translation.setZ(translation.getZ() + zoomSpeed);
+            stlViewer.getPerspectiveCamera().setTranslateZ(stlViewer.getPerspectiveCamera().getTranslateZ() + zoomSpeed);
         } else
         {
-            translation.setZ(translation.getZ() - zoomSpeed);
+            stlViewer.getPerspectiveCamera().setTranslateZ(stlViewer.getPerspectiveCamera().getTranslateZ() - zoomSpeed);
         }
 
+        // Calculate the new zoom scale
+        // TODO: Correct for parallax
+        zoomScale = startingDistance / distance;
         // Apply the new translation
         stlViewer.updateViewProperties();
         sendP2PData(collectP2PData());
@@ -616,6 +615,24 @@ public class STLViewerController
         return rotationX;
     }
 
+    public double getDistanceBetweenCameraAndMesh3dView ()
+    {
+        Bounds meshBoundsInThreeDGroup = rotationGroup.localToParent(stlViewer.getMeshView().getBoundsInLocal());
+        Point3D meshCenterInThreeDGroup = new Point3D(
+                (meshBoundsInThreeDGroup.getMinX() + meshBoundsInThreeDGroup.getMaxX()) / 2,
+                (meshBoundsInThreeDGroup.getMinY() + meshBoundsInThreeDGroup.getMaxY()) / 2,
+                (meshBoundsInThreeDGroup.getMinZ() + meshBoundsInThreeDGroup.getMaxZ()) / 2 + 1500 - longestSide
+        );
+
+        // Convert perspectiveCamera's position to threeDGroup's coordinate system
+        Point3D cameraPositionInThreeDGroup = new Point3D(
+                stlViewer.getPerspectiveCamera().getTranslateX(),
+                stlViewer.getPerspectiveCamera().getTranslateY(),
+                stlViewer.getPerspectiveCamera().getTranslateZ()
+        );
+        return cameraPositionInThreeDGroup.distance(meshCenterInThreeDGroup);
+    }
+
     /**
      * Gets the rotation on the Y axis.
      * Precondition: None
@@ -638,5 +655,15 @@ public class STLViewerController
     public Translate getTranslation ()
     {
         return translation;
+    }
+
+    public double getZoomFactor ()
+    {
+        return zoomFactor;
+    }
+
+    public void setZoomFactor (double zoomFactor)
+    {
+        this.zoomFactor = zoomFactor;
     }
 }

@@ -110,7 +110,7 @@ public interface Strings
     String CONSAPP_FILE_DOESNT_EXIST = "The file does not exist or is not an STL file. Please enter a valid STL file path.";
     String CONSAPP_PLEASE_ENTER_THE_FILE_NAME_AND_PATH = "Please enter the file name and path:";
     String STL_FILE_SUFFIX = ".stl";
-    String SOUT_ELAPSED_TIME = "Elapsed time: %d ms";
+    String SOUT_ELAPSED_TIME = "Elapsed time: %d ms\n";
     String SOUT_READING_FINISHED = "Reading finished";
     String LOCALHOST = "localhost";
     String EXCEPTION_WHEN_ATTEMPTING_TO_START_STL_VIEWER = "Exception when attempting to start stlViewer";

@@ -385,24 +385,6 @@ public class STLViewer extends Application
         zoomDialog.setTitle(Strings.STLV_SET_ZOOM_2);
 
         // Create the VBox for the dialog
-        VBox dialogVBox = configureZoomDialogVBox();
-        zoomDialog.getDialogPane().setContent(dialogVBox);
-        // Add the OK and Cancel buttons
-        zoomDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        // Show the dialog and wait for the user response
-        zoomDialog.showAndWait();
-    }
-
-    /**
-     * Configures the VBox for the zoom dialog with a text field for the zoom factor.
-     * Precondition: The corresponding dialog was opened.
-     * Postcondition: The VBox is configured with the text field for the zoom factor.
-     *
-     * @return The configured VBox for the zoom dialog.
-     */
-    private VBox configureZoomDialogVBox ()
-    {
         VBox dialogVBox = new VBox();
         // Add the text field for the zoom value
         TextField zoomValue = new TextField();
@@ -413,7 +395,28 @@ public class STLViewer extends Application
                 new Label(Strings.STLV_ZOOM_FACTOR + Strings.COLON), zoomValue
         );
 
-        return dialogVBox;
+        zoomDialog.getDialogPane().setContent(dialogVBox);
+        // Add the OK and Cancel buttons
+        zoomDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Handle the OK button click
+        zoomDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                try {
+                    double newZoomFactor = Double.parseDouble(zoomValue.getText());
+                    // Optionally, validate the newZoomFactor range here
+                    stlViewerController.setZoomFactor(newZoomFactor);
+                    System.out.println("Zoom factor set to: " + newZoomFactor);
+                } catch (NumberFormatException e) {
+                    // Handle invalid input
+                    System.out.println("Invalid zoom factor entered.");
+                }
+            }
+            return null;
+        });
+
+        // Show the dialog and wait for the user response
+        zoomDialog.showAndWait();
     }
 
     /**
@@ -455,7 +458,7 @@ public class STLViewer extends Application
     public void updateViewProperties ()
     {
         rotationLabel.setText(String.format(Strings.STLV_VIEWPROP_ROTATE, stlViewerController.getRotationX().getAngle(), stlViewerController.getRotationY().getAngle()));
-        translationLabel.setText(String.format(Strings.STLV_VIEWPROP_TRANSLATE, stlViewerController.getTranslation().getX(), stlViewerController.getTranslation().getY(), stlViewerController.getTranslation().getZ()));
+        translationLabel.setText(String.format(Strings.STLV_VIEWPROP_TRANSLATE, perspectiveCamera.getTranslateX(), perspectiveCamera.getTranslateY(), perspectiveCamera.getTranslateZ()));
     }
 
     /**
