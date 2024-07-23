@@ -1,9 +1,11 @@
 package com.example.stlviewer.util;
 
+import javafx.geometry.Point3D;
+
 /**
  * The Math class contains static methods for mathematical operations.
  */
-public abstract class Math
+public abstract class MathUtil
 {
     /**
      * Finds the maximum double in the given array.

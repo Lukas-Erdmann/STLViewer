@@ -168,7 +168,7 @@ public interface Strings
     String STLV_Y_COLON = "Y:";
     String STLV_ROTATE_MODEL = "Rotate Model";
     String STLV_SET_ZOOM_2 = "Set Zoom";
-    String STLV_ZOOM_FACTOR = "Zoom Factor";
+    String STLV_ZOOM_LIMIT = "Max Zoom Speed";
     String COLON = ":";
     String STLV_MODEL_INFORMATION = "Model Information";
     String STLV_NUMBER_OF_TRIANGLES = "Number of Triangles: ";
@@ -195,4 +195,6 @@ public interface Strings
     String EDGE_TOSTRING = "Edge{";
     String ARROW_RIGHT = " -> ";
     String THE_POLYGON_IS_ALREADY_CLOSED = "The polygon is already closed.";
+    String STLV_ZOOM_COEFF = "Zoom Coefficient";
+    String STLV_Z_COLON = "Z:";
 }

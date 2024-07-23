@@ -58,7 +58,7 @@ public class STLViewer extends Application
     /**
      * The PerspectiveCamera object for the 3D view.
      */
-    private final PerspectiveCamera perspectiveCamera = new PerspectiveCamera(false);
+    private final PerspectiveCamera perspectiveCamera = new PerspectiveCamera(true);
     /**
      * The controller for the STL viewer application.
      */
@@ -294,43 +294,47 @@ public class STLViewer extends Application
         translateDialog.setTitle(Strings.STLV_TRANSLATE_MODEL);
 
         // Create the VBox for the dialog
-        VBox dialogVBox = configureTranslateDialogVBox();
+        VBox dialogVBox = new VBox();
+        // Add the text fields for the translation values
+        TextField translateX = new TextField();
+        translateX.setText(String.valueOf(Constants.NUMBER_ZERO));
+        TextField translateY = new TextField();
+        translateY.setText(String.valueOf(Constants.NUMBER_ZERO));
+        TextField translateZ = new TextField();
+        translateZ.setText(String.valueOf(Constants.NUMBER_ZERO));
+
+        // Add the text fields with labels to the dialog VBox
+        dialogVBox.getChildren().addAll(
+                new Label(Strings.STLV_X_COLON), translateX,
+                new Label(Strings.STLV_Y_COLON), translateY,
+                new Label(Strings.STLV_Z_COLON), translateZ
+        );
+
         translateDialog.getDialogPane().setContent(dialogVBox);
         // Add the OK and Cancel buttons
         translateDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        translateDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                try {
+                    double newTranslateX = Double.parseDouble(translateX.getText());
+                    double newTranslateY = Double.parseDouble(translateY.getText());
+                    double newTranslateZ = Double.parseDouble(translateZ.getText());
+                    stlViewerController.translateModel(newTranslateX, newTranslateY, newTranslateZ);
+                } catch (NumberFormatException e) {
+                    // TODO: Handle invalid input
+                }
+            }
+            return null;
+        });
 
         // Show the dialog and wait for the user response
         translateDialog.showAndWait();
     }
 
     /**
-     * Configures the VBox for the translation dialog with text fields for the X and Y translation values.
-     * Precondition: The corresponding dialog was opened.
-     * Postcondition: The VBox is configured with the text fields for the translation values.
-     *
-     * @return The configured VBox for the translation dialog.
-     */
-    private VBox configureTranslateDialogVBox ()
-    {
-        VBox dialogVBox = new VBox();
-        // Add the text fields for the translation values
-        TextField translateX = new TextField();
-        translateX.setText(String.valueOf(stlViewerController.getTranslation().getX()));
-        TextField translateY = new TextField();
-        translateY.setText(String.valueOf(stlViewerController.getTranslation().getY()));
-
-        // Add the text fields with labels to the dialog VBox
-        dialogVBox.getChildren().addAll(
-                new Label(Strings.STLV_X_COLON), translateX,
-                new Label(Strings.STLV_Y_COLON), translateY
-        );
-
-        return dialogVBox;
-    }
-
-    /**
      * Opens a dialog to allow the user to apply a rotation motion to the 3D model. The dialog contains text fields
-     * for the X and Y rotation angles.
+     * for the X and Y rotation angles. The rotation angles are specified in degrees.
      * Precondition: The supermenu item was selected.
      * Postcondition: The rotation dialog is displayed and the new rotation angles are applied to the model.
      */
@@ -340,30 +344,12 @@ public class STLViewer extends Application
         rotateDialog.setTitle(Strings.STLV_ROTATE_MODEL);
 
         // Create the VBox for the dialog
-        VBox dialogVBox = configureRotateDialogVBox();
-        rotateDialog.getDialogPane().setContent(dialogVBox);
-        // Add the OK and Cancel buttons
-        rotateDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        // Show the dialog and wait for the user response
-        rotateDialog.showAndWait();
-    }
-
-    /**
-     * Configures the VBox for the rotation dialog with text fields for the X and Y rotation angles.
-     * Precondition: The corresponding dialog was opened.
-     * Postcondition: The VBox is configured with the text fields for the rotation angles.
-     *
-     * @return The configured VBox for the rotation dialog.
-     */
-    private VBox configureRotateDialogVBox ()
-    {
         VBox dialogVBox = new VBox();
         // Add the text fields for the rotation values
         TextField rotateX = new TextField();
-        rotateX.setText(String.valueOf(stlViewerController.getRotationX().getAngle()));
+        rotateX.setText(String.valueOf(String.valueOf(Constants.NUMBER_ZERO)));
         TextField rotateY = new TextField();
-        rotateY.setText(String.valueOf(stlViewerController.getRotationY().getAngle()));
+        rotateY.setText(String.valueOf(String.valueOf(Constants.NUMBER_ZERO)));
 
         // Add the text fields with labels to the dialog VBox
         dialogVBox.getChildren().addAll(
@@ -371,11 +357,33 @@ public class STLViewer extends Application
                 new Label(Strings.STLV_Y_COLON), rotateY
         );
 
-        return dialogVBox;
+        rotateDialog.getDialogPane().setContent(dialogVBox);
+        // Add the OK and Cancel buttons
+        rotateDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Handle the OK button click
+        rotateDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                try {
+                    double newRotateX = Double.parseDouble(rotateX.getText());
+                    stlViewerController.rotateModel(Strings.AXIS_X, newRotateX);
+                    double newRotateY = Double.parseDouble(rotateY.getText());
+                    stlViewerController.rotateModel(Strings.AXIS_Y, newRotateY);
+                } catch (NumberFormatException e) {
+                    // TODO: Handle invalid input
+                }
+            }
+            return null;
+        });
+
+        // Show the dialog and wait for the user response
+        rotateDialog.showAndWait();
     }
 
     /**
-     * Opens a dialog to allow the user to set the zoom factor for the 3D view.
+     * Opens a dialog to allow the user to set the zoom parameters for the camera motion. The dialog contains text fields
+     * for the zoom limit and zoom coefficient. The zoom limit is the maximum speed at which the camera can zoom in and
+     * out, while the zoom coefficient governs the rate at which the zoom speed increases.
      * Precondition: The supermenu item was selected.
      * Postcondition: The zoom dialog is displayed and the new zoom factor is applied to the 3D view.
      */
@@ -386,13 +394,18 @@ public class STLViewer extends Application
 
         // Create the VBox for the dialog
         VBox dialogVBox = new VBox();
-        // Add the text field for the zoom value
-        TextField zoomValue = new TextField();
-        zoomValue.setPromptText(Strings.STLV_ZOOM_FACTOR);
+        // Add the text field for the zoom values
+        TextField zoomLimit = new TextField();
+        zoomLimit.setPromptText(Strings.STLV_ZOOM_LIMIT);
+        zoomLimit.setText(String.valueOf(stlViewerController.getZoomLimit()));
+        TextField zoomCoefficient = new TextField();
+        zoomCoefficient.setPromptText(Strings.STLV_ZOOM_COEFF);
+        zoomCoefficient.setText(String.valueOf(stlViewerController.getZoomCoefficient()));
 
         // Add the text field with label to the dialog VBox
         dialogVBox.getChildren().addAll(
-                new Label(Strings.STLV_ZOOM_FACTOR + Strings.COLON), zoomValue
+                new Label(Strings.STLV_ZOOM_LIMIT + Strings.COLON), zoomLimit,
+                new Label(Strings.STLV_ZOOM_COEFF + Strings.COLON), zoomCoefficient
         );
 
         zoomDialog.getDialogPane().setContent(dialogVBox);
@@ -403,13 +416,12 @@ public class STLViewer extends Application
         zoomDialog.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 try {
-                    double newZoomFactor = Double.parseDouble(zoomValue.getText());
-                    // Optionally, validate the newZoomFactor range here
-                    stlViewerController.setZoomFactor(newZoomFactor);
-                    System.out.println("Zoom factor set to: " + newZoomFactor);
+                    double newZoomLimit = Double.parseDouble(zoomLimit.getText());
+                    stlViewerController.setZoomLimit(newZoomLimit);
+                    double newZoomCoefficient = Double.parseDouble(zoomCoefficient.getText());
+                    stlViewerController.setZoomCoefficient(newZoomCoefficient);
                 } catch (NumberFormatException e) {
-                    // Handle invalid input
-                    System.out.println("Invalid zoom factor entered.");
+                    // TODO: Handle invalid input
                 }
             }
             return null;
@@ -457,8 +469,17 @@ public class STLViewer extends Application
      */
     public void updateViewProperties ()
     {
-        rotationLabel.setText(String.format(Strings.STLV_VIEWPROP_ROTATE, stlViewerController.getRotationX().getAngle(), stlViewerController.getRotationY().getAngle()));
-        translationLabel.setText(String.format(Strings.STLV_VIEWPROP_TRANSLATE, perspectiveCamera.getTranslateX(), perspectiveCamera.getTranslateY(), perspectiveCamera.getTranslateZ()));
+        rotationLabel.setText(String.format(
+                Strings.STLV_VIEWPROP_ROTATE,
+                stlViewerController.getRotationX().getAngle(),
+                stlViewerController.getRotationY().getAngle()
+        ));
+        translationLabel.setText(String.format(
+                Strings.STLV_VIEWPROP_TRANSLATE,
+                stlViewerController.getTranslation().getX(),
+                stlViewerController.getTranslation().getY(),
+                stlViewerController.getTranslation().getZ()
+        ));
     }
 
     /**
@@ -532,6 +553,16 @@ public class STLViewer extends Application
     public Camera getPerspectiveCamera ()
     {
         return perspectiveCamera;
+    }
+
+    /**
+     * Returns the current field of view for the camera.
+     *
+     * @return The current field of view for the camera.
+     */
+    public double getFieldOfView ()
+    {
+        return perspectiveCamera.getFieldOfView();
     }
 
     /**
