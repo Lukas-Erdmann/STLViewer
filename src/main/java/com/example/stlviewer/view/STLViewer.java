@@ -184,6 +184,8 @@ public class STLViewer extends Application
         Menu menuEdit = new Menu(Strings.STLV_EDIT);
         // Add menu items
         MenuItem menuItemSetColor = new MenuItem(Strings.STLV_SET_COLOR);
+        // Disable the menu item if the model has no material/ is not loaded
+        menuItemSetColor.disableProperty().bind(meshView.materialProperty().isNull());
         menuItemSetColor.setOnAction(e -> openColorDialog());
         menuEdit.getItems().add(menuItemSetColor);
         return menuEdit;
@@ -271,12 +273,16 @@ public class STLViewer extends Application
         Menu menuView = new Menu(Strings.STLV_VIEW);
         // Add menu items
         MenuItem menuItemTranslate = new MenuItem(Strings.STLV_TRANSLATE);
+        menuItemTranslate.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
         menuItemTranslate.setOnAction(e -> openTranslateDialog());
         MenuItem menuItemRotate = new MenuItem(Strings.STLV_ROTATE);
+        menuItemRotate.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
         menuItemRotate.setOnAction(e -> openRotateDialog());
         MenuItem menuItemSetZoom = new MenuItem(Strings.STLV_SET_ZOOM);
+        menuItemSetZoom.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
         menuItemSetZoom.setOnAction(e -> openZoomDialog());
         MenuItem menuItemResetZoom = new MenuItem(Strings.STLV_RESET_VIEW);
+        menuItemResetZoom.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
         menuItemResetZoom.setOnAction(e -> stlViewerController.resetView());
         menuView.getItems().addAll(menuItemTranslate, menuItemRotate, menuItemSetZoom, menuItemResetZoom);
         return menuView;

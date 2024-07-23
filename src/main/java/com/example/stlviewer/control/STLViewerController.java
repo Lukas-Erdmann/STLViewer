@@ -8,6 +8,8 @@ import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 import com.example.stlviewer.view.STLViewer;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableFloatArray;
 import javafx.collections.ObservableIntegerArray;
 import javafx.geometry.Bounds;
@@ -102,10 +104,9 @@ public class STLViewerController
      */
     private double initialDistance;
     /**
-     * The zoom scale describes the relation between the staring distance
-     * and the current distance between the camera and the mesh.
+     * The boolean property to check if the mesh is loaded.
      */
-    private double zoomScale = 1;
+    private final BooleanProperty isMeshLoaded = new SimpleBooleanProperty(false);
 
     /**
      * Constructs a new STLViewerController instance.
@@ -281,6 +282,9 @@ public class STLViewerController
 
         // Apply initial transformations to place the mesh in the scene
         applyInitialTransformations();
+
+        // Mark the mesh as loaded
+        isMeshLoaded.set(true);
 
         // Poll user input
         pollMouseInput();
@@ -484,7 +488,6 @@ public class STLViewerController
             double deltaY = anchorPoint.getY() - anchorPointNow.getY();
             translation.setX(anchorTranslateX - deltaX);
             translation.setY(anchorTranslateY - deltaY);
-            System.out.println("Translation: " + translation);
         }
         sendP2PData(collectP2PData());
     }
@@ -809,5 +812,17 @@ public class STLViewerController
     public void setZoomCoefficient(double zoomCoefficient)
     {
         this.zoomCoefficient = zoomCoefficient;
+    }
+
+    /**
+     * Gets the isMeshLoaded property.
+     * Precondition: None
+     * Postcondition: The isMeshLoaded property is returned.
+     *
+     * @return The isMeshLoaded property.
+     */
+    public BooleanProperty isMeshLoadedProperty()
+    {
+        return isMeshLoaded;
     }
 }
