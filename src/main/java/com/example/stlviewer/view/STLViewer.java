@@ -5,6 +5,7 @@ import com.example.stlviewer.model.Polyhedron;
 import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -475,17 +476,19 @@ public class STLViewer extends Application
      */
     public void updateViewProperties ()
     {
-        rotationLabel.setText(String.format(
-                Strings.STLV_VIEWPROP_ROTATE,
-                stlViewerController.getRotationX().getAngle(),
-                stlViewerController.getRotationY().getAngle()
-        ));
-        translationLabel.setText(String.format(
-                Strings.STLV_VIEWPROP_TRANSLATE,
-                stlViewerController.getTranslation().getX(),
-                stlViewerController.getTranslation().getY(),
-                stlViewerController.getTranslation().getZ()
-        ));
+        Platform.runLater(() -> {
+            rotationLabel.setText(String.format(
+                    Strings.STLV_VIEWPROP_ROTATE,
+                    stlViewerController.getRotationX().getAngle(),
+                    stlViewerController.getRotationY().getAngle()
+            ));
+            translationLabel.setText(String.format(
+                    Strings.STLV_VIEWPROP_TRANSLATE,
+                    stlViewerController.getTranslation().getX(),
+                    stlViewerController.getTranslation().getY(),
+                    stlViewerController.getTranslation().getZ()
+            ));
+        });
     }
 
     /**
