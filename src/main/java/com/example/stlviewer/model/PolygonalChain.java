@@ -2,13 +2,14 @@ package com.example.stlviewer.model;
 
 import com.example.stlviewer.res.Strings;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * The PolygonalChain class represents a polygonal chain in a 3D space. It is a chain of edges that are connected
  * by their vertices. The class contains a list of edges and vertices that make up the chain.
  */
-public class PolygonalChain
+public class PolygonalChain implements Serializable
 {
     /**
      * The list of edges that make up the chain.

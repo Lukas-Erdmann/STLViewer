@@ -71,4 +71,5 @@ public interface Constants
     int AXIS_Z_INDEX = 2;
     int P2P_PORT_1 = 9757;
     int P2P_PORT_2 = 9758;
+    int Z_DISTANCE_FACTOR = 4;
 }

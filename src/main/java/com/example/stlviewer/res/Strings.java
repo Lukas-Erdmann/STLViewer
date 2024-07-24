@@ -185,8 +185,7 @@ public interface Strings
     String P2PPACKAGE_TOSTRING_2 = "polyhedron=";
     String P2PPACKAGE_TOSTRING_3 = ", translate=";
     String P2PPACKAGE_TOSTRING_4 = ", rotate=";
-    String P2PPACKAGE_TOSTRING_5 = ", zoom=";
-    String P2PPACKAGE_TOSTRING_6 = ", anchorAngles=";
+    String P2PPACKAGE_TOSTRING_5 = ", zoomParams=";
     String INVALID_P2P_PACKAGE = "Invalid P2P package.";
     String UNABLE_TO_START_P2P_CONNECTION = "Unable to start P2P connection.";
     String TRIANGLE_TOSTRING = "Triangle{";
@@ -197,4 +196,5 @@ public interface Strings
     String THE_POLYGON_IS_ALREADY_CLOSED = "The polygon is already closed.";
     String STLV_ZOOM_COEFF = "Zoom Coefficient";
     String STLV_Z_COLON = "Z:";
+    String INVALID_MODE = "Invalid operation mode.";
 }

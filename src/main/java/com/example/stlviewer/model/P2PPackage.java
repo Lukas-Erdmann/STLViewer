@@ -20,13 +20,9 @@ public class P2PPackage implements Serializable
      */
     private final double rotationX, rotationY;
     /**
-     * The zoom factor for camera view.
+     * The zoom parameters.
      */
-    private final double zoom;
-    /**
-     * The anchor angles for rotation.
-     */
-    private final double anchorAngleX, anchorAngleY;
+    private final double zoomLimit, zoomCoefficient;
 
     /**
      * Constructs a P2PPackage with the specified Polyhedron and transformation properties.
@@ -37,12 +33,11 @@ public class P2PPackage implements Serializable
      * @param translateZ - The Z translation value.
      * @param rotateX - The X rotation angle.
      * @param rotateY - The Y rotation angle.
-     * @param zoom - The zoom factor.
-     * @param anchorAngleX - The anchor angle for X-axis rotation.
-     * @param anchorAngleY - The anchor angle for Y-axis rotation.
+     * @param zoomLimit - The Z rotation angle.
+     * @param zoomCoefficient - The Z rotation angle.
      */
     public P2PPackage (Polyhedron polyhedron, double translateX, double translateY, double translateZ, double rotateX,
-                       double rotateY, double zoom, double anchorAngleX, double anchorAngleY)
+                       double rotateY,  double zoomLimit, double zoomCoefficient)
     {
         this.polyhedron = polyhedron;
         this.translationX = translateX;
@@ -50,9 +45,8 @@ public class P2PPackage implements Serializable
         this.translationZ = translateZ;
         this.rotationX = rotateX;
         this.rotationY = rotateY;
-        this.zoom = zoom;
-        this.anchorAngleX = anchorAngleX;
-        this.anchorAngleY = anchorAngleY;
+        this.zoomLimit = zoomLimit;
+        this.zoomCoefficient = zoomCoefficient;
     }
 
     /**
@@ -116,33 +110,21 @@ public class P2PPackage implements Serializable
     }
 
     /**
-     * Gets the Z rotation angle.
+     * Gets the zoom limit.
      *
-     * @return The Z rotation angle.
+     * @return The zoom limit.
      */
-    public double getZoom ()
-    {
-        return zoom;
+    public double getZoomLimit() {
+        return zoomLimit;
     }
 
     /**
-     * Gets the anchor angle for X-axis rotation.
+     * Gets the zoom coefficient.
      *
-     * @return The anchor angle for X-axis rotation.
+     * @return The zoom coefficient.
      */
-    public double getAnchorAngleX ()
-    {
-        return anchorAngleX;
-    }
-
-    /**
-     * Gets the anchor angle for Y-axis rotation.
-     *
-     * @return The anchor angle for Y-axis rotation.
-     */
-    public double getAnchorAngleY ()
-    {
-        return anchorAngleY;
+    public double getZoomCoefficient() {
+        return zoomCoefficient;
     }
 
     /**
@@ -157,8 +139,7 @@ public class P2PPackage implements Serializable
                 Strings.P2PPACKAGE_TOSTRING_2 + polyhedron +
                 Strings.P2PPACKAGE_TOSTRING_3 + Arrays.toString(new double[]{translationX, translationY, translationZ}) +
                 Strings.P2PPACKAGE_TOSTRING_4 + Arrays.toString(new double[]{rotationX, rotationY}) +
-                Strings.P2PPACKAGE_TOSTRING_5 + zoom +
-                Strings.P2PPACKAGE_TOSTRING_6 + Arrays.toString(new double[]{anchorAngleX, anchorAngleY}) +
+                Strings.P2PPACKAGE_TOSTRING_5 + Arrays.toString(new double[]{zoomLimit, zoomCoefficient}) +
                 Strings.CURLY_BRACKET_RIGHT;
     }
 }

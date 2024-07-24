@@ -16,10 +16,6 @@ public class Main extends Application
     @Override
     public void start (Stage stage) throws IOException
     {
-        masterController appController = new masterController();
-
-        //appController.readSTLFileInConsole(false);
-        appController.startTCPConnection();
-        //appController.startP2PConnection();
+        masterController appController = new masterController("P2P", true);
     }
 }

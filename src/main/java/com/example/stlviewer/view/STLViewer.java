@@ -29,6 +29,10 @@ import java.io.File;
 public class STLViewer extends Application
 {
     /**
+     * The main stage for the application.
+     */
+    private Stage stage = new Stage();
+    /**
      * The MeshView object for displaying the 3D model.
      */
     private final MeshView meshView = new MeshView();
@@ -91,7 +95,8 @@ public class STLViewer extends Application
     @Override
     public void start (Stage stage)
     {
-        configureStage(stage);
+        this.stage = stage;
+        configureStage();
         stage.show();
     }
 
@@ -100,10 +105,8 @@ public class STLViewer extends Application
      * added to the right, and the 3D view is added to the center of the border pane. The scene is then set on the stage.
      * Precondition: The stage must be initialized.
      * Postcondition: The stage is configured with the specified title and layout.
-     *
-     * @param stage - The primary stage for the application.
      */
-    private void configureStage (Stage stage)
+    private void configureStage ()
     {
         stage.setTitle(Strings.WINDOW_TITLE);
 
@@ -113,7 +116,7 @@ public class STLViewer extends Application
         scene.setFill(javafx.scene.paint.Color.GREY);
 
         // Add the menu bar, info labels, and the 3D view
-        borderPane.setTop(configureMenuBar(stage));
+        borderPane.setTop(configureMenuBar());
         borderPane.setRight(configureInfoLabels());
         borderPane.setCenter(configure3DView());
 
@@ -126,14 +129,13 @@ public class STLViewer extends Application
      * Precondition: The stage must be initialized.
      * Postcondition: The menu bar is configured with the specified menus and menu items.
      *
-     * @param stage - The primary stage for the application.
      * @return The configured menu bar.
      */
-    private MenuBar configureMenuBar (Stage stage)
+    private MenuBar configureMenuBar ()
     {
         MenuBar topMenuBar = new MenuBar();
         // Add menu items
-        topMenuBar.getMenus().addAll(configureMenuFile(stage), configureMenuEdit(), configureMenuView());
+        topMenuBar.getMenus().addAll(configureMenuFile(), configureMenuEdit(), configureMenuView());
         return topMenuBar;
     }
 
@@ -142,10 +144,9 @@ public class STLViewer extends Application
      * Precondition: The stage must be initialized.
      * Postcondition: The File menu is configured with the specified menu items.
      *
-     * @param stage - The primary stage for the application.
      * @return The configured File menu.
      */
-    private Menu configureMenuFile (Stage stage)
+    private Menu configureMenuFile ()
     {
         Menu menuFile = new Menu(Strings.STLV_MENU);
         // Add menu items
@@ -592,5 +593,14 @@ public class STLViewer extends Application
     public Group getThreeDGroup ()
     {
         return threeDGroup;
+    }
+
+    /**
+     * Returns the main stage for the application.
+     *
+     * @return The main stage for the application.
+     */
+    public Stage getStage() {
+        return stage;
     }
 }

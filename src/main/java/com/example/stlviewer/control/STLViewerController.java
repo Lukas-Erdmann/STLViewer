@@ -9,7 +9,9 @@ import com.example.stlviewer.res.Strings;
 import com.example.stlviewer.view.STLViewer;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ObservableFloatArray;
 import javafx.collections.ObservableIntegerArray;
 import javafx.geometry.Bounds;
@@ -26,15 +28,24 @@ import javafx.stage.Stage;
 
 import java.io.File;
 
-import static com.example.stlviewer.util.MathUtil.findMaxDouble;
-
 public class STLViewerController
 {
+    /**
+     * The masterController instance to manage the application.
+     */
     private final masterController masterController;
+    /**
+     * The polyhedronController instance to manage the polyhedron data.
+     */
+    private PolyhedronController polyhedronController;
     /**
      * The STLViewer instance to display the STL model.
      */
     private final STLViewer stlViewer;
+    /**
+     * The P2PController instance to manage the peer-to-peer connection.
+     */
+    private P2PController p2pController;
     /**
      * The Rotate instance for the X axis.
      */
@@ -60,14 +71,6 @@ public class STLViewerController
      */
     private final Group translationGroup = new Group();
     /**
-     * The P2PController instance to manage the peer-to-peer connection.
-     */
-    private P2PController p2pController;
-    /**
-     * The boolean to check if the model is new.
-     */
-    private boolean newModel = true;
-    /**
      * The anchor position for the mouse.
      */
     private double anchorX, anchorY;
@@ -86,7 +89,7 @@ public class STLViewerController
     /**
      * The longest side of the mesh.
      */
-    private double longestSide;
+    private double longestSideLength;
     /**
      * The file path of the STL file.
      */
@@ -94,11 +97,11 @@ public class STLViewerController
     /**
      * The zoom speed limit for the camera.
      */
-    private double zoomLimit = 100;
+    private final DoubleProperty zoomLimit = new SimpleDoubleProperty(100);
     /**
      * The zoom coefficient for the camera.
      */
-    private double zoomCoefficient = 0.0001;
+    private final DoubleProperty zoomCoefficient = new SimpleDoubleProperty(0.0001);
     /**
      * The initial distance between the camera and the mesh.
      */
@@ -117,6 +120,7 @@ public class STLViewerController
     {
         this.masterController = masterController;
         this.stlViewer = new STLViewer(this);
+        // Set up listeners to update labels and P2P data
         setupListeners();
     }
 
@@ -133,105 +137,16 @@ public class STLViewerController
     }
 
     /**
-     * Setter for the P2PController instance.
-     * @param p2pController
-     */
-    public void setP2PController (P2PController p2pController)
-    {
-        this.p2pController = p2pController;
-    }
-
-    /**
-     * Processes the P2P data by updating the model and the transformations.
-     * Precondition: The data must be a P2PPackage.
-     * Postcondition: The model and transformations are updated based on the data.
+     * Updates the title of the main stage with the specified title.
+     * Precondition: The stage must be initialized.
+     * Postcondition: The title of the main stage is updated with the specified title.
      *
-     * @param data - The data to process.
+     * @param title - The new title for the main stage.
      */
-    public void processP2PData (Object data)
-    {
-        // If the data is a P2PPackage, process the package
-        if (data instanceof P2PPackage)
-        {
-            // Cast the data to a P2PPackage
-            P2PPackage p2pPackage = (P2PPackage) data;
-            // runLater is used to update the JavaFX application thread and avoid concurrency issues
-            Platform.runLater(() -> {
-                // Only update the model if new
-                if (newModel)
-                {
-                    // Set the new model flag to false
-                    newModel = false;
-                    // Display the model
-                    stlViewer.displayModel(p2pPackage.getPolyhedron());
-                }
-                // Update translations if necessary
-                if (p2pPackage.getTranslationX() != translation.getX())
-                {
-                    translation.setX(p2pPackage.getTranslationX());
-                }
-                if (p2pPackage.getTranslationY() != translation.getY())
-                {
-                    translation.setY(p2pPackage.getTranslationY());
-                }
-                if (p2pPackage.getTranslationZ() != translation.getZ())
-                {
-                    translation.setZ(p2pPackage.getTranslationZ());
-                }
-
-                // Update rotations if necessary
-                if (p2pPackage.getRotationX() != rotationX.getAngle())
-                {
-                    rotationX.setAngle(p2pPackage.getRotationX());
-                }
-                if (p2pPackage.getRotationY() != rotationY.getAngle())
-                {
-                    rotationY.setAngle(p2pPackage.getRotationY());
-                }
-
-                // Update the zoom if necessary
-                if (p2pPackage.getZoom() != stlViewer.getPerspectiveCamera().getTranslateZ())
-                {
-                    stlViewer.getPerspectiveCamera().setTranslateZ(p2pPackage.getZoom());
-                }
-            });
-        } else
-        {
-            System.out.println(Strings.INVALID_P2P_PACKAGE);
-        }
-    }
-
-    /**
-     * Sends the P2P data to the connected peer, if the P2P controller is running.
-     * Precondition: The P2P controller must be running.
-     * Postcondition: The data is sent to the connected peer.
-     *
-     * @param p2pPackage - The P2P package to send.
-     */
-    public void sendP2PData (P2PPackage p2pPackage)
-    {
-        if (p2pController != null)
-        {
-            p2pController.sendData(p2pPackage);
-        }
-    }
-
-    /**
-     * Collects the P2P data to send to the connected peer.
-     * Precondition: None
-     * Postcondition: The P2P data is collected and returned.
-     *
-     * @return The collected P2P data.
-     */
-    public P2PPackage collectP2PData ()
-    {
-        return new P2PPackage(
-                masterController.getPolyhedronController().getPolyhedron(),
-                translation.getX(), translation.getY(), translation.getZ(),
-                rotationX.getAngle(), rotationY.getAngle(),
-                stlViewer.getPerspectiveCamera().getTranslateZ(),
-                anchorAngleX, anchorAngleY
-        );
+    public void updateWindowTitle(String title) {
+        Platform.runLater(() -> {
+            stlViewer.getStage().setTitle(Strings.WINDOW_TITLE + title);
+        });
     }
 
     /**
@@ -249,14 +164,17 @@ public class STLViewerController
         // If a file is selected, open the file and display the model
         if (stlFile != null)
         {
-            filePath = stlFile.getAbsolutePath();
-            masterController.openFile(filePath);
-            stlViewer.displayModel(masterController.getPolyhedronController().getPolyhedron());
-            // If the P2P controller is running, send the file path to the connected peer
-            if (p2pController != null)
+            // Clear the scene
+            if (isMeshLoaded.get())
             {
-                sendP2PData(collectP2PData());
+                clearScene();
             }
+            polyhedronController = new PolyhedronController();
+            filePath = stlFile.getAbsolutePath();
+            masterController.openFile(filePath, polyhedronController);
+            stlViewer.displayModel(polyhedronController.getPolyhedron());
+            // Update the title of the stage
+            updateWindowTitle(stlFile.getAbsolutePath());
         }
     }
 
@@ -270,9 +188,6 @@ public class STLViewerController
      */
     public void renderModel (Polyhedron polyhedron)
     {
-        // Clear the scene
-        clearScene();
-
         // Create the mesh
         TriangleMesh polyhedronMesh = createMesh(polyhedron);
 
@@ -285,6 +200,12 @@ public class STLViewerController
 
         // Mark the mesh as loaded
         isMeshLoaded.set(true);
+
+        // If the P2P controller is running, send the file path to the connected peer
+        if (p2pController != null)
+        {
+            sendP2PData(collectP2PData(true));
+        }
 
         // Poll user input
         pollMouseInput();
@@ -299,8 +220,17 @@ public class STLViewerController
     {
         // Reset the mesh view
         stlViewer.getMeshView().setMesh(null);
-        stlViewer.getThreeDGroup().getChildren().removeAll();
-        rotationGroup.getChildren().removeAll();
+
+        // Clear all children from the groups
+        rotationGroup.getChildren().clear();
+        translationGroup.getChildren().clear();
+        stlViewer.getThreeDGroup().getChildren().clear(); // Ensure this removes all elements, including rotationGroup and translationGroup if they were added
+
+        // Reset transformations if necessary
+        resetView();
+
+        // Mark the mesh as not loaded
+        isMeshLoaded.set(false);
     }
 
     /**
@@ -385,11 +315,10 @@ public class STLViewerController
         translationGroup.getChildren().add(stlViewer.getPerspectiveCamera());
 
         // Calculate distance to the mesh based on the mesh size
-        // TODO: Use Bounds class to get the size of the mesh and delete the custom method
-        longestSide = findMaxDouble(masterController.getPolyhedronController().getPolyhedron().getBoundingBox());
+        longestSideLength = findLongestSideLength(findMeshBounds());
 
         // Set the initial camera position
-        translation.setZ(-longestSide * 4);
+        translation.setZ(-longestSideLength * Constants.Z_DISTANCE_FACTOR);
         // Set the initial distance
         initialDistance = getDistanceBetweenCameraAndMeshView3D();
 
@@ -410,10 +339,9 @@ public class STLViewerController
         rotationY.setAngle(0);
         translation.setX(0);
         translation.setY(0);
-        translation.setZ(-longestSide * 4);
-        zoomLimit = 100;
-        zoomCoefficient = 0.0001;
-        sendP2PData(collectP2PData());
+        translation.setZ(-longestSideLength * Constants.Z_DISTANCE_FACTOR);
+        zoomLimit.set(100);
+        zoomCoefficient.set(0.0001);
     }
 
     /**
@@ -489,7 +417,7 @@ public class STLViewerController
             translation.setX(anchorTranslateX - deltaX);
             translation.setY(anchorTranslateY - deltaY);
         }
-        sendP2PData(collectP2PData());
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -532,7 +460,7 @@ public class STLViewerController
         // Zoom the mesh based on the scroll direction
         double delta = event.getDeltaY();
         double distance = getDistanceBetweenCameraAndMeshView3D();
-        double zoomSpeed = Math.max(1, zoomLimit - (zoomLimit * Math.exp(-zoomCoefficient * distance)));
+        double zoomSpeed = Math.max(1, zoomLimit.get() - (zoomLimit.get() * Math.exp(-zoomCoefficient.get() * distance)));
 
         if (delta > 0)
         {
@@ -543,8 +471,7 @@ public class STLViewerController
         {
             translation.setZ(translation.getZ() - zoomSpeed);
         }
-
-        sendP2PData(collectP2PData());
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -572,7 +499,7 @@ public class STLViewerController
                 System.out.println(Strings.INVALID_AXIS + axis);
                 break;
         }
-        sendP2PData(collectP2PData());
+        sendP2PData(collectP2PData(false));
     }
 
     public void translateModel (double offsetX, double offsetY, double offsetZ)
@@ -581,7 +508,7 @@ public class STLViewerController
         translation.setX(translation.getX() - offsetX);
         translation.setY(translation.getY() + offsetY);
         translation.setZ(translation.getZ() + offsetZ);
-        sendP2PData(collectP2PData());
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -606,7 +533,7 @@ public class STLViewerController
                 System.out.println(Strings.INVALID_AXIS + axis);
                 break;
         }
-        sendP2PData(collectP2PData());
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -619,12 +546,8 @@ public class STLViewerController
      */
     public double getDistanceBetweenCameraAndMeshView3D()
     {
-        Bounds meshBoundsInThreeDGroup = rotationGroup.localToParent(stlViewer.getMeshView().getBoundsInLocal());
-        Point3D meshCenterInThreeDGroup = new Point3D(
-                (meshBoundsInThreeDGroup.getMinX() + meshBoundsInThreeDGroup.getMaxX()) / 2,
-                (meshBoundsInThreeDGroup.getMinY() + meshBoundsInThreeDGroup.getMaxY()) / 2,
-                (meshBoundsInThreeDGroup.getMinZ() + meshBoundsInThreeDGroup.getMaxZ()) / 2
-        );
+        // Get the center of the mesh in the threeDGroup
+        Point3D meshCenterInThreeDGroup = findMeshCenter();
 
         // Convert perspectiveCamera's position to threeDGroup's coordinate system
         Point3D cameraPositionInThreeDGroup = new Point3D(
@@ -633,6 +556,64 @@ public class STLViewerController
                 translation.getZ()
         );
         return cameraPositionInThreeDGroup.distance(meshCenterInThreeDGroup);
+    }
+
+    /**
+     * Finds the bounds of the mesh in the threeDGroup. The method gets the bounds of the mesh in the threeDGroup
+     * and returns the maximum and minimum values of the mesh bounds.
+     * Precondition: The mesh view must be initialized and not null.
+     * Postcondition: The maximum and minimum values of the mesh bounds are returned.
+     *
+     * @return The maximum and minimum values of the mesh bounds.
+     */
+    public double[] findMeshBounds()
+    {
+        // Get the bounds of the mesh in the threeDGroup
+        Bounds meshBoundsInThreeDGroup = rotationGroup.localToParent(stlViewer.getMeshView().getBoundsInLocal());
+        // Get the maximum and minimum values of the mesh bounds
+        double maxX = meshBoundsInThreeDGroup.getMaxX();
+        double maxY = meshBoundsInThreeDGroup.getMaxY();
+        double maxZ = meshBoundsInThreeDGroup.getMaxZ();
+        double minX = meshBoundsInThreeDGroup.getMinX();
+        double minY = meshBoundsInThreeDGroup.getMinY();
+        double minZ = meshBoundsInThreeDGroup.getMinZ();
+        return new double[]{maxX, maxY, maxZ, minX, minY, minZ};
+    }
+
+    /**
+     * Finds the longest side length of the mesh. The method takes the bounds of the mesh as input and calculates
+     * the longest side length of the mesh based on the bounds.
+     * Precondition: The mesh view must be initialized and not null.
+     * Postcondition: The longest side length of the mesh is returned.
+     *
+     * @return The longest side length of the mesh.
+     */
+    public double findLongestSideLength(double[] bounds)
+    {
+        double xLength = Math.abs(bounds[0] - bounds[3]);
+        double yLength = Math.abs(bounds[1] - bounds[4]);
+        double zLength = Math.abs(bounds[2] - bounds[5]);
+        return Math.max(xLength, Math.max(yLength, zLength));
+    }
+
+    /**
+     * Finds the center of the mesh in the threeDGroup. The method gets the bounds of the mesh in the threeDGroup
+     * and calculates the center of the mesh based on the bounds.
+     * Precondition: The mesh view must be initialized and not null.
+     * Postcondition: The center of the mesh is returned.
+     *
+     * @return The center of the mesh.
+     */
+    public Point3D findMeshCenter()
+    {
+        // Get the bounds of the mesh in the threeDGroup
+        Bounds meshBoundsInThreeDGroup = rotationGroup.localToParent(stlViewer.getMeshView().getBoundsInLocal());
+        // Get the center of the mesh
+        return new Point3D(
+                (meshBoundsInThreeDGroup.getMinX() + meshBoundsInThreeDGroup.getMaxX()) / 2,
+                (meshBoundsInThreeDGroup.getMinY() + meshBoundsInThreeDGroup.getMaxY()) / 2,
+                (meshBoundsInThreeDGroup.getMinZ() + meshBoundsInThreeDGroup.getMaxZ()) / 2
+        );
     }
 
     /**
@@ -712,6 +693,7 @@ public class STLViewerController
     public void setRotationX (double angle)
     {
         rotationX.setAngle(angle);
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -736,6 +718,7 @@ public class STLViewerController
     public void setRotationY (double angle)
     {
         rotationY.setAngle(angle);
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -764,6 +747,7 @@ public class STLViewerController
         translation.setX(xPos);
         translation.setY(yPos);
         translation.setZ(zPos);
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -775,7 +759,7 @@ public class STLViewerController
      */
     public double getZoomLimit()
     {
-        return zoomLimit;
+        return zoomLimit.get();
     }
 
     /**
@@ -787,7 +771,8 @@ public class STLViewerController
      */
     public void setZoomLimit(double zoomLimit)
     {
-        this.zoomLimit = zoomLimit;
+        this.zoomLimit.set(zoomLimit);
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -799,7 +784,7 @@ public class STLViewerController
      */
     public double getZoomCoefficient()
     {
-        return zoomCoefficient;
+        return zoomCoefficient.get();
     }
 
     /**
@@ -811,7 +796,8 @@ public class STLViewerController
      */
     public void setZoomCoefficient(double zoomCoefficient)
     {
-        this.zoomCoefficient = zoomCoefficient;
+        this.zoomCoefficient.set(zoomCoefficient);
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -824,5 +810,143 @@ public class STLViewerController
     public BooleanProperty isMeshLoadedProperty()
     {
         return isMeshLoaded;
+    }
+
+    /**
+     * Sets the isMeshLoaded property.
+     * Precondition: The isLoaded must be a valid boolean.
+     * Postcondition: The isMeshLoaded property is set.
+     *
+     * @param isLoaded - The boolean to set.
+     */
+    public void setMeshLoaded(boolean isLoaded)
+    {
+        isMeshLoaded.set(isLoaded);
+    }
+
+    // --- P2P methods --- //
+
+    /**
+     * Sends the P2P data to the connected peer, if the P2P controller is running.
+     * Precondition: The P2P controller must be running.
+     * Postcondition: The data is sent to the connected peer.
+     *
+     * @param p2pPackage - The P2P package to send.
+     */
+    public void sendP2PData (P2PPackage p2pPackage)
+    {
+        if (p2pController != null)
+        {
+            p2pController.sendData(p2pPackage);
+        }
+    }
+
+    /**
+     * Collects the P2P data to send to the connected peer.
+     * Precondition: None
+     * Postcondition: The P2P data is collected and returned.
+     *
+     * @return The collected P2P data.
+     */
+    public P2PPackage collectP2PData (boolean sendPolyhedron)
+    {
+        if (sendPolyhedron)
+        {
+            return new P2PPackage(
+                    polyhedronController.getPolyhedron(),
+                    translation.getX(),
+                    translation.getY(),
+                    translation.getZ(),
+                    rotationX.getAngle(),
+                    rotationY.getAngle(),
+                    zoomLimit.get(),
+                    zoomCoefficient.get()
+            );
+        } else
+        {
+            return new P2PPackage(
+                    null,
+                    translation.getX(),
+                    translation.getY(),
+                    translation.getZ(),
+                    rotationX.getAngle(),
+                    rotationY.getAngle(),
+                    zoomLimit.get(),
+                    zoomCoefficient.get()
+            );
+        }
+    }
+
+    /**
+     * Processes the P2P data by updating the model and the transformations.
+     * Precondition: The data must be a P2PPackage.
+     * Postcondition: The model and transformations are updated based on the data.
+     *
+     * @param data - The data to process.
+     */
+    public void processP2PData (Object data)
+    {
+        // If the data is a P2PPackage, process the package
+        if (data instanceof P2PPackage p2pPackage)
+        {
+            // runLater is used to update the JavaFX application thread and avoid concurrency issues
+            Platform.runLater(() -> {
+                // Only update the model if new
+                if (!isMeshLoaded.get() && p2pPackage.getPolyhedron() != null)
+                {
+                    // Create a new polyhedron controller with the received polyhedron
+                    polyhedronController = new PolyhedronController(p2pPackage.getPolyhedron());
+                    // Clear the scene of the old model
+                    clearScene();
+                    // Display the model
+                    stlViewer.displayModel(polyhedronController.getPolyhedron());
+                }
+                // Update translations if necessary
+                if (p2pPackage.getTranslationX() != translation.getX())
+                {
+                    translation.setX(p2pPackage.getTranslationX());
+                }
+                if (p2pPackage.getTranslationY() != translation.getY())
+                {
+                    translation.setY(p2pPackage.getTranslationY());
+                }
+                if (p2pPackage.getTranslationZ() != translation.getZ())
+                {
+                    translation.setZ(p2pPackage.getTranslationZ());
+                }
+
+                // Update rotations if necessary
+                if (p2pPackage.getRotationX() != rotationX.getAngle())
+                {
+                    rotationX.setAngle(p2pPackage.getRotationX());
+                }
+                if (p2pPackage.getRotationY() != rotationY.getAngle())
+                {
+                    rotationY.setAngle(p2pPackage.getRotationY());
+                }
+
+                // Update the zoom parameters if necessary
+                if (p2pPackage.getZoomLimit() != zoomLimit.get())
+                {
+                    zoomLimit.set(p2pPackage.getZoomLimit());
+                }
+                if (p2pPackage.getZoomCoefficient() != zoomCoefficient.get())
+                {
+                    zoomCoefficient.set(p2pPackage.getZoomCoefficient());
+                }
+            });
+        } else
+        {
+            System.out.println(Strings.INVALID_P2P_PACKAGE);
+        }
+    }
+
+    /**
+     * Setter for the P2PController instance.
+     * @param p2pController - The P2PController instance to set.
+     */
+    public void setP2PController (P2PController p2pController)
+    {
+        this.p2pController = p2pController;
     }
 }

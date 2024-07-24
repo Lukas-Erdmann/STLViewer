@@ -47,6 +47,7 @@ public class PolyhedronController implements Runnable
     public PolyhedronController (Polyhedron polyhedron)
     {
         this.polyhedron = polyhedron;
+        isReadingFinished = true;
     }
 
     /**
@@ -112,13 +113,11 @@ public class PolyhedronController implements Runnable
      * the polyhedron.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The volume of the polyhedron is calculated.
-     *
-     * @return - The volume of the polyhedron.
      */
-    public double calculateVolume ()
+    public void calculateVolume ()
     {
-        // The arbitrary point is the origin
-        Vertex arbitraryPoint = polyhedron.getTriangles().get(0).getVertices().get(0);
+        // The arbitrary point is chosen to be the first vertex of the first triangle
+        Vertex arbitraryPoint = polyhedron.getTriangles().getFirst().getVertices().getFirst();
         // For each triangle in the polyhedron, calculate the volume of the tetrahedron formed
         for (Triangle triangle : polyhedron.getTriangles())
         {
@@ -134,7 +133,6 @@ public class PolyhedronController implements Runnable
                 polyhedron.setVolume(newVolume);
             }
         }
-        return polyhedron.getVolume();
     }
 
     /**
@@ -142,16 +140,13 @@ public class PolyhedronController implements Runnable
      * triangleMesh in the polyhedron.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The surface area of the polyhedron is calculated.
-     *
-     * @return - The surface area of the polyhedron.
      */
-    public double calculateSurfaceArea ()
+    public void calculateSurfaceArea ()
     {
         for (Triangle triangle : polyhedron.getTriangles())
         {
             polyhedron.setSurfaceArea(triangle.getArea() + polyhedron.getSurfaceArea());
         }
-        return polyhedron.getSurfaceArea();
     }
 
     /**
@@ -160,10 +155,8 @@ public class PolyhedronController implements Runnable
      * it is returned without recalculating it.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The bounding box of the polyhedron is defined.
-     *
-     * @return - The bounding box of the polyhedron.
      */
-    public double[] defineBoundingBox ()
+    public void defineBoundingBox ()
     {
         if (polyhedron.getBoundingBox() == null)
         {
@@ -209,23 +202,17 @@ public class PolyhedronController implements Runnable
                     }
                 }
             }
-            return polyhedron.getBoundingBox();
-        } else
-        {
-            // If the bounding box has already been defined, return it
-            return polyhedron.getBoundingBox();
         }
+        polyhedron.getBoundingBox();
     }
 
     /**
-     * Define the center of the polyhedron. This is done by calculating the center of the bounding box.
+     * Defines the center of the polyhedron. This is done by calculating the center of the bounding box.
      * If the center has already been defined, it is returned without recalculating it.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The center of the polyhedron is defined.
-     *
-     * @return - The center of the polyhedron.
      */
-    public Vertex defineCenter ()
+    public void defineCenter ()
     {
         if (polyhedron.getCenter() == null)
         {
@@ -237,11 +224,9 @@ public class PolyhedronController implements Runnable
             double centerZ = (polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Z_INDEX] +
                     polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX]) / Constants.NUMBER_TWO;
             polyhedron.setCenter(new Vertex(centerX, centerY, centerZ));
-            return polyhedron.getCenter();
         } else
         {
             // If the center has already been defined, return it
-            return polyhedron.getCenter();
         }
     }
 

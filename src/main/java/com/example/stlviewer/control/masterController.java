@@ -17,15 +17,19 @@ import java.io.IOException;
 public class masterController
 {
     /**
+     * The mode of the application. (CONSOLE, TCP, P2P)
+     */
+    private String mode;
+    /**
      * The STLReader instance to read STL files.
      */
-    private STLReader stlReader;
+    private final STLReader stlReader;
     /**
      * The STLViewerController instance to manage the STL viewer.
      */
     private STLViewerController stlViewerController;
     /**
-     * The PolyhedronController instance to manage the polyhedron data.
+     * The PolyhedronController instance to manage the polyhedron data when reading the file in the console.
      */
     private PolyhedronController polyhedronController;
     /**
@@ -60,31 +64,35 @@ public class masterController
      * Precondition: None
      * Postcondition: An masterController instance is created.
      */
-    public masterController ()
-    {
+    public masterController (String mode, boolean parallelized) throws IOException {
+        // Reader always initialized
         this.stlReader = new STLReader();
-        this.polyhedronController = new PolyhedronController();
-        this.stlViewerController = new STLViewerController(this);
-        this.tcpController = new TCPController();
-        this.consoleApplication = new ConsoleApplication();
 
-        // -- P2P Controllers --
-        this.stlViewerControllerP2P1 = new STLViewerController(this);
-        this.stlViewerControllerP2P2 = new STLViewerController(this);
-        this.p2pController1 = new P2PController(stlViewerControllerP2P1);
-        this.p2pController2 = new P2PController(stlViewerControllerP2P2);
-    }
-
-    /**
-     * Starts the stl viewer application on the provided stage.
-     * Precondition: None
-     * Postcondition: The viewer is started.
-     *
-     * @param stage - The stage to start the viewer on.
-     */
-    public void startViewer (Stage stage)
-    {
-        stlViewerController.startSTLViewer(stage);
+        switch (mode)
+        {
+            case "CONSOLE": // Console mode
+                this.mode = "CONSOLE";
+                this.stlViewerController = new STLViewerController(this);
+                this.consoleApplication = new ConsoleApplication();
+                readSTLFileInConsole(parallelized);
+                break;
+            case "TCP": // TCP mode
+                this.mode = "TCP";
+                this.stlViewerController = new STLViewerController(this);
+                this.tcpController = new TCPController();
+                startTCPConnection();
+                break;
+            case "P2P": // Peer-to-peer mode
+                this.mode = "P2P";
+                this.stlViewerControllerP2P1 = new STLViewerController(this);
+                this.stlViewerControllerP2P2 = new STLViewerController(this);
+                this.p2pController1 = new P2PController(stlViewerControllerP2P1);
+                this.p2pController2 = new P2PController(stlViewerControllerP2P2);
+                startP2PConnection();
+                break;
+            default:
+                throw new IllegalArgumentException(Strings.INVALID_MODE);
+        }
     }
 
     /**
@@ -95,17 +103,15 @@ public class masterController
      *
      * @param filepath - The path to the file to open.
      */
-    public void openFile (String filepath)
+    public void openFile (String filepath, PolyhedronController polyhedronController)
     {
-        if (polyhedronController.getPolyhedron() != null)
-        {
-            polyhedronController.clearPolyhedron();
-        }
+        reinitializePolyhedronController();
         try
         {
             this.stlReader.readSTLFileParallelized(filepath, polyhedronController);
         } catch (Exception exception)
         {
+            // TODO: Handle exception
             exception.printStackTrace();
         }
     }
@@ -121,6 +127,7 @@ public class masterController
      */
     public void readSTLFileInConsole (boolean parallelized) throws IOException
     {
+        reinitializePolyhedronController();
         stlReader.readSTLFile(consoleApplication.askForFileName(), polyhedronController, parallelized);
         System.out.println(polyhedronController.getPolyhedron().toString());
     }
@@ -243,5 +250,13 @@ public class masterController
         {
             System.out.println(triangle);
         }
+    }
+
+    public void reinitializePolyhedronController() {
+        this.polyhedronController = new PolyhedronController();
+    }
+
+    public String getMode() {
+        return mode;
     }
 }
