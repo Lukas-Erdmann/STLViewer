@@ -200,7 +200,7 @@ public class Polyhedron implements Serializable
     /**
      * Returns the string representation of the polyhedron.
      *
-     * @return
+     * @return  The string representation of the polyhedron.
      */
     @Override
     public String toString ()

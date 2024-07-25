@@ -74,6 +74,7 @@ public class PolyhedronController implements Runnable
     @Override
     public void run ()
     {
+        // The thread runs in a loop until the reader reports that reading the file is finished
         while (true)
         {
             try
@@ -83,11 +84,13 @@ public class PolyhedronController implements Runnable
                     // When the polyhedron is complete, calculate the center
                     defineCenter();
                     executorService.shutdown();
+                    System.out.println("Read " + idCounter + " triangles.");
                     break;
                 } else if (!blockingQueue.isEmpty())
                 {
                     Triangle triangle = blockingQueue.take();
                     executorService.submit(() -> processTriangle(triangle));
+                    idCounter++;
                 } else
                 {
                     Thread.sleep(10);
@@ -107,12 +110,22 @@ public class PolyhedronController implements Runnable
             // Calculate the adjacency list
             //calculateAdjacencyList(triangle);
             // Add the volume of the tetrahedron to the polyhedron
-            polyhedron.addVolume(calculateVolumeOfTetrahedron(triangle, new Vertex(0, 0, 0)));
+            polyhedron.addVolume(calculateVolumeOfTetrahedron(triangle, new Vertex(Constants.NUMBER_ZERO, Constants.NUMBER_ZERO, Constants.NUMBER_ZERO)));
             // Add the surface area of the triangle to the polyhedron
             polyhedron.addSurfaceArea(triangle.getArea());
             // Expand the bounding box to include the triangle
             expandBoundingBox(triangle);
         }
+    }
+
+    /**
+     * Returns if the reading is finished.
+     *
+     * @return - The flag to indicate that the reading is finished.
+     */
+    public boolean isReadingFinished()
+    {
+        return isReadingFinished;
     }
 
     /**
@@ -337,5 +350,15 @@ public class PolyhedronController implements Runnable
     public void clearPolyhedron ()
     {
         polyhedron = new Polyhedron();
+    }
+
+    /**
+     * Gets the id counter.
+     *
+     * @return The id counter.
+     */
+    public int getIdCounter ()
+    {
+        return idCounter;
     }
 }

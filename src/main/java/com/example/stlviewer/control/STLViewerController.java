@@ -176,6 +176,7 @@ public class STLViewerController
             polyhedronController = new PolyhedronController();
             filePath = stlFile.getAbsolutePath();
             masterController.openFile(filePath, polyhedronController);
+            // TODO: Wait for the polyhedronController thread from STLReader to finish
             stlViewer.displayModel(polyhedronController.getPolyhedron());
             // Update the title of the stage
             updateWindowTitle(stlFile.getAbsolutePath());
