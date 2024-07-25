@@ -150,6 +150,20 @@ public class PolyhedronController implements Runnable
     }
 
     /**
+     * Calculate the weight of the polyhedron. This is done by multiplying the density of the material
+     * by the volume of the polyhedron.
+     * Pre-condition: The polyhedron is not null.
+     * Post-condition: The weight of the polyhedron is calculated.
+     *
+     * @param density - The density of the material.
+     */
+    public double calculateWeight (double density)
+    {
+        polyhedron.setWeight(density * polyhedron.getVolume());
+        return polyhedron.getWeight();
+    }
+
+    /**
      * Calculates the bounding box of the polyhedron. This is done by finding the minimum and maximum
      * x, y, and z values of the vertices of the polyhedron. If the bounding box has already been defined,
      * it is returned without recalculating it.

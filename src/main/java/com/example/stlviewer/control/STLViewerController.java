@@ -1,9 +1,6 @@
 package com.example.stlviewer.control;
 
-import com.example.stlviewer.model.P2PPackage;
-import com.example.stlviewer.model.Polyhedron;
-import com.example.stlviewer.model.Triangle;
-import com.example.stlviewer.model.Vertex;
+import com.example.stlviewer.model.*;
 import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 import com.example.stlviewer.view.STLViewer;
@@ -27,6 +24,7 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class STLViewerController
 {
@@ -110,6 +108,10 @@ public class STLViewerController
      * The boolean property to check if the mesh is loaded.
      */
     private final BooleanProperty isMeshLoaded = new SimpleBooleanProperty(false);
+    /**
+     * The current material applied to the 3D model.
+     */
+    private com.example.stlviewer.model.Material currentMaterial = new com.example.stlviewer.model.Material(Strings.DEFAULT_MATERIAL, 1, Strings.DEFAULT_COLOR);
 
     /**
      * Constructs a new STLViewerController instance.
@@ -120,6 +122,8 @@ public class STLViewerController
     {
         this.masterController = masterController;
         this.stlViewer = new STLViewer(this);
+        // Create the materials for the mesh
+        createMaterials();
         // Set up listeners to update labels and P2P data
         setupListeners();
     }
@@ -342,6 +346,7 @@ public class STLViewerController
         translation.setZ(-longestSideLength * Constants.Z_DISTANCE_FACTOR);
         zoomLimit.set(100);
         zoomCoefficient.set(0.0001);
+        sendP2PData(collectP2PData(false));
     }
 
     /**
@@ -657,6 +662,7 @@ public class STLViewerController
         translation.zProperty().addListener((observable, oldValue, newValue) -> stlViewer.updateViewProperties());
         rotationX.angleProperty().addListener((observable, oldValue, newValue) -> stlViewer.updateViewProperties());
         rotationY.angleProperty().addListener((observable, oldValue, newValue) -> stlViewer.updateViewProperties());
+        // TODO: Find out how to use Listeners to trigger the sendP2PData method
     }
 
     /**
@@ -860,7 +866,8 @@ public class STLViewerController
                     rotationX.getAngle(),
                     rotationY.getAngle(),
                     zoomLimit.get(),
-                    zoomCoefficient.get()
+                    zoomCoefficient.get(),
+                    currentMaterial
             );
         } else
         {
@@ -872,7 +879,8 @@ public class STLViewerController
                     rotationX.getAngle(),
                     rotationY.getAngle(),
                     zoomLimit.get(),
-                    zoomCoefficient.get()
+                    zoomCoefficient.get(),
+                    currentMaterial
             );
         }
     }
@@ -889,6 +897,7 @@ public class STLViewerController
         // If the data is a P2PPackage, process the package
         if (data instanceof P2PPackage p2pPackage)
         {
+            System.out.println("[" + java.time.LocalTime.now() + "] [" + this + "] P2P package: " + p2pPackage);
             // runLater is used to update the JavaFX application thread and avoid concurrency issues
             Platform.runLater(() -> {
                 // Only update the model if new
@@ -900,6 +909,12 @@ public class STLViewerController
                     clearScene();
                     // Display the model
                     stlViewer.displayModel(polyhedronController.getPolyhedron());
+                }
+                // Update the material separately if only it changed
+                else if (!currentMaterial.equals(p2pPackage.getMaterial()))
+                {
+                    currentMaterial = p2pPackage.getMaterial();
+                    stlViewer.updateMaterialData();
                 }
                 // Update translations if necessary
                 if (p2pPackage.getTranslationX() != translation.getX())
@@ -948,5 +963,55 @@ public class STLViewerController
     public void setP2PController (P2PController p2pController)
     {
         this.p2pController = p2pController;
+    }
+
+    public void createMaterials() {
+        String[][] materialData = {
+                {"Steel", "7900", "#888B8D", "Steel is a strong alloy of iron and carbon.\nDensity: 7900 kg/m³"},
+                {"Aluminium", "2710", "#D0D5D9", "Aluminium is a lightweight metal with good thermal and electrical conductivity.\nDensity: 2710 kg/m³"},
+                {"Copper", "8960", "#B77729", "Copper is a ductile metal with high thermal and electrical conductivity.\nDensity: 8960 kg/m³"},
+                {"Brass", "8600", "#AC9F3C", "Brass is an alloy of copper and zinc.\nDensity: 8600 kg/m³"},
+                {"Gold", "19320", "#CBA135", "Gold is a precious metal with high thermal and electrical conductivity.\nDensity: 19320 kg/m³"},
+                {"Silver", "10490", "#C0C0C0", "Silver is a precious metal with high thermal and electrical conductivity.\nDensity: 10490 kg/m³"},
+                {"Chrome", "7190", "#DBE2E9", "Chrome is a shiny metal with good corrosion resistance.\nDensity: 7190 kg/m³"},
+                {"Titanium", "4506", "#878681", "Titanium is a strong, lightweight metal with good corrosion resistance.\nDensity: 4506 kg/m³"},
+                {"Plastic (PLA)", "1240", "#FF9913", "PLA is a biodegradable plastic made from renewable resources.\nDensity: 1240 kg/m³"}
+        };
+        // TODO: Implement a way to add custom materials
+        // TODO: Import material data from JSON or CSV file
+
+        ArrayList<Material> materials = new ArrayList<>();
+        for (String[] data : materialData) {
+            Material material = new Material(data[0], Integer.parseInt(data[1]), data[2]);
+            material.setDescription(data[3]);
+            materials.add(material);
+        }
+        stlViewer.setMaterials(materials);
+    }
+
+    public double calculateWeight (Material material)
+    {
+        return polyhedronController.calculateWeight(material.getDensity());
+    }
+
+    /**
+     * Gets the current material applied to the 3D model.
+     *
+     * @return The current material applied to the 3D model.
+     */
+    public com.example.stlviewer.model.Material getCurrentMaterial() {
+        return currentMaterial;
+    }
+
+    /**
+     * Sets the current material applied to the 3D model and triggers the sendP2PData method.
+     *
+     * @param currentMaterial - The current material applied to the 3D model.
+     */
+    public void setCurrentMaterial(com.example.stlviewer.model.Material currentMaterial) {
+        this.currentMaterial = currentMaterial;
+        if (masterController.getMode().equals("P2P")) {
+            sendP2PData(collectP2PData(false));
+        }
     }
 }

@@ -19,6 +19,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * The STLViewer class provides a JavaFX-based interface for viewing and interacting with 3D models in STL format.
@@ -49,6 +50,22 @@ public class STLViewer extends Application
      */
     private final Label volumeLabel = new Label();
     /**
+     * The Label displaying the weight of the model.
+     */
+    private final Label weightLabel = new Label();
+    /**
+     * The Label displaying the material of the model.
+     */
+    private final Label materialLabel = new Label();
+    /**
+     * The Label displaying the density of the model.
+     */
+    private final Label densityLabel = new Label();
+    /**
+     * The Label displaying the material description of the model.
+     */
+    private final Label materialDescriptionLabel = new Label();
+    /**
      * The Label displaying the rotation properties of the model.
      */
     private final Label rotationLabel = new Label();
@@ -72,6 +89,10 @@ public class STLViewer extends Application
      * The SubScene object for the 3D view.
      */
     private SubScene threeDView;
+    /**
+     * The list of materials available for the 3D model.
+     */
+    private ArrayList<com.example.stlviewer.model.Material> materials = new ArrayList<>();
 
     /**
      * Constructs an STLViewer with the specified controller.
@@ -185,11 +206,16 @@ public class STLViewer extends Application
     {
         Menu menuEdit = new Menu(Strings.STLV_EDIT);
         // Add menu items
+        // Color menu
         MenuItem menuItemSetColor = new MenuItem(Strings.STLV_SET_COLOR);
-        // Disable the menu item if the model has no material/ is not loaded
         menuItemSetColor.disableProperty().bind(meshView.materialProperty().isNull());
         menuItemSetColor.setOnAction(e -> openColorDialog());
-        menuEdit.getItems().add(menuItemSetColor);
+        // Material menu
+        MenuItem menuItemSetMaterial = new MenuItem(Strings.STLV_SET_MATERIAL);
+        menuItemSetMaterial.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
+        menuItemSetMaterial.setOnAction(e -> openMaterialDialog());
+
+        menuEdit.getItems().addAll(menuItemSetColor, menuItemSetMaterial);
         return menuEdit;
     }
 
@@ -228,6 +254,62 @@ public class STLViewer extends Application
         );
 
         return dialogVBox;
+    }
+
+    public void openMaterialDialog() {
+        Dialog<ButtonType> materialDialog = new Dialog<>();
+        materialDialog.setTitle(Strings.STLV_SET_MATERIAL);
+
+        // Create the VBox for the dialog
+        VBox dialogVBox = new VBox();
+        // Add the dropdown for the material
+        ComboBox<String> materialComboBox = new ComboBox<>();
+        for (com.example.stlviewer.model.Material material : materials) {
+            materialComboBox.getItems().add(material.getName());
+        }
+        materialComboBox.setValue(stlViewerController.getCurrentMaterial().getName()); // Default material is the first one
+        // The description of the selected material is displayed beneath the dropdown menu
+        Label materialDescription = new Label(stlViewerController.getCurrentMaterial().getDescription());
+
+        // Add the dropdown with label and description to the dialog VBox
+        dialogVBox.getChildren().addAll(
+                new Label(Strings.STLV_MATERIAL), materialComboBox, materialDescription
+        );
+
+        // Add the OK and Cancel buttons
+        materialDialog.getDialogPane().setContent(dialogVBox);
+        materialDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Update the description label when a new material is selected
+        materialComboBox.setOnAction(e -> {
+            for (com.example.stlviewer.model.Material material : materials) {
+                if (material.getName().equals(materialComboBox.getValue())) {
+                    materialDescription.setText(material.getDescription());
+                    break;
+                }
+            }
+        });
+
+        // Handle the OK button click
+        materialDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                String selectedMaterial = materialComboBox.getValue();
+                for (com.example.stlviewer.model.Material material : materials) {
+                    // Get material with the selected name
+                    if (material.getName().equals(selectedMaterial)) {
+                        // Apply the new material to the model
+                        stlViewerController.setCurrentMaterial(material);
+                        // Update the labels and recalculate the weight
+                        updateMaterialData();
+                        break;
+                    }
+                }
+            }
+            return null;
+        });
+
+        // Show the dialog and wait for the user response
+        materialDialog.showAndWait();
     }
 
     /**
@@ -457,6 +539,10 @@ public class STLViewer extends Application
         infoLabels.setPadding(new javafx.geometry.Insets(10));
         infoLabels.setSpacing(10);
 
+        // Make the description label wrap text
+        materialDescriptionLabel.setWrapText(true);
+        materialLabel.setFont(Font.font(Strings.ARIAL, FontWeight.NORMAL, 14));
+
         // Add the labels for the number of triangles, surface area, and volume
         infoLabels.getChildren().addAll(
                 makeLabelArial(Strings.STLV_MODEL_INFORMATION, FontWeight.BOLD, 16),
@@ -465,7 +551,10 @@ public class STLViewer extends Application
                 makeLabelArial(Strings.STLV_VOLUME, FontWeight.NORMAL, 14), volumeLabel,
                 makeLabelArial(Strings.STLV_VIEW_PROPERTIES, FontWeight.BOLD, 16),
                 makeLabelArial(Strings.STLC_ROTATION_LABEL, FontWeight.NORMAL, 14), rotationLabel,
-                makeLabelArial(Strings.STLV_TRANSLATION_LABEL, FontWeight.NORMAL, 14), translationLabel
+                makeLabelArial(Strings.STLV_TRANSLATION_LABEL, FontWeight.NORMAL, 14), translationLabel,
+                makeLabelArial(Strings.STLV_MATERIAL_INFORMATION, FontWeight.BOLD, 16),
+                materialLabel, materialDescriptionLabel,
+                makeLabelArial(Strings.STLV_WEIGHT, FontWeight.NORMAL, 14), weightLabel
         );
         return infoLabels;
     }
@@ -489,6 +578,17 @@ public class STLViewer extends Application
                     stlViewerController.getTranslation().getY(),
                     stlViewerController.getTranslation().getZ()
             ));
+        });
+    }
+
+    public void updateMaterialData ()
+    {
+        meshView.setMaterial(stlViewerController.getCurrentMaterial());
+        Platform.runLater(() -> {
+            materialLabel.setText(stlViewerController.getCurrentMaterial().getName());
+            densityLabel.setText(String.format(Strings.FORMAT_STRING_2F, stlViewerController.getCurrentMaterial().getDensity()));
+            weightLabel.setText(String.format(Strings.FORMAT_STRING_2F, stlViewerController.calculateWeight(stlViewerController.getCurrentMaterial())) + " kg");
+            materialDescriptionLabel.setText(stlViewerController.getCurrentMaterial().getDescription());
         });
     }
 
@@ -540,6 +640,8 @@ public class STLViewer extends Application
         numberOfTrianglesLabel.setText(String.valueOf(polyhedron.getTriangleCount()));
         surfaceAreaLabel.setText(String.format(Strings.FORMAT_STRING_2F, polyhedron.getSurfaceArea()));
         volumeLabel.setText(String.format(Strings.FORMAT_STRING_2F, polyhedron.getVolume()));
+        // Apply the current material to the model
+        updateMaterialData();
 
         // Render the 3D model
         stlViewerController.renderModel(polyhedron);
@@ -602,5 +704,23 @@ public class STLViewer extends Application
      */
     public Stage getStage() {
         return stage;
+    }
+
+    /**
+     * Gets the list of materials available for the 3D model.
+     *
+     * @return  The list of materials available for the 3D model.
+     */
+    public ArrayList<com.example.stlviewer.model.Material> getMaterials() {
+        return materials;
+    }
+
+    /**
+     * Sets the list of materials available for the 3D model.
+     *
+     * @param materials - The list of materials available for the 3D model.
+     */
+    public void setMaterials(ArrayList<com.example.stlviewer.model.Material> materials) {
+        this.materials = materials;
     }
 }

@@ -26,6 +26,10 @@ public class Polyhedron implements Serializable
      */
     private double surfaceArea = 0;
     /**
+     * The weight of the polyhedron.
+     */
+    private double weight = 0;
+    /**
      * The bounding box of the polyhedron. The bounding box is an array of 6 doubles that represent the minimum and
      * maximum x, y, and z coordinates of the polyhedron.
      */
@@ -101,6 +105,26 @@ public class Polyhedron implements Serializable
     public void setSurfaceArea (double surfaceArea)
     {
         this.surfaceArea = surfaceArea;
+    }
+
+    /**
+     * Gets the weight of the polyhedron.
+     *
+     * @return The weight of the polyhedron.
+     */
+    public double getWeight ()
+    {
+        return weight;
+    }
+
+    /**
+     * Sets the weight of the polyhedron.
+     *
+     * @param weight The weight of the polyhedron.
+     */
+    public void setWeight (double weight)
+    {
+        this.weight = weight;
     }
 
     /**

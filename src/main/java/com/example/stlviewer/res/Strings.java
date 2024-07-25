@@ -197,4 +197,12 @@ public interface Strings
     String STLV_ZOOM_COEFF = "Zoom Coefficient";
     String STLV_Z_COLON = "Z:";
     String INVALID_MODE = "Invalid operation mode.";
+    String STLV_SET_MATERIAL = "Set Material...";
+    String STLV_MATERIAL = "Material";
+    String STLV_MATERIAL_INFORMATION = "Material Information";
+    String STLV_DENSITY = "Density: ";
+    String STLV_WEIGHT = "Weight: ";
+    String STLV_MATERIAL_DESCRIPTION = "Material Description";
+    String DEFAULT_MATERIAL = "No material selected";
+    String DEFAULT_COLOR = "#FF0000";
 }

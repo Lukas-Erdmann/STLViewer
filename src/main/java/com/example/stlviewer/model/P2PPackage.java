@@ -23,21 +23,26 @@ public class P2PPackage implements Serializable
      * The zoom parameters.
      */
     private final double zoomLimit, zoomCoefficient;
+    /**
+     * The model material as a String.
+     */
+    private final String material;
 
     /**
      * Constructs a P2PPackage with the specified Polyhedron and transformation properties.
      *
-     * @param polyhedron - The Polyhedron object.
-     * @param translateX - The X translation value.
-     * @param translateY - The Y translation value.
-     * @param translateZ - The Z translation value.
-     * @param rotateX - The X rotation angle.
-     * @param rotateY - The Y rotation angle.
-     * @param zoomLimit - The Z rotation angle.
-     * @param zoomCoefficient - The Z rotation angle.
+     * @param polyhedron        The Polyhedron object.
+     * @param translateX        The X translation value.
+     * @param translateY        The Y translation value.
+     * @param translateZ        The Z translation value.
+     * @param rotateX           The X rotation angle.
+     * @param rotateY           The Y rotation angle.
+     * @param zoomLimit         The Z rotation angle.
+     * @param zoomCoefficient   The Z rotation angle.
+     * @param material          The model material.
      */
     public P2PPackage (Polyhedron polyhedron, double translateX, double translateY, double translateZ, double rotateX,
-                       double rotateY,  double zoomLimit, double zoomCoefficient)
+                       double rotateY,  double zoomLimit, double zoomCoefficient, Material material)
     {
         this.polyhedron = polyhedron;
         this.translationX = translateX;
@@ -47,6 +52,7 @@ public class P2PPackage implements Serializable
         this.rotationY = rotateY;
         this.zoomLimit = zoomLimit;
         this.zoomCoefficient = zoomCoefficient;
+        this.material = material.materialToString();
     }
 
     /**
@@ -128,6 +134,16 @@ public class P2PPackage implements Serializable
     }
 
     /**
+     * Gets the model material.
+     *
+     * @return The model material.
+     */
+    public Material getMaterial ()
+    {
+        return new Material(material);
+    }
+
+    /**
      * Returns a string representation of the P2PPackage.
      *
      * @return A string representation of the P2PPackage.
@@ -140,6 +156,7 @@ public class P2PPackage implements Serializable
                 Strings.P2PPACKAGE_TOSTRING_3 + Arrays.toString(new double[]{translationX, translationY, translationZ}) +
                 Strings.P2PPACKAGE_TOSTRING_4 + Arrays.toString(new double[]{rotationX, rotationY}) +
                 Strings.P2PPACKAGE_TOSTRING_5 + Arrays.toString(new double[]{zoomLimit, zoomCoefficient}) +
+                Strings.COMMA_SPACE + new Material(material) +
                 Strings.CURLY_BRACKET_RIGHT;
     }
 }
