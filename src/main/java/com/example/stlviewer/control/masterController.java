@@ -19,7 +19,11 @@ public class masterController
     /**
      * The mode of the application. (CONSOLE, TCP, P2P)
      */
-    private String mode;
+    private String userOperationMode;
+    /**
+     * Whether to read the file in parallel.
+     */
+    private boolean parallelized = false;
     /**
      * The STLReader instance to read STL files.
      */
@@ -64,26 +68,27 @@ public class masterController
      * Precondition: None
      * Postcondition: An masterController instance is created.
      */
-    public masterController (String mode, boolean parallelized) throws IOException {
+    public masterController (String userOperationMode, boolean parallelized) throws IOException {
+        this.parallelized = parallelized;
         // Reader always initialized
         this.stlReader = new STLReader();
 
-        switch (mode)
+        switch (userOperationMode)
         {
             case "CONSOLE": // Console mode
-                this.mode = "CONSOLE";
+                this.userOperationMode = "CONSOLE";
                 this.stlViewerController = new STLViewerController(this);
                 this.consoleApplication = new ConsoleApplication();
                 readSTLFileInConsole(parallelized);
                 break;
             case "TCP": // TCP mode
-                this.mode = "TCP";
+                this.userOperationMode = "TCP";
                 this.stlViewerController = new STLViewerController(this);
                 this.tcpController = new TCPController();
                 startTCPConnection();
                 break;
             case "P2P": // Peer-to-peer mode
-                this.mode = "P2P";
+                this.userOperationMode = "P2P";
                 this.stlViewerControllerP2P1 = new STLViewerController(this);
                 this.stlViewerControllerP2P2 = new STLViewerController(this);
                 this.p2pController1 = new P2PController(stlViewerControllerP2P1);
@@ -101,14 +106,14 @@ public class masterController
      * Precondition: The file path must be valid.
      * Postcondition: The STL data is read from the file and stored in the polyhedron controller.
      *
-     * @param filepath - The path to the file to open.
+     * @param polyhedronController     The polyhedron controller to store the data in.
      */
-    public void openFile (String filepath, PolyhedronController polyhedronController)
+    public void openFile (String filePath, PolyhedronController polyhedronController)
     {
         reinitializePolyhedronController();
         try
         {
-            this.stlReader.readSTLFileParallelized(filepath, polyhedronController);
+            this.stlReader.readSTLFile(filePath, polyhedronController, parallelized);
         } catch (Exception exception)
         {
             // TODO: Handle exception
@@ -256,7 +261,7 @@ public class masterController
         this.polyhedronController = new PolyhedronController();
     }
 
-    public String getMode() {
-        return mode;
+    public String getUserOperationMode() {
+        return userOperationMode;
     }
 }

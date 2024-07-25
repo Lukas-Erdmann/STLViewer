@@ -1010,7 +1010,7 @@ public class STLViewerController
      */
     public void setCurrentMaterial(com.example.stlviewer.model.Material currentMaterial) {
         this.currentMaterial = currentMaterial;
-        if (masterController.getMode().equals("P2P")) {
+        if (masterController.getUserOperationMode().equals("P2P")) {
             sendP2PData(collectP2PData(false));
         }
     }

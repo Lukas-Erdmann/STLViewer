@@ -8,6 +8,8 @@ import com.example.stlviewer.res.Strings;
 
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -38,6 +40,10 @@ public class PolyhedronController implements Runnable
      * The flag to indicate that the reading is finished.
      */
     private volatile boolean isReadingFinished = false;
+    /**
+     * The executor service that handles adding triangles to the polyhedron.
+     */
+    ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     /**
      * Constructor for the PolyhedronController class.
@@ -74,16 +80,14 @@ public class PolyhedronController implements Runnable
             {
                 if (isReadingFinished && blockingQueue.isEmpty())
                 {
-                    // When the polyhedron is complete, calculate the volume, surface area, bounding box and center
-                    calculateVolume();
-                    calculateSurfaceArea();
-                    defineBoundingBox();
+                    // When the polyhedron is complete, calculate the center
                     defineCenter();
+                    executorService.shutdown();
                     break;
                 } else if (!blockingQueue.isEmpty())
                 {
                     Triangle triangle = blockingQueue.take();
-                    addTriangle(triangle);
+                    executorService.submit(() -> processTriangle(triangle));
                 } else
                 {
                     Thread.sleep(10);
@@ -94,6 +98,19 @@ public class PolyhedronController implements Runnable
                 break;
             }
         }
+    }
+
+    private void processTriangle(Triangle triangle) {
+        // Add the triangle to the polyhedron
+        addTriangle(triangle);
+        // Calculate the adjacency list
+        //calculateAdjacencyList(triangle);
+        // Add the volume of the tetrahedron to the polyhedron
+        calculateVolumeOfTetrahedron(triangle, new Vertex(0, 0, 0));
+        // Add the surface area of the triangle to the polyhedron
+        polyhedron.addSurfaceArea(triangle.getArea());
+        // Expand the bounding box to include the triangle
+        expandBoundingBox(triangle);
     }
 
     /**
@@ -116,23 +133,35 @@ public class PolyhedronController implements Runnable
      */
     public void calculateVolume ()
     {
+        double volume = 0;
         // The arbitrary point is chosen to be the first vertex of the first triangle
-        Vertex arbitraryPoint = polyhedron.getTriangles().getFirst().getVertices().getFirst();
+        Vertex refPoint = polyhedron.getTriangles().getFirst().getVertices().getFirst();
         // For each triangle in the polyhedron, calculate the volume of the tetrahedron formed
         for (Triangle triangle : polyhedron.getTriangles())
         {
-            if (triangle.pointsAwayFromReferenceVertex(arbitraryPoint))
-            {
-                // If the triangle points away from the reference vertex, add the volume
-                double newVolume = polyhedron.getVolume() - triangle.calculateVolumeWithReferenceVertex(arbitraryPoint);
-                polyhedron.setVolume(newVolume);
-            } else
-            {
-                // If the triangle points towards the reference vertex, subtract the volume
-                double newVolume = polyhedron.getVolume() + triangle.calculateVolumeWithReferenceVertex(arbitraryPoint);
-                polyhedron.setVolume(newVolume);
-            }
+            volume += calculateVolumeOfTetrahedron(triangle, refPoint);
         }
+        polyhedron.setVolume(volume);
+    }
+
+    /**
+     * Calculate the volume of the tetrahedron formed by the triangle and a reference vertex.
+     * The volume is calculated using the scalar triple product.
+     * Pre-condition: The triangle and the reference vertex are not null.
+     * Post-condition: The volume of the tetrahedron is calculated.
+     *
+     * @param triangle      - The triangle to form the tetrahedron.
+     * @param arbitraryPoint - The reference vertex to form the tetrahedron.
+     * @return - The volume of the tetrahedron.
+     */
+    private double calculateVolumeOfTetrahedron(Triangle triangle, Vertex arbitraryPoint) {
+        double volume = triangle.calculateVolumeWithReferenceVertex(arbitraryPoint);
+        if (triangle.pointsAwayFromReferenceVertex(arbitraryPoint))
+        {
+            // If the triangle points away from the reference vertex, add the volume
+            volume = -volume;
+        }
+        return volume;
     }
 
     /**
@@ -172,52 +201,61 @@ public class PolyhedronController implements Runnable
      */
     public void defineBoundingBox ()
     {
-        if (polyhedron.getBoundingBox() == null)
+        // For each triangle in the polyhedron, check if the vertices are within the bounding box
+        // If they are not, update the bounding box
+        for (Triangle triangle : polyhedron.getTriangles())
         {
+            expandBoundingBox(triangle);
+        }
+    }
+
+    /**
+     * Expands the bounding box of the polyhedron to include the vertices of the triangle.
+     * Pre-condition: The triangle is not null.
+     * Post-condition: The bounding box of the polyhedron is expanded.
+     *
+     * @param triangle - The triangle to expand the bounding box.
+     */
+    private void expandBoundingBox(Triangle triangle) {
+        // If the bounding box has not been initialized, initialize it
+        if (polyhedron.getBoundingBox() == null) {
             polyhedron.setBoundingBox(new double[6]);
             // Initialize the bounding box with the maximum possible values
-            for (int i = 0; i < 3; i++)
-            {
+            for (int i = 0; i < 3; i++) {
                 polyhedron.getBoundingBox()[i] = Double.MAX_VALUE;
             }
-            for (int i = 3; i < 6; i++)
-            {
+            for (int i = 3; i < 6; i++) {
                 polyhedron.getBoundingBox()[i] = Double.MIN_VALUE;
             }
-            // For each triangle in the polyhedron, check if the vertices are within the bounding box
-            // If they are not, update the bounding box
-            for (Triangle triangle : polyhedron.getTriangles())
+        }
+
+        for (Vertex vertex : triangle.getVertices())
+        {
+            if (vertex.getPosX() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_X_INDEX])
             {
-                for (Vertex vertex : triangle.getVertices())
-                {
-                    if (vertex.getPosX() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_X_INDEX])
-                    {
-                        polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_X_INDEX] = vertex.getPosX();
-                    }
-                    if (vertex.getPosY() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Y_INDEX])
-                    {
-                        polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Y_INDEX] = vertex.getPosY();
-                    }
-                    if (vertex.getPosZ() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Z_INDEX])
-                    {
-                        polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Z_INDEX] = vertex.getPosZ();
-                    }
-                    if (vertex.getPosX() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX])
-                    {
-                        polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX] = vertex.getPosX();
-                    }
-                    if (vertex.getPosY() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Y_INDEX])
-                    {
-                        polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Y_INDEX] = vertex.getPosY();
-                    }
-                    if (vertex.getPosZ() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX])
-                    {
-                        polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX] = vertex.getPosZ();
-                    }
-                }
+                polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_X_INDEX] = vertex.getPosX();
+            }
+            if (vertex.getPosY() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Y_INDEX])
+            {
+                polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Y_INDEX] = vertex.getPosY();
+            }
+            if (vertex.getPosZ() < polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Z_INDEX])
+            {
+                polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Z_INDEX] = vertex.getPosZ();
+            }
+            if (vertex.getPosX() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX])
+            {
+                polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX] = vertex.getPosX();
+            }
+            if (vertex.getPosY() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Y_INDEX])
+            {
+                polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Y_INDEX] = vertex.getPosY();
+            }
+            if (vertex.getPosZ() > polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX])
+            {
+                polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX] = vertex.getPosZ();
             }
         }
-        polyhedron.getBoundingBox();
     }
 
     /**
@@ -242,6 +280,17 @@ public class PolyhedronController implements Runnable
         {
             // If the center has already been defined, return it
         }
+    }
+
+    /**
+     * Calls the methods to calculate the volume, surface area, bounding box and center of the polyhedron.
+     * This method is used if the triangles were added to the polyhedron without using the blocking queue.
+     */
+    public void calculatePolyhedronProperties() {
+        calculateVolume();
+        calculateSurfaceArea();
+        defineBoundingBox();
+        defineCenter();
     }
 
     /**

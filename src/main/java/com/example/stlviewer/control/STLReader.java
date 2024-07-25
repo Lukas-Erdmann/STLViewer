@@ -18,6 +18,11 @@ import java.nio.ByteOrder;
 public class STLReader
 {
     /**
+     * The file path of the STL file.
+     */
+    private String filePath;
+
+    /**
      * Reads an STL file from the given file path. The file can be in ASCII or binary format.
      * The file is either read sequentially or in parallel.
      * Precondition: The file path must be valid. The controller must be initialized.
@@ -30,12 +35,13 @@ public class STLReader
      */
     public void readSTLFile (String filePath, PolyhedronController controller, boolean parallelized) throws IOException
     {
+        this.filePath = filePath;
         if (parallelized)
         {
-            readSTLFileParallelized(filePath, controller);
+            readSTLFileParallelized(controller);
         } else
         {
-            readSTLFileSequential(filePath, controller);
+            readSTLFileSequential(controller);
         }
     }
 
@@ -45,23 +51,25 @@ public class STLReader
      * Precondition: The file path must be valid. The controller must be initialized.
      * Postcondition: The triangles are read from the file and sent to the controller.
      *
-     * @param filePath   - The file path of the STL file.
      * @param controller - The PolyhedronController instance to send the triangles to.
      * @throws IOException - If an error occurs while reading the file.
      */
-    public void readSTLFileSequential (String filePath, PolyhedronController controller) throws IOException
+    public void readSTLFileSequential (PolyhedronController controller) throws IOException
     {
         RuntimeHandler runtimeHandler = new RuntimeHandler();
         runtimeHandler.startTimer();
-        if (isASCII(filePath))
+        if (isASCII())
         {
             System.out.println(Strings.SOUT_READING_ASCII_FILE);
-            readSTLASCII(filePath, controller, false);
+            readSTLASCII(controller, false);
         } else
         {
             System.out.println(Strings.SOUT_READING_BINARY_FILE);
-            readSTLBinary(filePath, controller, false);
+            readSTLBinary(controller, false);
         }
+        // Calculate volume, surface area, and other properties of the polyhedron
+        controller.calculatePolyhedronProperties();
+
         runtimeHandler.stopTimer();
         System.out.printf(Strings.SOUT_ELAPSED_TIME, runtimeHandler.getElapsedTime());
     }
@@ -72,25 +80,24 @@ public class STLReader
      * Precondition: The file path must be valid. The controller must be initialized.
      * Postcondition: The triangles are read from the file and sent to the controller.
      *
-     * @param filePath   - The file path of the STL file.
      * @param controller - The PolyhedronController instance to send the triangles to.
      * @throws IOException - If an error occurs while reading the file.
      */
-    public void readSTLFileParallelized (String filePath, PolyhedronController controller) throws IOException
+    public void readSTLFileParallelized (PolyhedronController controller) throws IOException
     {
         RuntimeHandler runtimeHandler = new RuntimeHandler();
         runtimeHandler.startTimer();
         Thread readerThread = new Thread(controller);
         readerThread.start();
 
-        if (isASCII(filePath))
+        if (isASCII())
         {
             System.out.println(Strings.SOUT_READING_ASCII_FILE);
-            readSTLASCII(filePath, controller, true);
+            readSTLASCII(controller, true);
         } else
         {
             System.out.println(Strings.SOUT_READING_BINARY_FILE);
-            readSTLBinary(filePath, controller, true);
+            readSTLBinary(controller, true);
         }
 
         try
@@ -110,11 +117,10 @@ public class STLReader
      * Precondition: The file path must be valid.
      * Postcondition: Returns true if the file is in ASCII format, false otherwise.
      *
-     * @param filePath - The file path of the STL file.
      * @return True if the file is in ASCII format, false otherwise.
      * @throws IOException - If an error occurs while reading the file.
      */
-    public boolean isASCII (String filePath) throws IOException
+    public boolean isASCII () throws IOException
     {
         File stlFile = new File(filePath);
         // Check if the file exists
@@ -149,11 +155,10 @@ public class STLReader
      * Precondition: The file path must be valid. The controller must be initialized.
      * Postcondition: The triangles are read from the file and sent to the controller.
      *
-     * @param filePath   - The file path of the STL file.
      * @param controller - The PolyhedronController instance to send the triangles to.
      * @throws IOException - If an error occurs while reading the file.
      */
-    public void readSTLASCII (String filePath, PolyhedronController controller, boolean parallelized) throws IOException
+    public void readSTLASCII (PolyhedronController controller, boolean parallelized) throws IOException
     {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath)))
         {
@@ -291,11 +296,10 @@ public class STLReader
      * Precondition: The file path must be valid. The controller must be initialized.
      * Postcondition: The triangles are read from the file and sent to the controller.
      *
-     * @param filePath     - The file path of the STL file.
      * @param controller   - The PolyhedronController instance to send the triangles to.
      * @param parallelized - True if the file should be read in parallel, false otherwise.
      */
-    public void readSTLBinary (String filePath, PolyhedronController controller, boolean parallelized)
+    public void readSTLBinary (PolyhedronController controller, boolean parallelized)
     {
         try (FileInputStream fileInputStream = new FileInputStream(filePath))
         {

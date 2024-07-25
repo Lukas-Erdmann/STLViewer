@@ -88,6 +88,16 @@ public class Polyhedron implements Serializable
     }
 
     /**
+     * Adds the volume to the polyhedron.
+     *
+     * @param volume The volume of the polyhedron.
+     */
+    public void addVolume (double volume)
+    {
+        this.volume += volume;
+    }
+
+    /**
      * Gets the surface area of the polyhedron.
      *
      * @return The surface area of the polyhedron.
@@ -105,6 +115,16 @@ public class Polyhedron implements Serializable
     public void setSurfaceArea (double surfaceArea)
     {
         this.surfaceArea = surfaceArea;
+    }
+
+    /**
+     * Adds the surface area to the polyhedron.
+     *
+     * @param surfaceArea The surface area of the polyhedron.
+     */
+    public void addSurfaceArea (double surfaceArea)
+    {
+        this.surfaceArea += surfaceArea;
     }
 
     /**
