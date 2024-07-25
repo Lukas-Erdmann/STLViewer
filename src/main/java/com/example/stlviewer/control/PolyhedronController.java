@@ -101,16 +101,18 @@ public class PolyhedronController implements Runnable
     }
 
     private void processTriangle(Triangle triangle) {
-        // Add the triangle to the polyhedron
-        addTriangle(triangle);
-        // Calculate the adjacency list
-        //calculateAdjacencyList(triangle);
-        // Add the volume of the tetrahedron to the polyhedron
-        calculateVolumeOfTetrahedron(triangle, new Vertex(0, 0, 0));
-        // Add the surface area of the triangle to the polyhedron
-        polyhedron.addSurfaceArea(triangle.getArea());
-        // Expand the bounding box to include the triangle
-        expandBoundingBox(triangle);
+        synchronized (polyhedron) {
+            // Add the triangle to the polyhedron
+            addTriangle(triangle);
+            // Calculate the adjacency list
+            //calculateAdjacencyList(triangle);
+            // Add the volume of the tetrahedron to the polyhedron
+            polyhedron.addVolume(calculateVolumeOfTetrahedron(triangle, new Vertex(0, 0, 0)));
+            // Add the surface area of the triangle to the polyhedron
+            polyhedron.addSurfaceArea(triangle.getArea());
+            // Expand the bounding box to include the triangle
+            expandBoundingBox(triangle);
+        }
     }
 
     /**
