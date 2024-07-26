@@ -216,4 +216,5 @@ public interface Strings
     String TCP_MODE = "TCP";
     String CONSOLE_MODE = "CONSOLE";
     String P2P_MODE = "P2P";
+    String CLOSING_APPLICATION = "Closing application.";
 }

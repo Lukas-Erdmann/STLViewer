@@ -64,12 +64,23 @@ public class masterController
      */
     private STLViewerController stlViewerControllerP2P2;
 
+    // -- Stages --
+    /**
+     * The stage passed from the main application.
+     */
+    private Stage mainStage;
+    /**
+     * The stage 2 for the peer-to-peer connection.
+     */
+    private Stage stageP2P2;
+
     /**
      * Constructs an masterController with the default controllers.
      * Precondition: None
      * Postcondition: An masterController instance is created.
      */
-    public masterController (String userOperationMode, boolean parallelized) throws IOException {
+    public masterController (Stage stage, String userOperationMode, boolean parallelized) throws IOException {
+        this.mainStage = stage;
         this.parallelized = parallelized;
         // Reader always initialized
         this.stlReader = new STLReader();
@@ -168,8 +179,7 @@ public class masterController
             Platform.runLater(() -> {
                 try
                 {
-                    Stage stageTCP = new Stage();
-                    stlViewerController.startSTLViewer(stageTCP);
+                    stlViewerController.startSTLViewer(mainStage);
                 } catch (Exception exception)
                 {
                     throw new RuntimeException(Strings.EXCEPTION_WHEN_ATTEMPTING_TO_START_STL_VIEWER, exception);
@@ -226,9 +236,8 @@ public class masterController
             Platform.runLater(() -> {
                 try
                 {
-                    Stage stageP2P1 = new Stage();
-                    stlViewerControllerP2P1.startSTLViewer(stageP2P1);
-                    Stage stageP2P2 = new Stage();
+                    stlViewerControllerP2P1.startSTLViewer(mainStage);
+                    stageP2P2 = new Stage();
                     stlViewerControllerP2P2.startSTLViewer(stageP2P2);
                 } catch (Exception exception)
                 {
@@ -284,7 +293,7 @@ public class masterController
             case Strings.CONSOLE_MODE:
                 consoleApplication.terminate();
                 break;
-            case "TCP":
+            case Strings.TCP_MODE:
                 tcpController.terminate();
                 break;
             case Strings.P2P_MODE:

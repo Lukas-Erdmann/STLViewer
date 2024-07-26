@@ -8,6 +8,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
 
+import static com.example.stlviewer.util.RuntimeHandler.logMessage;
+
 public class Main extends Application
 {
     masterController appController;
@@ -25,20 +27,20 @@ public class Main extends Application
         String arg1 = !args.isEmpty() ? args.get(0) : Strings.TCP_MODE;
         boolean arg2 = args.size() <= 1 || Boolean.parseBoolean(args.get(1));
 
-        appController = new masterController(arg1, arg2);
+        appController = new masterController(stage, arg1, arg2);
 
         // Set up the stage close request to terminate the application
         stage.setOnCloseRequest(event -> {
-            System.exit(0);
+            logMessage(Strings.CLOSING_APPLICATION);
             try {
                 stop();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            System.exit(0);
         });
-
-
     }
+
     @Override
     public void stop() {
         // Terminate all processes and threads
