@@ -338,7 +338,10 @@ public class PolyhedronController implements Runnable
      */
     public void addTriangle (Triangle triangle)
     {
-        polyhedron.getTriangles().add(triangle);
+        if (triangle != null)
+        {
+            polyhedron.getTriangles().add(triangle);
+        }
     }
 
     /**
@@ -350,7 +353,9 @@ public class PolyhedronController implements Runnable
      */
     public void addTriangleToQueue (Triangle triangle)
     {
-        blockingQueue.add(triangle);
+        if (triangle != null) {
+            blockingQueue.add(triangle);
+        }
     }
 
     /**

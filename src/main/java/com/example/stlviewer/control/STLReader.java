@@ -10,6 +10,8 @@ import javax.vecmath.Vector3d;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static com.example.stlviewer.util.RuntimeHandler.logMessage;
@@ -31,6 +33,9 @@ public class STLReader
      */
     private byte[] attributeBytesReference;
     private boolean firstTriangle = true;
+    private ByteBuffer byteBuffer;
+    private int triangleCount;
+    private int currentTriangleIndex;
 
     /**
      * Reads an STL file from the given file path. The file can be in ASCII or binary format.
@@ -75,7 +80,7 @@ public class STLReader
         } else
         {
             logMessage(Strings.SOUT_READING_BINARY_FILE);
-            readSTLBinary(controller, false);
+            readSTLBinaryIntoMemory(controller, false);
         }
         // Calculate volume, surface area, and other properties of the polyhedron
         controller.calculatePolyhedronProperties();
@@ -107,7 +112,7 @@ public class STLReader
         } else
         {
             logMessage(Strings.SOUT_READING_BINARY_FILE);
-            readSTLBinary(controller, true);
+            readSTLBinaryIntoMemory(controller, true);
         }
 
         try
@@ -345,6 +350,108 @@ public class STLReader
         } catch (IOException ioException)
         {
             throw new IOException(String.format(Strings.ERROR_WHILE_READING_FILE, filePath) + ioException.getMessage());
+        }
+    }
+
+    public void readSTLBinaryIntoMemory (PolyhedronController controller, boolean parallelized) throws IOException
+    {
+        // Read the file into a byte buffer
+        byteBuffer = ByteBuffer.wrap(Files.readAllBytes(Paths.get(filePath)));
+        // Set the byte order to little endian
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        // Skip the header of the file and read the number of triangleMesh
+        byteBuffer.position(Constants.STL_BINARY_HEADER_BYTE_SIZE);
+        triangleCount = byteBuffer.getInt();
+        logMessage("Triangle count: %d", triangleCount);
+        for (currentTriangleIndex = 0; currentTriangleIndex < triangleCount; currentTriangleIndex++)
+        {
+            if (parallelized)
+            {
+                controller.addTriangleToQueue(readTriangleBinaryFromBuffer());
+            } else
+            {
+                controller.addTriangle(readTriangleBinaryFromBuffer());
+            }
+        }
+        // If the number of triangles indicated by triangleCount were read, the file should be fully read
+        // If not, the file is corrupted. The discrepancy is calculated and an exception is thrown
+        if (byteBuffer.hasRemaining() && byteBuffer.remaining() % 50 == 0)
+        {
+            throw new IOException(String.format(Strings.TRIANGLE_COUNT_DISCREPANCY, byteBuffer.remaining()));
+        }
+
+        // Set the reading finished flag to true
+        controller.setReadingFinished(true);
+    }
+
+    private Triangle readTriangleBinaryFromBuffer() {
+        // Read the normal of the triangle
+        Vector3d normal = new Vector3d(byteBuffer.getFloat(), byteBuffer.getFloat(), byteBuffer.getFloat());
+
+        // Read the three vertices of the triangle
+        Vertex[] vertices = new Vertex[Constants.TRIANGLE_VERTEX_COUNT];
+        for (int i = 0; i < 3; i++)
+        {
+            vertices[i] = new Vertex(byteBuffer.getFloat(), byteBuffer.getFloat(), byteBuffer.getFloat());
+        }
+
+        // Skip the attribute byte count
+        if (firstTriangle) {
+            // The first triangle is read, and it's attribute byte count is stored as a reference
+            attributeBytesReference = new byte[Constants.STL_BINARY_ATTR_BYTE_SIZE];
+            byteBuffer.get(attributeBytesReference);
+            firstTriangle = false;
+        } else {
+            // Read the attribute byte count of the current triangle
+            byte[] attributeBytes = new byte[Constants.STL_BINARY_ATTR_BYTE_SIZE];
+            byteBuffer.get(attributeBytes);
+            // Compare the attribute byte count of the current triangle to the reference
+            // If they are not equal, the file is probably corrupted
+            if (!Arrays.equals(attributeBytesReference, attributeBytes)) {
+                logMessage(Strings.ATTRIBUTE_BYTE_DISCREPANCY);
+                // Try to recover by finding reference attribute bytes and skipping the current triangle
+                recoverToNextTriangleFromBuffer();
+                return null;
+            }
+        }
+
+        return new Triangle(vertices[Constants.TRIANGLE_VERTEX1_INDEX], vertices[Constants.TRIANGLE_VERTEX2_INDEX], vertices[Constants.TRIANGLE_VERTEX3_INDEX], normal);
+    }
+
+    private void recoverToNextTriangleFromBuffer() {
+        logMessage(Strings.RECOVERING_TO_NEXT_TRIANGLE);
+        int bytesSkipped = 0;
+        // Jump back to the start of the corrupted triangle
+        byteBuffer.position(byteBuffer.position() - 50);
+        try {
+            // Skip 100 bytes and check if the attribute bytes of the next triangle are found
+            while (bytesSkipped <= 100) {
+                // Read the next byte
+                int nextByte = byteBuffer.get();
+                bytesSkipped++;
+                logMessage(String.format("Byte: %d (Position: %d)", nextByte, byteBuffer.position()));
+                // If the next byte is the first byte of the attribute bytes, check the next byte
+                if (nextByte == attributeBytesReference[0]) {
+                    // Read the next byte
+                    int nextNextByte = byteBuffer.get();
+                    bytesSkipped++;
+                    logMessage("Next byte: %d", nextNextByte);
+                    // If the next byte is the second byte of the attribute bytes, the attribute bytes are found
+                    if (nextNextByte == attributeBytesReference[1]) {
+                        // Log the recovery and return
+                        logMessage(Strings.RECOVERED_TO_NEXT_TRIANGLE, bytesSkipped);
+                        // Increment the triangle counter if more than 50 bytes were skipped
+                        if (bytesSkipped > 50) {
+                            currentTriangleIndex++;
+                        }
+                        return;
+                    }
+                }
+            }
+            // If the attribute bytes are not found, throw an exception
+            throw new IllegalArgumentException(Strings.ATTRIBUTE_BYTES_NOT_FOUND);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + e.getMessage());
         }
     }
 
