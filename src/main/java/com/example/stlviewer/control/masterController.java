@@ -149,7 +149,11 @@ public class masterController
         {
             // Start the server and client
             startTCPServer(Constants.SERVER_PORT);
-            startTCPClient(Strings.LOCALHOST, Constants.SERVER_PORT);
+
+            // Set the callback to start the client after the file is loaded
+            stlViewerController.setOnFileLoadedCallback((Void) -> {
+                startTCPClient(Strings.LOCALHOST, Constants.SERVER_PORT);
+            });
 
             // Start the STL viewer without blocking the main thread
             Platform.runLater(() -> {

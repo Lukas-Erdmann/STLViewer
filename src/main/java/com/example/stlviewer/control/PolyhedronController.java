@@ -62,11 +62,14 @@ public class PolyhedronController implements Runnable
     }
 
     /**
-     * Run method for the PolyhedronController class. This method is responsible for adding all the triangles
+     * Run method for the PolyhedronController thread. This method is responsible for adding all the triangles
      * to the polyhedron and calculating the volume, surface area, bounding box and center of the polyhedron.
-     * It runs in a loop until the reading is finished and the blocking queue is empty.
-     * Pre-condition: The polyhedron is not null.
-     * Post-condition: The polyhedron is complete and all the attributes are calculated.
+     * It runs in a loop until the reading is finished and the blocking queue is empty. The triangles are added
+     * to the polyhedron using an executor service to parallelize the process. When the blocking queue is empty, the
+     * executor service is shut down and checked if all tasks are completed. The center of the polyhedron is then
+     * calculated.
+     * <p>Pre-condition: The polyhedron is not null.
+     * <p>Post-condition: The polyhedron is complete and all the attributes are calculated.
      */
     @Override
     public void run ()

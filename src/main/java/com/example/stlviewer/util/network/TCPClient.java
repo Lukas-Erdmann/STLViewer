@@ -45,13 +45,12 @@ public class TCPClient
      */
     public void start ()
     {
-        System.out.printf(Strings.CONNECTING_TO_SERVER_AT, host, port);
         try (Socket socket = new Socket(host, port);
              BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
              Scanner scanner = new Scanner(System.in))
         {
-
+            System.out.printf(Strings.CONNECTING_TO_SERVER_AT, host, port);
             handleUserInput(output, scanner);
         } catch (IOException ioException)
         {

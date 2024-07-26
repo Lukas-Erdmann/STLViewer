@@ -26,6 +26,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class STLViewerController
 {
@@ -113,6 +114,10 @@ public class STLViewerController
      * The current material applied to the 3D model.
      */
     private com.example.stlviewer.model.Material currentMaterial = new com.example.stlviewer.model.Material(Strings.DEFAULT_MATERIAL, 1, Strings.DEFAULT_COLOR);
+    /**
+     * The callback to execute when a file is loaded.
+     */
+    private Consumer<Void> onFileLoadedCallback;
 
     /**
      * Constructs a new STLViewerController instance.
@@ -185,10 +190,25 @@ public class STLViewerController
             loadFileTask.setOnSucceeded(event -> {
                 stlViewer.displayModel(polyhedronController.getPolyhedron());
                 updateWindowTitle(stlFile.getAbsolutePath());
+                // Execute the callback if it is not null
+                if (onFileLoadedCallback != null) {
+                    onFileLoadedCallback.accept(null);
+                }
             });
 
             new Thread(loadFileTask).start();
         }
+    }
+
+    /**
+     * Sets the consumer callback to execute when a file is loaded.
+     * Precondition: The callback must be valid.
+     * Postcondition: The callback is set.
+     *
+     * @param callback  The callback to execute when a file is loaded.
+     */
+    public void setOnFileLoadedCallback(Consumer<Void> callback) {
+        this.onFileLoadedCallback = callback;
     }
 
     /**
