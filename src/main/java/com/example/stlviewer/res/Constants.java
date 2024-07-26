@@ -72,4 +72,6 @@ public interface Constants
     int P2P_PORT_1 = 9757;
     int P2P_PORT_2 = 9758;
     int Z_DISTANCE_FACTOR = 4;
+    int BOUNDING_BOX_SIZE = 6;
+    int THREAD_SLEEP_MILLIS = 10;
 }

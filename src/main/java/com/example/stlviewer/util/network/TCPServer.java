@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import static com.example.stlviewer.util.RuntimeHandler.logMessage;
+
 /**
  * The TCPServer class listens for client connections and delegates the handling of each client to a
  * CPClientHandler instance. It runs on a specified port and communicates with the STLViewerController.
@@ -21,6 +23,10 @@ public class TCPServer
      * The controller for the STL viewer application.
      */
     private final STLViewerController stlViewerController;
+    /**
+     * A flag to indicate if the application is running.
+     */
+    private boolean closeApplication = false;
 
     /**
      * Constructs a TCPServer with the specified port and controller.
@@ -47,7 +53,7 @@ public class TCPServer
     {
         try (ServerSocket serverSocket = createSocket())
         {
-            System.out.println(Strings.SERVER_IS_AVAILABLE_ON_PORT + port);
+            logMessage(Strings.SERVER_IS_AVAILABLE_ON_PORT + port);
             acceptClients(serverSocket);
         } catch (IOException exception)
         {
@@ -78,14 +84,14 @@ public class TCPServer
      */
     private void acceptClients (ServerSocket serverSocket)
     {
-        while (true)
+        while (!closeApplication)
         {
             try
             {
                 handleClient(serverSocket.accept());
-            } catch (IOException e)
+            } catch (IOException ioException)
             {
-                System.err.println("Error accepting client connection: " + e.getMessage());
+                System.err.println(Strings.ERROR_ACCEPTING_CLIENT_CONNECTION + ioException.getMessage());
             }
         }
     }
@@ -100,5 +106,13 @@ public class TCPServer
     private void handleClient (Socket clientSocket)
     {
         new TCPClientHandler(clientSocket, stlViewerController).start();
+    }
+
+    /**
+     * Terminates the server and stops accepting client connections.
+     */
+    public void terminate ()
+    {
+        closeApplication = true;
     }
 }

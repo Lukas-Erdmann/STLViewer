@@ -9,10 +9,22 @@ import com.example.stlviewer.util.network.P2PServer;
  */
 public class P2PController
 {
-
+    /**
+     * The P2PClient instance to control the client.
+     */
     private P2PClient p2pClient;
+    /**
+     * The P2PServer instance to control the server.
+     */
     private P2PServer p2pServer;
+    /**
+     * The STLViewerController instance to handle viewer-related operations.
+     */
     private STLViewerController stlViewerController;
+    /**
+     * A flag to indicate if the application is running.
+     */
+    private boolean closeApplication = false;
 
     /**
      * Constructs a P2PController with the specified stlViewerController.
@@ -70,6 +82,23 @@ public class P2PController
         if (p2pClient != null)
         {
             p2pClient.sendData(data);
+        }
+    }
+
+    /**
+     * Stops the P2P client and server if they are running.
+     * Precondition: The P2P client and server must be running.
+     * Postcondition: The P2P client and server are stopped.
+     */
+    public void terminate ()
+    {
+        if (p2pClient != null)
+        {
+            p2pClient.stopClient();
+        }
+        if (p2pServer != null)
+        {
+            p2pServer.stopServer();
         }
     }
 }

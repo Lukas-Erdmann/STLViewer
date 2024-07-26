@@ -7,6 +7,7 @@ import com.example.stlviewer.view.ConsoleApplication;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -75,20 +76,20 @@ public class masterController
 
         switch (userOperationMode)
         {
-            case "CONSOLE": // Console mode
-                this.userOperationMode = "CONSOLE";
+            case Strings.CONSOLE_MODE: // Console mode
+                this.userOperationMode = Strings.CONSOLE_MODE;
                 this.stlViewerController = new STLViewerController(this);
                 this.consoleApplication = new ConsoleApplication();
                 readSTLFileInConsole(parallelized);
                 break;
-            case "TCP": // TCP mode
-                this.userOperationMode = "TCP";
+            case Strings.TCP_MODE: // TCP mode
+                this.userOperationMode = Strings.TCP_MODE;
                 this.stlViewerController = new STLViewerController(this);
                 this.tcpController = new TCPController();
                 startTCPConnection();
                 break;
-            case "P2P": // Peer-to-peer mode
-                this.userOperationMode = "P2P";
+            case Strings.P2P_MODE: // Peer-to-peer mode
+                this.userOperationMode = Strings.P2P_MODE;
                 this.stlViewerControllerP2P1 = new STLViewerController(this);
                 this.stlViewerControllerP2P2 = new STLViewerController(this);
                 this.p2pController1 = new P2PController(stlViewerControllerP2P1);
@@ -114,10 +115,18 @@ public class masterController
         try
         {
             this.stlReader.readSTLFile(filePath, polyhedronController, parallelized);
-        } catch (Exception exception)
-        {
-            // TODO: Handle exception
-            exception.printStackTrace();
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("File not found: " + filePath);
+            fnfe.printStackTrace();
+        } catch (IOException ioe) {
+            System.err.println("I/O error while reading the file: " + filePath);
+            ioe.printStackTrace();
+        } catch (IllegalArgumentException iae) {
+            System.err.println("Invalid argument: " + iae.getMessage());
+            iae.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred while opening the file: " + filePath);
+            e.printStackTrace();
         }
     }
 
@@ -267,5 +276,23 @@ public class masterController
 
     public String getUserOperationMode() {
         return userOperationMode;
+    }
+
+    public void terminate() {
+        switch (userOperationMode)
+        {
+            case Strings.CONSOLE_MODE:
+                consoleApplication.terminate();
+                break;
+            case "TCP":
+                tcpController.terminate();
+                break;
+            case Strings.P2P_MODE:
+                p2pController1.terminate();
+                p2pController2.terminate();
+                break;
+            default:
+                throw new IllegalArgumentException(Strings.INVALID_MODE);
+        }
     }
 }

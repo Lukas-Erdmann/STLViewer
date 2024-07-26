@@ -1,6 +1,7 @@
 package com.example.stlviewer.model;
 
 import com.example.stlviewer.res.Strings;
+import com.example.stlviewer.util.MathUtil;
 
 import java.io.Serializable;
 
@@ -105,8 +106,9 @@ public class Vertex implements Comparable<Vertex>, Serializable
     @Override
     public String toString ()
     {
-        return Strings.VERTEX_TOSTRING + posX + Strings.COMMA_SPACE + posY + Strings.COMMA_SPACE
-                + posZ + Strings.CURLY_BRACKET_RIGHT;
+        return Strings.VERTEX_TOSTRING + MathUtil.roundToThreeDigits(posX) + Strings.COMMA_SPACE +
+                MathUtil.roundToThreeDigits(posY) + Strings.COMMA_SPACE +
+                MathUtil.roundToThreeDigits(posZ) + Strings.CURLY_BRACKET_RIGHT;
     }
 
     /**

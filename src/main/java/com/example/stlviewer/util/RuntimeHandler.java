@@ -2,6 +2,7 @@ package com.example.stlviewer.util;
 
 import com.example.stlviewer.res.Strings;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
 
 /**
@@ -137,5 +138,22 @@ public class RuntimeHandler
     public long getElapsedTime ()
     {
         return endTime - startTime;
+    }
+
+    public static void logMessage(String message, Object... args) {
+        // Get the current local date and time
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        // Get the caller class name and instance address
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        String callerClassName = stackTrace[2].getClassName();
+        String simpleClassName = callerClassName.substring(callerClassName.lastIndexOf('.') + 1);
+        String callerInstanceAddress = Integer.toHexString(System.identityHashCode(stackTrace[2]));
+
+        // Format the message with the provided arguments
+        String formattedMessage = String.format(message, args);
+
+        // Print the formatted message to the console
+        System.out.printf("[%s][%s@%s] %s%n", currentTime, simpleClassName, callerInstanceAddress, formattedMessage);
     }
 }

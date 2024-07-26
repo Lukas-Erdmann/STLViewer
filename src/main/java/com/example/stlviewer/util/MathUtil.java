@@ -1,28 +1,25 @@
 package com.example.stlviewer.util;
 
-import javafx.geometry.Point3D;
-
 /**
  * The Math class contains static methods for mathematical operations.
  */
 public abstract class MathUtil
 {
     /**
-     * Finds the maximum double in the given array.
+     * Rounds a double value to a specified number of decimal places.
      *
-     * @param array - The array of doubles.
-     * @return The maximum double in the array.
+     * @param value  - The value to round.
+     * @param digits - The number of decimal places to round to.
+     * @return The rounded value.
      */
-    public static double findMaxDouble (double[] array)
+    public static double roundToDigits(double value, int digits)
     {
-        double max = array[0];
-        for (int i = 1; i < array.length; i++)
-        {
-            if (array[i] > max)
-            {
-                max = array[i];
-            }
-        }
-        return max;
+        double factor = Math.pow(10, digits);
+        return Math.round(value * factor) / factor;
+    }
+
+    public static double roundToThreeDigits(double value)
+    {
+        return roundToDigits(value, 3);
     }
 }

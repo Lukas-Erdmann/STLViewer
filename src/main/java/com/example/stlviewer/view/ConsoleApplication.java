@@ -62,4 +62,9 @@ public class ConsoleApplication
     {
         System.out.println(polyhedron.toString());
     }
+
+    public void terminate ()
+    {
+        scanner.close();
+    }
 }

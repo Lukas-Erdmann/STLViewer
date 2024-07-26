@@ -61,4 +61,16 @@ public class TCPController
             }
         }).start();
     }
+
+    public void terminate ()
+    {
+        if (tcpServer != null)
+        {
+            tcpServer.terminate();
+        }
+        if (tcpClient != null)
+        {
+            tcpClient.terminate();
+        }
+    }
 }

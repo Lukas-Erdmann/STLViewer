@@ -1,5 +1,7 @@
 package com.example.stlviewer.model;
 
+import com.example.stlviewer.util.MathUtil;
+
 import javax.vecmath.Vector3d;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -58,5 +60,11 @@ public class Face extends Polygon implements Serializable
     public void setNormal (Vector3d normal)
     {
         this.normal = normal;
+    }
+
+    public String getNormalString()
+    {
+        return MathUtil.roundToThreeDigits(normal.getX()) + " " + MathUtil.roundToThreeDigits(normal.getY()) +
+                " " + MathUtil.roundToThreeDigits(normal.getZ());
     }
 }

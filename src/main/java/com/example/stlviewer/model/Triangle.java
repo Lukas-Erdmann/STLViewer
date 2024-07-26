@@ -1,6 +1,7 @@
 package com.example.stlviewer.model;
 
 import com.example.stlviewer.res.Strings;
+import com.example.stlviewer.util.MathUtil;
 
 import javax.vecmath.Vector3d;
 import java.io.Serializable;
@@ -193,14 +194,14 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         StringBuilder builder = new StringBuilder();
         builder.append(Strings.TRIANGLE_TOSTRING);
         builder.append(Strings.TRIANGLE_TOSTRING_2);
-        builder.append(area).append(Strings.COMMA_SPACE);
+        builder.append(MathUtil.roundToDigits(area, 2)).append(Strings.COMMA_SPACE);
         for (Edge edge : edges)
         {
             builder.append(edge.toString());
             builder.append(Strings.COMMA_SPACE);
         }
         builder.append(Strings.TRIANGLE_TOSTRING_3);
-        builder.append(getNormal().toString());
+        builder.append(getNormalString());
         builder.append(Strings.CURLY_BRACKET_RIGHT);
         return builder.toString();
     }

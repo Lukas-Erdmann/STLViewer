@@ -11,6 +11,8 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static com.example.stlviewer.util.RuntimeHandler.logMessage;
+
 /**
  * The STLReader class is responsible for reading STL files in ASCII and binary format.
  * It can read the files sequentially or in parallel.
@@ -60,18 +62,18 @@ public class STLReader
         runtimeHandler.startTimer();
         if (isASCII())
         {
-            System.out.println(Strings.SOUT_READING_ASCII_FILE);
+            logMessage(Strings.SOUT_READING_ASCII_FILE);
             readSTLASCII(controller, false);
         } else
         {
-            System.out.println(Strings.SOUT_READING_BINARY_FILE);
+            logMessage(Strings.SOUT_READING_BINARY_FILE);
             readSTLBinary(controller, false);
         }
         // Calculate volume, surface area, and other properties of the polyhedron
         controller.calculatePolyhedronProperties();
 
         runtimeHandler.stopTimer();
-        System.out.printf(Strings.SOUT_ELAPSED_TIME, runtimeHandler.getElapsedTime());
+        logMessage(Strings.SOUT_ELAPSED_TIME, runtimeHandler.getElapsedTime());
     }
 
     /**
@@ -92,11 +94,11 @@ public class STLReader
 
         if (isASCII())
         {
-            System.out.println(Strings.SOUT_READING_ASCII_FILE);
+            logMessage(Strings.SOUT_READING_ASCII_FILE);
             readSTLASCII(controller, true);
         } else
         {
-            System.out.println(Strings.SOUT_READING_BINARY_FILE);
+            logMessage(Strings.SOUT_READING_BINARY_FILE);
             readSTLBinary(controller, true);
         }
 
@@ -109,7 +111,7 @@ public class STLReader
             throw new IOException(Strings.THREAD_WAS_INTERRUPTED, interruptedException);
         }
         runtimeHandler.stopTimer();
-        System.out.printf(Strings.SOUT_ELAPSED_TIME, runtimeHandler.getElapsedTime());
+        logMessage(Strings.SOUT_ELAPSED_TIME, runtimeHandler.getElapsedTime());
     }
 
     /**
@@ -158,8 +160,7 @@ public class STLReader
      * @param controller - The PolyhedronController instance to send the triangles to.
      * @throws IOException - If an error occurs while reading the file.
      */
-    public void readSTLASCII (PolyhedronController controller, boolean parallelized) throws IOException
-    {
+    public void readSTLASCII (PolyhedronController controller, boolean parallelized) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath)))
         {
             String line;
@@ -183,6 +184,9 @@ public class STLReader
             }
             // Set the reading finished flag to true
             controller.setReadingFinished(true);
+        } catch (FileNotFoundException fileNotFoundException)
+        {
+            throw new FileNotFoundException(Strings.FILE_NOT_FOUND + filePath);
         } catch (IOException ioException)
         {
             throw new IOException(Strings.ERROR_WHILE_READING_FILE + filePath);
@@ -299,8 +303,7 @@ public class STLReader
      * @param controller   - The PolyhedronController instance to send the triangles to.
      * @param parallelized - True if the file should be read in parallel, false otherwise.
      */
-    public void readSTLBinary (PolyhedronController controller, boolean parallelized)
-    {
+    public void readSTLBinary (PolyhedronController controller, boolean parallelized) throws IOException {
         try (FileInputStream fileInputStream = new FileInputStream(filePath))
         {
             // Skip the header of the file and read the number of triangleMesh
@@ -322,6 +325,9 @@ public class STLReader
             }
             // Set the reading finished flag to true
             controller.setReadingFinished(true);
+        } catch (FileNotFoundException fileNotFoundException)
+        {
+            throw new FileNotFoundException(Strings.FILE_NOT_FOUND + filePath);
         } catch (IOException ioException)
         {
             throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_FILE + filePath);

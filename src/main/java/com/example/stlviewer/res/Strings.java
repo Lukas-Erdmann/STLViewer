@@ -110,7 +110,7 @@ public interface Strings
     String CONSAPP_FILE_DOESNT_EXIST = "The file does not exist or is not an STL file. Please enter a valid STL file path.";
     String CONSAPP_PLEASE_ENTER_THE_FILE_NAME_AND_PATH = "Please enter the file name and path:";
     String STL_FILE_SUFFIX = ".stl";
-    String SOUT_ELAPSED_TIME = "Elapsed time: %d ms\n";
+    String SOUT_ELAPSED_TIME = "Elapsed time: %d ms";
     String SOUT_READING_FINISHED = "Reading finished";
     String LOCALHOST = "localhost";
     String EXCEPTION_WHEN_ATTEMPTING_TO_START_STL_VIEWER = "Exception when attempting to start stlViewer";
@@ -127,7 +127,7 @@ public interface Strings
     String POLYHEDRON_TOSTRING_5 = ", center=";
     String POLYHEDRON_TOSTRING_6 = ", triangles=";
     String VERTEX_TOSTRING = "Vertex{";
-    String CONNECTING_TO_SERVER_AT = "Connecting to server at %s:%d%n";
+    String CONNECTING_TO_SERVER_AT = "Connecting to server at %s:%d";
     String FAILED_CONNECTING_TO_SERVER = "Failed connecting to server: ";
     String ENTER_COMMAND_TYPE = "Enter command type (rotate, translate): ";
     String COMMAND_TYPE_ROTATE = "rotate";
@@ -137,7 +137,6 @@ public interface Strings
     String INVALID_AXIS_REPEAT = "Invalid axis. Please enter x, y, or z.";
     String ENTER_AMOUNT = "Enter amount: ";
     String INVALID_AMOUNT = "Invalid amount. Please enter a valid number.";
-    String CLIENT_CONNECTED = "Client connected: ";
     String AN_EXCEPTION_OCCURRED_PROCESSING_CLIENT_COMMANDS = "An Exception occurred processing client commands: ";
     String AN_EXCEPTION_OCCURRED_CLOSING_CLIENT_SOCKET = "An Exception occurred closing client socket: ";
     String EXECUTED_COMMAND = "Executed command: ";
@@ -200,12 +199,21 @@ public interface Strings
     String STLV_SET_MATERIAL = "Set Material...";
     String STLV_MATERIAL = "Material";
     String STLV_MATERIAL_INFORMATION = "Material Information";
-    String STLV_DENSITY = "Density: ";
     String STLV_WEIGHT = "Weight: ";
-    String STLV_MATERIAL_DESCRIPTION = "Material Description";
     String DEFAULT_MATERIAL = "No material selected";
     String DEFAULT_COLOR = "#FF0000";
-    String NUMBER_TRIANGLES_READ = "Number of triangles read: %d\n";
+    String NUMBER_TRIANGLES_READ = "Number of triangles read: %d";
     String TIMEOUT_OCCURRED_BEFORE_POLYHEDRON_WAS_FINISHED = "Timeout occurred before polyhedron was finished.";
     String FINISHED_COMPILING_POLYHEDRON = "Finished compiling polyhedron.";
+    String BOUNDING_BOX_XMIN = "[xMin=";
+    String BOUNDING_BOX_YMIN = ", yMin=";
+    String BOUNDING_BOX_ZMIN = ", zMin=";
+    String BOUNDING_BOX_XMAX = ", xMax=";
+    String BOUNDING_BOX_YMAX = ", yMax=";
+    String BOUNDING_BOX_ZMAX = ", zMax=";
+    String BLOCKY_BRACKET_RIGHT = "]";
+    String ERROR_ACCEPTING_CLIENT_CONNECTION = "Error accepting client connection: ";
+    String TCP_MODE = "TCP";
+    String CONSOLE_MODE = "CONSOLE";
+    String P2P_MODE = "P2P";
 }

@@ -9,6 +9,8 @@ import com.example.stlviewer.res.Strings;
 import java.util.ArrayList;
 import java.util.concurrent.*;
 
+import static com.example.stlviewer.util.RuntimeHandler.logMessage;
+
 /**
  * Controller class for the Polyhedron object. This class is responsible for calculating the volume,
  * surface area, bounding box and center of the polyhedron.
@@ -23,7 +25,7 @@ public class PolyhedronController implements Runnable
     /**
      * The counter for the triangle IDs.
      */
-    private int idCounter = 0;
+    private int idCounter = Constants.NUMBER_ZERO;
     /**
      * The adjacency list for the polyhedron.
      */
@@ -87,7 +89,7 @@ public class PolyhedronController implements Runnable
                     executorService.shutdown();
                     try {
                         if (executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-                            System.out.println(Strings.FINISHED_COMPILING_POLYHEDRON);
+                            logMessage(Strings.FINISHED_COMPILING_POLYHEDRON);
                         } else {
                             throw new InterruptedException(Strings.TIMEOUT_OCCURRED_BEFORE_POLYHEDRON_WAS_FINISHED);
                         }
@@ -95,7 +97,7 @@ public class PolyhedronController implements Runnable
                         Thread.currentThread().interrupt();
                         System.out.println(Strings.THREAD_WAS_INTERRUPTED);
                     }
-                    System.out.printf(Strings.NUMBER_TRIANGLES_READ, polyhedron.getTriangles().size());
+                    logMessage(Strings.NUMBER_TRIANGLES_READ, polyhedron.getTriangles().size());
                     break;
                 } else if (!blockingQueue.isEmpty())
                 {
@@ -104,7 +106,7 @@ public class PolyhedronController implements Runnable
                     idCounter++;
                 } else
                 {
-                    Thread.sleep(10);
+                    Thread.sleep(Constants.THREAD_SLEEP_MILLIS);
                 }
             } catch (InterruptedException e)
             {
@@ -114,6 +116,14 @@ public class PolyhedronController implements Runnable
         }
     }
 
+    /**
+     * Process the triangle by adding it to the polyhedron, calculating the adjacency list, volume and surface area,
+     * and expanding the bounding box. This method is synchronized to prevent concurrent modification of the polyhedron.
+     * <p>Pre-condition: The triangle is not null and the polyhedron is not null.
+     * <p>Post-condition: The triangle is added to the polyhedron and the attributes are updated.
+     *
+     * @param triangle - The triangle to be processed.
+     */
     private void processTriangle(Triangle triangle) {
         synchronized (polyhedron) {
             // Add the triangle to the polyhedron
@@ -146,7 +156,7 @@ public class PolyhedronController implements Runnable
      */
     public void setReadingFinished (boolean readingFinished)
     {
-        System.out.println(Strings.SOUT_READING_FINISHED);
+        logMessage(Strings.SOUT_READING_FINISHED);
         this.isReadingFinished = readingFinished;
     }
 
@@ -159,7 +169,7 @@ public class PolyhedronController implements Runnable
      */
     public void calculateVolume ()
     {
-        double volume = 0;
+        double volume = Constants.NUMBER_ZERO;
         // The arbitrary point is chosen to be the first vertex of the first triangle
         Vertex refPoint = polyhedron.getTriangles().getFirst().getVertices().getFirst();
         // For each triangle in the polyhedron, calculate the volume of the tetrahedron formed
@@ -245,12 +255,12 @@ public class PolyhedronController implements Runnable
     private void expandBoundingBox(Triangle triangle) {
         // If the bounding box has not been initialized, initialize it
         if (polyhedron.getBoundingBox() == null) {
-            polyhedron.setBoundingBox(new double[6]);
+            polyhedron.setBoundingBox(new double[Constants.BOUNDING_BOX_SIZE]);
             // Initialize the bounding box with the maximum possible values
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < Constants.BOUNDING_BOX_SIZE / Constants.NUMBER_TWO; i++) {
                 polyhedron.getBoundingBox()[i] = Double.MAX_VALUE;
             }
-            for (int i = 3; i < 6; i++) {
+            for (int i = Constants.BOUNDING_BOX_SIZE / Constants.NUMBER_TWO; i < Constants.BOUNDING_BOX_SIZE; i++) {
                 polyhedron.getBoundingBox()[i] = Double.MIN_VALUE;
             }
         }

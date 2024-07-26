@@ -1,10 +1,11 @@
 package com.example.stlviewer.model;
 
+import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
+import com.example.stlviewer.util.MathUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * The Polyhedron class represents a polyhedron in a 3D space. It is a solid that is bounded by a finite number of
@@ -20,15 +21,15 @@ public class Polyhedron implements Serializable
     /**
      * The volume of the polyhedron.
      */
-    private double volume = 0;
+    private double volume = Constants.NUMBER_ZERO;
     /**
      * The surface area of the polyhedron.
      */
-    private double surfaceArea = 0;
+    private double surfaceArea = Constants.NUMBER_ZERO;
     /**
      * The weight of the polyhedron.
      */
-    private double weight = 0;
+    private double weight = Constants.NUMBER_ZERO;
     /**
      * The bounding box of the polyhedron. The bounding box is an array of 6 doubles that represent the minimum and
      * maximum x, y, and z coordinates of the polyhedron.
@@ -78,7 +79,7 @@ public class Polyhedron implements Serializable
     }
 
     /**
-     * Sets the volume of the polyhedron.
+     * Sets the volume of the polyhedron. Used when the volume of the polyhedron is calculated in one go.
      *
      * @param volume The volume of the polyhedron.
      */
@@ -88,7 +89,7 @@ public class Polyhedron implements Serializable
     }
 
     /**
-     * Adds the volume to the polyhedron.
+     * Adds the volume to the polyhedron. Used when the area of a triangle is calculated and added to the polyhedron.
      *
      * @param volume The volume of the polyhedron.
      */
@@ -157,6 +158,17 @@ public class Polyhedron implements Serializable
         return boundingBox;
     }
 
+    public String getBoundingBoxString()
+    {
+        return  Strings.BOUNDING_BOX_XMIN + MathUtil.roundToThreeDigits(boundingBox[0]) +
+                Strings.BOUNDING_BOX_YMIN + MathUtil.roundToThreeDigits(boundingBox[1]) +
+                Strings.BOUNDING_BOX_ZMIN + MathUtil.roundToThreeDigits(boundingBox[2]) +
+                Strings.BOUNDING_BOX_XMAX + MathUtil.roundToThreeDigits(boundingBox[3]) +
+                Strings.BOUNDING_BOX_YMAX + MathUtil.roundToThreeDigits(boundingBox[4]) +
+                Strings.BOUNDING_BOX_ZMAX + MathUtil.roundToThreeDigits(boundingBox[5]) +
+                Strings.BLOCKY_BRACKET_RIGHT;
+    }
+
     /**
      * Sets the bounding box of the polyhedron.
      *
@@ -206,9 +218,9 @@ public class Polyhedron implements Serializable
     public String toString ()
     {
         return Strings.POLYHEDRON_TOSTRING +
-                Strings.POLYHEDRON_TOSTRING_2 + volume +
-                Strings.POLYHEDRON_TOSTRING_3 + surfaceArea +
-                Strings.POLYHEDRON_TOSTRING_4 + Arrays.toString(boundingBox) +
+                Strings.POLYHEDRON_TOSTRING_2 + MathUtil.roundToThreeDigits(volume) +
+                Strings.POLYHEDRON_TOSTRING_3 + MathUtil.roundToThreeDigits(surfaceArea) +
+                Strings.POLYHEDRON_TOSTRING_4 + getBoundingBoxString() +
                 Strings.POLYHEDRON_TOSTRING_5 + center +
                 Strings.POLYHEDRON_TOSTRING_6 + triangles +
                 Strings.CURLY_BRACKET_RIGHT;

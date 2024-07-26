@@ -1,5 +1,6 @@
 package com.example.stlviewer.util.network;
 
+import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 
 import java.io.BufferedReader;
@@ -8,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+
+import static com.example.stlviewer.util.RuntimeHandler.logMessage;
 
 /**
  * The TCPClient class handles communication with the TCP server.
@@ -23,7 +26,10 @@ public class TCPClient
      * The port number of the server.
      */
     private final int port;
-
+    /**
+     * A flag to indicate if the application is running.
+     */
+    private boolean closeApplication = false;
     /**
      * Constructs a TCPClient with the specified host and port.
      * Precondition: host should be a valid server address and port should be a valid port number.
@@ -50,7 +56,7 @@ public class TCPClient
              PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
              Scanner scanner = new Scanner(System.in))
         {
-            System.out.printf(Strings.CONNECTING_TO_SERVER_AT, host, port);
+            logMessage(Strings.CONNECTING_TO_SERVER_AT, host, port);
             handleUserInput(output, scanner);
         } catch (IOException ioException)
         {
@@ -68,7 +74,7 @@ public class TCPClient
      */
     private void handleUserInput (PrintWriter output, Scanner scanner)
     {
-        while (true)
+        while (!closeApplication)
         {
             String commandType = fetchCommandType(scanner);
             String axis = fetchAxis(scanner, commandType);
@@ -89,7 +95,7 @@ public class TCPClient
      */
     private String fetchCommandType (Scanner scanner)
     {
-        while (true)
+        while (!closeApplication)
         {
             System.out.print(Strings.ENTER_COMMAND_TYPE);
             String commandType = scanner.nextLine().trim().toLowerCase();
@@ -101,6 +107,7 @@ public class TCPClient
                 System.out.println(Strings.INVALID_COMMAND_TYPE);
             }
         }
+        return Strings.EMPTY_STRING;
     }
 
     /**
@@ -114,7 +121,7 @@ public class TCPClient
      */
     private String fetchAxis (Scanner scanner, String commandType)
     {
-        while (true)
+        while (!closeApplication)
         {
             System.out.print(Strings.ENTER_AXIS);
             String axis = scanner.nextLine().trim().toLowerCase();
@@ -129,6 +136,7 @@ public class TCPClient
                 System.out.println(Strings.INVALID_AXIS_REPEAT);
             }
         }
+        return Strings.EMPTY_STRING;
     }
 
     /**
@@ -141,7 +149,7 @@ public class TCPClient
      */
     private double fetchAmount (Scanner scanner)
     {
-        while (true)
+        while (!closeApplication)
         {
             System.out.print(Strings.ENTER_AMOUNT);
             try
@@ -152,5 +160,16 @@ public class TCPClient
                 System.out.println(Strings.INVALID_AMOUNT);
             }
         }
+        return Constants.NUMBER_ZERO;
+    }
+
+    /**
+     * Terminates the application.
+     * Precondition: None.
+     * Postcondition: The application is terminated.
+     */
+    public void terminate ()
+    {
+        closeApplication = true;
     }
 }

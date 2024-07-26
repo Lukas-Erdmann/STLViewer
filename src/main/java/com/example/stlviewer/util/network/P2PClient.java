@@ -10,7 +10,6 @@ import java.net.Socket;
  */
 public class P2PClient extends Thread
 {
-
     /**
      * The host to connect to.
      */
