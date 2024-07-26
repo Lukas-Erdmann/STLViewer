@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 import static com.example.stlviewer.util.RuntimeHandler.logMessage;
 
@@ -23,6 +24,13 @@ public class STLReader
      * The file path of the STL file.
      */
     private String filePath;
+
+    // -- File validation data --
+    /**
+     * The reference to compare the attribute bytes of each triangle to. Used when reading binary files.
+     */
+    private byte[] attributeBytesReference;
+    private boolean firstTriangle = true;
 
     /**
      * Reads an STL file from the given file path. The file can be in ASCII or binary format.
@@ -323,6 +331,12 @@ public class STLReader
                     controller.addTriangle(readTriangleBinary(fileInputStream));
                 }
             }
+            // If the number of triangles indicated by triangleCount were read, the file should be fully read
+            // If not, the file is corrupted. The discrepancy is calculated and an exception is thrown
+            if (fileInputStream.available() != 0)
+            {
+                throw new IOException(String.format(Strings.TRIANGLE_COUNT_DISCREPANCY, triangleCount));
+            }
             // Set the reading finished flag to true
             controller.setReadingFinished(true);
         } catch (FileNotFoundException fileNotFoundException)
@@ -330,7 +344,7 @@ public class STLReader
             throw new FileNotFoundException(Strings.FILE_NOT_FOUND + filePath);
         } catch (IOException ioException)
         {
-            throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_FILE + filePath);
+            throw new IOException(String.format(Strings.ERROR_WHILE_READING_FILE, filePath) + ioException.getMessage());
         }
     }
 
@@ -361,7 +375,21 @@ public class STLReader
             }
 
             // Skip the attribute byte count
-            fileInputStream.skip(Constants.STL_BINARY_ATTR_BYTE_SIZE);
+            if (firstTriangle) {
+                // The first triangle is read, and it's attribute byte count is stored as a reference
+                attributeBytesReference = fileInputStream.readNBytes(Constants.STL_BINARY_ATTR_BYTE_SIZE);
+                firstTriangle = false;
+            } else {
+                // Read the attribute byte count of the current triangle
+                byte[] attributeBytes = fileInputStream.readNBytes(Constants.STL_BINARY_ATTR_BYTE_SIZE);
+                // Compare the attribute byte count of the current triangle to the reference
+                // If they are not equal, the file is probably corrupted
+                if (!Arrays.equals(attributeBytesReference, attributeBytes)) {
+                    logMessage(Strings.ATTRIBUTE_BYTE_DISCREPANCY);
+                    // Try to recover by finding reference attribute bytes and skipping the current triangle
+                    recoverToNextTriangle(fileInputStream);
+                }
+            }
 
             return new Triangle(vertices[Constants.TRIANGLE_VERTEX1_INDEX], vertices[Constants.TRIANGLE_VERTEX2_INDEX], vertices[Constants.TRIANGLE_VERTEX3_INDEX], normal);
         } catch (IOException ioException)
@@ -369,6 +397,37 @@ public class STLReader
             throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + ioException.getMessage());
         }
 
+    }
+
+    private void recoverToNextTriangle(FileInputStream fileInputStream) {
+        logMessage(Strings.RECOVERING_TO_NEXT_TRIANGLE);
+        int bytesSkipped = 0;
+        try {
+            // Skip 100 bytes and check if the attribute bytes of the next triangle are found
+            while (bytesSkipped < 100) {
+                // Read the next byte
+                int nextByte = fileInputStream.read();
+                bytesSkipped++;
+                logMessage(String.format("Byte: %d (Number of bytes skipped: %d)", nextByte, bytesSkipped));
+                // If the next byte is the first byte of the attribute bytes, check the next byte
+                if (nextByte == attributeBytesReference[0]) {
+                    // Read the next byte
+                    int nextNextByte = fileInputStream.read();
+                    bytesSkipped++;
+                    logMessage("Next byte: %d", nextNextByte);
+                    // If the next byte is the second byte of the attribute bytes, the attribute bytes are found
+                    if (nextNextByte == attributeBytesReference[1]) {
+                        // Log the recovery and return
+                        logMessage(Strings.RECOVERED_TO_NEXT_TRIANGLE, bytesSkipped);
+                        return;
+                    }
+                }
+            }
+            // If the attribute bytes are not found, throw an exception
+            throw new IllegalArgumentException(Strings.ATTRIBUTE_BYTES_NOT_FOUND);
+        } catch (IOException ioException) {
+            throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + ioException.getMessage());
+        }
     }
 
     /**

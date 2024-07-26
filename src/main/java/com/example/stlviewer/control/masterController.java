@@ -9,6 +9,8 @@ import javafx.stage.Stage;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The masterController class is the main controller class of the application.
@@ -20,11 +22,11 @@ public class masterController
     /**
      * The mode of the application. (CONSOLE, TCP, P2P)
      */
-    private String userOperationMode;
+    private final String userOperationMode;
     /**
      * Whether to read the file in parallel.
      */
-    private boolean parallelized = false;
+    private final boolean parallelized;
     /**
      * The STLReader instance to read STL files.
      */
@@ -68,16 +70,21 @@ public class masterController
     /**
      * The stage passed from the main application.
      */
-    private Stage mainStage;
+    private final Stage mainStage;
     /**
      * The stage 2 for the peer-to-peer connection.
      */
     private Stage stageP2P2;
 
     /**
+     * The logger for the masterController class.
+     */
+    private static final Logger LOGGER = Logger.getLogger(masterController.class.getName());
+
+    /**
      * Constructs an masterController with the default controllers.
      * Precondition: None
-     * Postcondition: An masterController instance is created.
+     * Post-Condition: An masterController instance is created.
      */
     public masterController (Stage stage, String userOperationMode, boolean parallelized) throws IOException {
         this.mainStage = stage;
@@ -116,7 +123,7 @@ public class masterController
      * Opens a file and reads the STL data from it. If a polyhedron already exists,
      * it is cleared before reading the new data.
      * Precondition: The file path must be valid.
-     * Postcondition: The STL data is read from the file and stored in the polyhedron controller.
+     * Post-Condition: The STL data is read from the file and stored in the polyhedron controller.
      *
      * @param polyhedronController     The polyhedron controller to store the data in.
      */
@@ -126,18 +133,14 @@ public class masterController
         try
         {
             this.stlReader.readSTLFile(filePath, polyhedronController, parallelized);
-        } catch (FileNotFoundException fnfe) {
-            System.err.println("File not found: " + filePath);
-            fnfe.printStackTrace();
-        } catch (IOException ioe) {
-            System.err.println("I/O error while reading the file: " + filePath);
-            ioe.printStackTrace();
-        } catch (IllegalArgumentException iae) {
-            System.err.println("Invalid argument: " + iae.getMessage());
-            iae.printStackTrace();
-        } catch (Exception e) {
-            System.err.println("An unexpected error occurred while opening the file: " + filePath);
-            e.printStackTrace();
+        } catch (FileNotFoundException fileNotFoundException) {
+            LOGGER.log(Level.SEVERE, "File not found: " + filePath, fileNotFoundException);
+        } catch (IOException ioException) {
+            LOGGER.log(Level.SEVERE, "I/O error while reading the file: " + filePath, ioException);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            LOGGER.log(Level.WARNING, "Invalid argument: " + illegalArgumentException.getMessage(), illegalArgumentException);
+        } catch (Exception exception) {
+            LOGGER.log(Level.SEVERE, "An unexpected error occurred while opening the file: " + filePath, exception);
         }
     }
 
@@ -145,7 +148,7 @@ public class masterController
      * Reads an STL file from a path defined by the user in the console and prints the polyhedron data to the console.
      * The file is read in parallel if the parallelized parameter is set to true, and sequentially otherwise.
      * Precondition: None
-     * Postcondition: The STL data is read from the file and stored in the polyhedron controller.
+     * Post-Condition: The STL data is read from the file and stored in the polyhedron controller.
      *
      * @param parallelized - Whether to read the file in parallel.
      * @throws IOException - If an I/O error occurs.
@@ -161,7 +164,7 @@ public class masterController
      * Starts a TCP connection between a server and a client. The server listens on the specified port,
      * and the client connects to the server. The STL viewer is then started.
      * Precondition: The specified port should be available and not in use by another application.
-     * Postcondition: The TCP connection is established and the STL viewer is started.
+     * Post-Condition: The TCP connection is established and the STL viewer is started.
      */
     public void startTCPConnection ()
     {
@@ -171,9 +174,8 @@ public class masterController
             startTCPServer(Constants.SERVER_PORT);
 
             // Set the callback to start the client after the file is loaded
-            stlViewerController.setOnFileLoadedCallback((Void) -> {
-                startTCPClient(Strings.LOCALHOST, Constants.SERVER_PORT);
-            });
+            stlViewerController.setOnFileLoadedCallback((_) ->
+                    startTCPClient(Strings.LOCALHOST, Constants.SERVER_PORT));
 
             // Start the STL viewer without blocking the main thread
             Platform.runLater(() -> {
@@ -194,7 +196,7 @@ public class masterController
     /**
      * Starts the server on the specified port.
      * Precondition: The port must be valid and the STL viewer controller must be initialized.
-     * Postcondition: The server is started on a new thread.
+     * Post-Condition: The server is started on a new thread.
      *
      * @param port - The port to start the server on.
      */
@@ -206,7 +208,7 @@ public class masterController
     /**
      * Starts the client to connect to the specified host and port.
      * Precondition: The host must be a valid string and the port must be valid.
-     * Postcondition: The client is started on a new thread.
+     * Post-Condition: The client is started on a new thread.
      *
      * @param host - The host to connect to.
      * @param port - The port to connect to.
@@ -219,7 +221,7 @@ public class masterController
     /**
      * Starts a peer-to-peer connection between two peers. Each peer acts as a server and a client.
      * Precondition: The ip address and ports must be valid and not in use by another application.
-     * Postcondition: The peer-to-peer connection is established and the STL viewers are started.
+     * Post-Condition: The peer-to-peer connection is established and the STL viewers are started.
      */
     public void startP2PConnection ()
     {
@@ -254,7 +256,7 @@ public class masterController
     /**
      * Gets the polyhedron controller.
      * Precondition: None
-     * Postcondition: The polyhedron controller is returned.
+     * Post-Condition: The polyhedron controller is returned.
      *
      * @return The polyhedron controller.
      */
@@ -266,7 +268,7 @@ public class masterController
     /**
      * Sorts the triangles of the polyhedron by their area.
      * Precondition: None
-     * Postcondition: The triangles are sorted.
+     * Post-Condition: The triangles are sorted.
      */
     public void sortTriangles ()
     {

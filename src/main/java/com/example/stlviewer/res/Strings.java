@@ -39,7 +39,7 @@ public interface Strings
     /**
      * Exception message for when reading the file fails.
      */
-    String ERROR_WHILE_READING_FILE = "Error while reading file: ";
+    String ERROR_WHILE_READING_FILE = "Error while reading file (%s): ";
     /**
      * Exception message for invalid integer input.
      */
@@ -217,4 +217,9 @@ public interface Strings
     String CONSOLE_MODE = "CONSOLE";
     String P2P_MODE = "P2P";
     String CLOSING_APPLICATION = "Closing application.";
+    String TRIANGLE_COUNT_DISCREPANCY = "The number of triangles read does not match the number of triangles indicated in the file header. The file may be corrupted. (Leftover bytes: %d)";
+    String ATTRIBUTE_BYTE_DISCREPANCY = "The triangle attribute byte value does not match the expected value. The file may be corrupted.";
+    String RECOVERED_TO_NEXT_TRIANGLE = "Recovered to next triangle. Bytes skipped: %d";
+    String ATTRIBUTE_BYTES_NOT_FOUND = "Attribute bytes couldn't be found again. File reading will be aborted.";
+    String RECOVERING_TO_NEXT_TRIANGLE = "Trying to recover to next triangle.";
 }
