@@ -1,5 +1,6 @@
 package com.example.stlviewer.control;
 
+import com.example.stlviewer.model.Edge;
 import com.example.stlviewer.model.Polyhedron;
 import com.example.stlviewer.model.Triangle;
 import com.example.stlviewer.model.Vertex;
@@ -7,7 +8,10 @@ import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.example.stlviewer.util.RuntimeHandler.logMessage;
 
@@ -25,11 +29,13 @@ public class PolyhedronController implements Runnable
     /**
      * The counter for the triangle IDs.
      */
-    private int idCounter = Constants.NUMBER_ZERO;
+    private AtomicInteger idCounter = new AtomicInteger(Constants.NUMBER_ZERO);
     /**
      * The adjacency list for the polyhedron.
      */
     private ArrayList<ArrayList<Integer>> adjacencyList = new ArrayList<>();
+
+    private ArrayList<Edge> degenerateEdges = new ArrayList<>();
 
     /**
      * The blocking queue for the triangles.
@@ -103,7 +109,7 @@ public class PolyhedronController implements Runnable
                 {
                     Triangle triangle = blockingQueue.take();
                     executorService.submit(() -> processTriangle(triangle));
-                    idCounter++;
+                    idCounter.incrementAndGet();
                 } else
                 {
                     Thread.sleep(Constants.THREAD_SLEEP_MILLIS);
@@ -117,8 +123,8 @@ public class PolyhedronController implements Runnable
     }
 
     /**
-     * Process the triangle by adding it to the polyhedron, calculating the adjacency list, volume and surface area,
-     * and expanding the bounding box. This method is synchronized to prevent concurrent modification of the polyhedron.
+     * Process the triangle by adding it to the polyhedron, volume and surface area, and expanding the bounding box.
+     * This method is synchronized to prevent concurrent modification of the polyhedron.
      * <p>Pre-condition: The triangle is not null and the polyhedron is not null.
      * <p>Post-condition: The triangle is added to the polyhedron and the attributes are updated.
      *
@@ -128,8 +134,7 @@ public class PolyhedronController implements Runnable
         synchronized (polyhedron) {
             // Add the triangle to the polyhedron
             addTriangle(triangle);
-            // Calculate the adjacency list
-            //calculateAdjacencyList(triangle);
+            triangle.setId(idCounter.get());
             // Add the volume of the tetrahedron to the polyhedron
             polyhedron.addVolume(calculateVolumeOfTetrahedron(triangle, new Vertex(Constants.NUMBER_ZERO, Constants.NUMBER_ZERO, Constants.NUMBER_ZERO)));
             // Add the surface area of the triangle to the polyhedron
@@ -140,24 +145,187 @@ public class PolyhedronController implements Runnable
     }
 
     /**
-     * Returns if the reading is finished.
-     *
-     * @return - The flag to indicate that the reading is finished.
+     * Populate the adjacency list of the polyhedron. The adjacency list is a list of lists of that represent the
+     * triangles that are adjacent to a particular triangle in the polyhedron. The list stores the IDs of the triangles
+     * to save memory. The adjacency list is populated by iterating over all the triangles in the polyhedron and adding
+     * the adjacent triangles to the list. The adjacency list is used to fix simple holes in the polyhedron.
+     * <p>Pre-condition: The polyhedron is not null and it has triangles.
+     * <p>Post-condition: The adjacency list of the polyhedron is populated.
      */
-    public boolean isReadingFinished()
-    {
-        return isReadingFinished;
+    public void populateAdjacencyList() {
+        // Initialize the adjacency list with the triangles
+        for (int i = 0; i < polyhedron.getTriangles().size(); i++) {
+            adjacencyList.add(new ArrayList<>());
+            // Add all the triangles to the adjacency list
+            adjacencyList.get(i).add(polyhedron.getTriangles().get(i).getId());
+        }
+        for (int i = 0; i < polyhedron.getTriangles().size(); i++) {
+            for (int j = 0; j < polyhedron.getTriangles().size(); j++) {
+                if (i != j) {
+                    // If the triangle j is adjacent to triangle i, add it to the adjacency list of triangle i
+                    if (polyhedron.getTriangles().get(i).isAdjacentTo(polyhedron.getTriangles().get(j))) {
+                        adjacencyList.get(i).add(polyhedron.getTriangles().get(j).getId());
+                    }
+                }
+            }
+        }
     }
 
     /**
-     * Set the readingFinished flag to true.
-     *
-     * @param readingFinished - The flag to indicate that the reading is finished.
+     * Fix simple holes in the polyhedron. This is done by finding the degenerate edges and the missing triangles.
+     * The degenerate edges are found by finding the triangles that have only 2 adjacent triangles. The missing triangles
+     * are found by finding three degenerate edges that form a triangle. The missing triangle is then formed by the three
+     * vertices of the degenerate edges. The missing triangles are then added to the polyhedron.
+     * <p>Pre-condition: The polyhedron is not null.
+     * <p>Post-condition: The simple holes in the polyhedron are fixed.
      */
-    public void setReadingFinished (boolean readingFinished)
-    {
-        logMessage(Strings.SOUT_READING_FINISHED);
-        this.isReadingFinished = readingFinished;
+    public void fixSimpleHoles () {
+        // TODO: Make this work for sequential reading and make it more reliable
+        // Find the degenerate edges
+        findDegenerateEdges();
+        // Find the missing triangles
+        ArrayList<Triangle> missingTriangles = findMissingTriangles();
+        // Add the missing triangles to the polyhedron
+        for (Triangle triangle : missingTriangles) {
+            addTriangle(triangle);
+        }
+        logMessage(Strings.NUMBER_MISSING_TRIANGLES_ADDED, missingTriangles.size());
+    }
+
+    /**
+     * Find the degenerate edges in the polyhedron. The degenerate edges are the edges that are not shared with any other
+     * triangle. This is done by finding the triangles that have only 2 adjacent triangles. The degenerate edges are then
+     * found by adding all the edges of the triangle to the degenerate edges list. If the edge is already in the degenerate
+     * edges list, it is removed, as it is not a degenerate edge. If the edge is not in the degenerate edges list, it is added.
+     * <p>Pre-condition: The polyhedron is not null.
+     * <p>Post-condition: The degenerate edges of the polyhedron are found.
+     */
+    public void findDegenerateEdges () {
+        // Iterate over all the triangles in the adjacency list
+        for (int i = 0; i < adjacencyList.size(); i++) {
+            // If the triangle has only 2 adjacent triangles, it is a degenerate triangle. This means that one of it's
+            // edges isn't shared with any other triangle, making it a degenerate edge.
+            if (adjacencyList.get(i).size() == 3) {
+                logMessage("Degenerate Triangle found: " + polyhedron.getTriangleByID(adjacencyList.get(i).getFirst()).getId());
+                Triangle triangle = polyhedron.getTriangleByID(adjacencyList.get(i).getFirst());
+                for (int j = 0; j < Constants.TRIANGLE_VERTEX_COUNT; j++) {
+                    // First all the edges of the triangle are added to the degenerate edges list
+                    Edge edge = triangle.getEdges().get(j);
+                    // Add the edge to the degenerate edges list if it isn't shared with any other adjacent triangle
+                    boolean isShared = false;
+                    for (int k = 1; k < adjacencyList.get(i).size(); k++)
+                    {
+                        Triangle adjacentTriangle = polyhedron.getTriangleByID(adjacencyList.get(i).get(k));
+                        if (adjacentTriangle.getEdges().contains(edge))
+                        {
+                            isShared = true;
+                            break;
+                        }
+                    }
+                    // If the edge isn't shared with any other adjacent triangle, add it to the degenerate edges list
+                    if (!isShared)
+                    {
+                        degenerateEdges.add(edge);
+                    }
+                }
+            }
+        }
+        logMessage(Strings.NUMBER_DEGENERATE_EDGES_FOUND, degenerateEdges.size());
+    }
+
+    /**
+     * Find the missing triangles in the polyhedron. The missing triangles are the triangles that are formed by three
+     * degenerate edges. This is done by finding three degenerate edges that form a triangle, meaning they share three
+     * vertices between them. The missing triangle is then formed by the three vertices. The missing triangles are then
+     * added to the missing triangles list. The degenerate edges are then removed from the degenerate edges list.
+     * <p>This method can only fix holes with three edges. Complexer holes are not fixed, as they require to also
+     * build missing edges.
+     * <p>Pre-condition: The polyhedron is not null.
+     * <p>Post-condition: The missing triangles of the polyhedron are found.
+     *
+     * @return - The missing triangles of the polyhedron.
+     */
+    public ArrayList<Triangle> findMissingTriangles () {
+        ArrayList<Triangle> missingTriangles = new ArrayList<>();
+        // Find missing triangles by finding three degenerate edges that form a triangle, meaning they share three
+        // vertices between them. The missing triangle is then formed by the three vertices.
+        for (int i = 0; i < degenerateEdges.size(); i++) {
+            for (int j = 0; j < degenerateEdges.size(); j++) {
+                for (int k = 0; k < degenerateEdges.size(); k++) {
+                    if (i != j && i != k && j != k) {
+                        if (degenerateEdges.get(i).isAdjacentTo(degenerateEdges.get(j)) &&
+                                degenerateEdges.get(i).isAdjacentTo(degenerateEdges.get(k)) &&
+                                degenerateEdges.get(j).isAdjacentTo(degenerateEdges.get(k))) {
+                            // The missing triangle is formed by the three vertices of the degenerate edges
+                            Vertex vertex1 = degenerateEdges.get(i).getStartVertex();
+                            Vertex vertex2 = degenerateEdges.get(i).getEndVertex();
+                            Vertex vertex3 = degenerateEdges.get(j).getStartVertex().equals(vertex1) ||
+                                    degenerateEdges.get(j).getStartVertex().equals(vertex2) ?
+                                    degenerateEdges.get(j).getEndVertex() : degenerateEdges.get(j).getStartVertex();
+                            // If the missing triangle is not already in the missing triangles list, add it
+                            Triangle missingTriangle = new Triangle(vertex1, vertex2, vertex3);
+                            if (!missingTriangles.contains(missingTriangle)) {
+                                missingTriangles.add(missingTriangle);
+                            }
+                            // Remove the degenerate edges from the degenerate edges list
+                            // Consequence: This method can only fix holes with three edges
+                            // Remove list element with the highest index first to prevent index out of bounds
+                            // TODO: Find a more efficient way to remove the degenerate edges
+                            if (i > j && i > k) {
+                                degenerateEdges.remove(i);
+                                if (j > k) {
+                                    degenerateEdges.remove(j);
+                                    degenerateEdges.remove(k);
+                                } else {
+                                    degenerateEdges.remove(k);
+                                    degenerateEdges.remove(j);
+                                }
+                            } else if (j > i && j > k) {
+                                degenerateEdges.remove(j);
+                                if (i > k) {
+                                    degenerateEdges.remove(i);
+                                    degenerateEdges.remove(k);
+                                } else {
+                                    degenerateEdges.remove(k);
+                                    degenerateEdges.remove(i);
+                                }
+                            } else {
+                                degenerateEdges.remove(k);
+                                if (i > j) {
+                                    degenerateEdges.remove(i);
+                                    degenerateEdges.remove(j);
+                                } else {
+                                    degenerateEdges.remove(j);
+                                    degenerateEdges.remove(i);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return missingTriangles;
+    }
+
+    /**
+     * Remove duplicate triangles from the polyhedron. This is done by creating a new list of triangles and adding
+     * the triangles to the new list only if they are not already in the list. The new list is then set as the list
+     * of triangles in the polyhedron. The number of duplicate triangles removed is returned.
+     * <p>Pre-condition: The polyhedron is not null.
+     * <p>Post-condition: The duplicate triangles are removed from the polyhedron.
+     *
+     * @return  The number of duplicate triangles removed.
+     */
+    public String removeDuplicateTriangles() {
+        int duplicateCount = Constants.NUMBER_ZERO;
+        ArrayList<Triangle> uniqueTriangles = new ArrayList<>();
+        for (Triangle triangle : polyhedron.getTriangles()) {
+            if (!uniqueTriangles.contains(triangle)) {
+                uniqueTriangles.add(triangle);
+            }
+        }
+        polyhedron.setTriangles(uniqueTriangles);
+        return Strings.NUMBER_DUPLICATE_TRIANGLES_REMOVED + duplicateCount;
     }
 
     /**
@@ -224,7 +392,8 @@ public class PolyhedronController implements Runnable
      */
     public double calculateWeight (double density)
     {
-        polyhedron.setWeight(density * polyhedron.getVolume());
+        // TODO: Make the factor settable by the user
+        polyhedron.setWeight(density * polyhedron.getVolume() * Constants.FACTOR_KGM3_TO_KGMM3);
         return polyhedron.getWeight();
     }
 
@@ -385,6 +554,27 @@ public class PolyhedronController implements Runnable
      */
     public int getIdCounter ()
     {
-        return idCounter;
+        return idCounter.get();
+    }
+
+    /**
+     * Returns if the reading is finished.
+     *
+     * @return - The flag to indicate that the reading is finished.
+     */
+    public boolean isReadingFinished()
+    {
+        return isReadingFinished;
+    }
+
+    /**
+     * Set the readingFinished flag to true.
+     *
+     * @param readingFinished - The flag to indicate that the reading is finished.
+     */
+    public void setReadingFinished (boolean readingFinished)
+    {
+        logMessage(Strings.SOUT_READING_FINISHED);
+        this.isReadingFinished = readingFinished;
     }
 }

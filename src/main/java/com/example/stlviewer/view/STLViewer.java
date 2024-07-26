@@ -214,6 +214,7 @@ public class STLViewer extends Application
         MenuItem menuItemSetMaterial = new MenuItem(Strings.STLV_SET_MATERIAL);
         menuItemSetMaterial.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
         menuItemSetMaterial.setOnAction(e -> openMaterialDialog());
+        // TODO: Menu to set unit system/scaling
 
         menuEdit.getItems().addAll(menuItemSetColor, menuItemSetMaterial);
         return menuEdit;

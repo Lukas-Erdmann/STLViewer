@@ -26,15 +26,31 @@ public class STLReader
      * The file path of the STL file.
      */
     private String filePath;
+    /**
+     * The byte buffer in which the binary file is read.
+     */
+    private ByteBuffer byteBuffer;
+    /**
+     * The number of triangles in the binary file according to the file header.
+     */
+    private int triangleCount;
 
     // -- File validation data --
+    /**
+     * A flag to indicate if the file is corrupted.
+     */
+    private boolean fileIsCorrupted = false;
     /**
      * The reference to compare the attribute bytes of each triangle to. Used when reading binary files.
      */
     private byte[] attributeBytesReference;
+    /**
+     * A flag to indicate if the first triangle is being read. Used when reading binary files.
+     */
     private boolean firstTriangle = true;
-    private ByteBuffer byteBuffer;
-    private int triangleCount;
+    /**
+     * The index of the current triangle being read. Used when reading binary files.
+     */
     private int currentTriangleIndex;
 
     /**
@@ -51,6 +67,10 @@ public class STLReader
     public void readSTLFile (String filePath, PolyhedronController controller, boolean parallelized) throws IOException
     {
         this.filePath = filePath;
+
+        RuntimeHandler runtimeHandler = new RuntimeHandler();
+        runtimeHandler.startTimer();
+
         if (parallelized)
         {
             readSTLFileParallelized(controller);
@@ -58,6 +78,27 @@ public class STLReader
         {
             readSTLFileSequential(controller);
         }
+        // If the file is corrupted, run additional validation checks and repairs
+        if (fileIsCorrupted)
+        {
+            // Populate the adjacency list of the polyhedron
+            controller.populateAdjacencyList();
+            // Remove duplicate triangles
+            logMessage(controller.removeDuplicateTriangles());
+            // Fix simple holes in the mesh
+            controller.fixSimpleHoles();
+
+            // TODO: Check for mismatch between given triangle normal and calculated normal/it's vertexes
+            // TODO: Check for normals that point in the wrong direction
+            // TODO: Check for "complex" holes in the mesh (multiple triangles missing)
+            // TODO: Account for overlapping triangles
+
+            // Recalculate the volume, surface area, and other properties of the polyhedron
+            controller.calculatePolyhedronProperties();
+        }
+
+        runtimeHandler.stopTimer();
+        logMessage(Strings.SOUT_ELAPSED_TIME, runtimeHandler.getElapsedTime());
     }
 
     /**
@@ -71,8 +112,6 @@ public class STLReader
      */
     public void readSTLFileSequential (PolyhedronController controller) throws IOException
     {
-        RuntimeHandler runtimeHandler = new RuntimeHandler();
-        runtimeHandler.startTimer();
         if (isASCII())
         {
             logMessage(Strings.SOUT_READING_ASCII_FILE);
@@ -82,11 +121,9 @@ public class STLReader
             logMessage(Strings.SOUT_READING_BINARY_FILE);
             readSTLBinaryIntoMemory(controller, false);
         }
+
         // Calculate volume, surface area, and other properties of the polyhedron
         controller.calculatePolyhedronProperties();
-
-        runtimeHandler.stopTimer();
-        logMessage(Strings.SOUT_ELAPSED_TIME, runtimeHandler.getElapsedTime());
     }
 
     /**
@@ -100,8 +137,6 @@ public class STLReader
      */
     public void readSTLFileParallelized (PolyhedronController controller) throws IOException
     {
-        RuntimeHandler runtimeHandler = new RuntimeHandler();
-        runtimeHandler.startTimer();
         Thread readerThread = new Thread(controller);
         readerThread.start();
 
@@ -123,8 +158,6 @@ public class STLReader
             Thread.currentThread().interrupt();
             throw new IOException(Strings.THREAD_WAS_INTERRUPTED, interruptedException);
         }
-        runtimeHandler.stopTimer();
-        logMessage(Strings.SOUT_ELAPSED_TIME, runtimeHandler.getElapsedTime());
     }
 
     /**
@@ -408,6 +441,8 @@ public class STLReader
             // Compare the attribute byte count of the current triangle to the reference
             // If they are not equal, the file is probably corrupted
             if (!Arrays.equals(attributeBytesReference, attributeBytes)) {
+                // Set the fileIsCorrupted flag to true
+                fileIsCorrupted = true;
                 logMessage(Strings.ATTRIBUTE_BYTE_DISCREPANCY);
                 // Try to recover by finding reference attribute bytes and skipping the current triangle
                 recoverToNextTriangleFromBuffer();
@@ -429,17 +464,16 @@ public class STLReader
                 // Read the next byte
                 int nextByte = byteBuffer.get();
                 bytesSkipped++;
-                logMessage(String.format("Byte: %d (Position: %d)", nextByte, byteBuffer.position()));
                 // If the next byte is the first byte of the attribute bytes, check the next byte
                 if (nextByte == attributeBytesReference[0]) {
                     // Read the next byte
                     int nextNextByte = byteBuffer.get();
                     bytesSkipped++;
-                    logMessage("Next byte: %d", nextNextByte);
                     // If the next byte is the second byte of the attribute bytes, the attribute bytes are found
                     if (nextNextByte == attributeBytesReference[1]) {
                         // Log the recovery and return
                         logMessage(Strings.RECOVERED_TO_NEXT_TRIANGLE, bytesSkipped);
+                        logMessage("Likely discarded triangles: %d", 1 + bytesSkipped / 50);
                         // Increment the triangle counter if more than 50 bytes were skipped
                         if (bytesSkipped > 50) {
                             currentTriangleIndex++;

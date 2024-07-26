@@ -74,4 +74,5 @@ public interface Constants
     int Z_DISTANCE_FACTOR = 4;
     int BOUNDING_BOX_SIZE = 6;
     int THREAD_SLEEP_MILLIS = 10;
+    double FACTOR_KGM3_TO_KGMM3 = 1e-9;
 }

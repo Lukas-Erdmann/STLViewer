@@ -41,6 +41,12 @@ public class Polyhedron implements Serializable
     private Vertex center;
 
     /**
+     * The adjacency list of the polyhedron. The adjacency list is a list of lists of triangles. Each list of triangles
+     * represents the triangles that are adjacent to a particular triangle in the polyhedron.
+     */
+    private ArrayList<ArrayList<Triangle>> triangleAdjacencyList;
+
+    /**
      * Creates a new polyhedron with the given list of triangles.
      *
      * @param triangleArrayList - The list of triangles that make up the polyhedron.
@@ -59,6 +65,16 @@ public class Polyhedron implements Serializable
     }
 
     /**
+     * Sets the list of triangles that make up the polyhedron.
+     *
+     * @param triangles The list of triangles that make up the polyhedron.
+     */
+    public void setTriangles (ArrayList<Triangle> triangles)
+    {
+        this.triangles = triangles;
+    }
+
+    /**
      * Gets the list of triangles that make up the polyhedron.
      *
      * @return The list of triangles that make up the polyhedron.
@@ -66,6 +82,25 @@ public class Polyhedron implements Serializable
     public ArrayList<Triangle> getTriangles ()
     {
         return triangles;
+    }
+
+    /**
+     * Gets a triangle in the polyhedron by its ID.
+     *
+     * @param id    The ID of the triangle.
+     * @return      The triangle with the given ID.
+     */
+    public Triangle getTriangleByID(int id)
+    {
+        // TODO: Replace this with a more efficient data structure
+        for (Triangle triangle : triangles)
+        {
+            if (triangle.getId() == id)
+            {
+                return triangle;
+            }
+        }
+        return null;
     }
 
     /**

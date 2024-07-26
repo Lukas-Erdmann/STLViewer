@@ -54,6 +54,20 @@ public class Edge extends Vector3d implements Serializable
     }
 
     /**
+     * Used to check if two edges are adjacent. Two edges are adjacent if they share a common vertex.
+     * Precondition: The edge must exist and the edge to compare to must exist.
+     * Postcondition: The adjacency of the two edges is returned.
+     *
+     * @param edge  The edge to compare to.
+     * @return      True if the edges are adjacent, false otherwise.
+     */
+    public boolean isAdjacentTo (Edge edge)
+    {
+        return startVertex.equals(edge.startVertex) || startVertex.equals(edge.endVertex) ||
+                endVertex.equals(edge.startVertex) || endVertex.equals(edge.endVertex);
+    }
+
+    /**
      * Used to identify if two edges are equal. Two edges are equal if their start and end vertices are equal.
      * Overrides the equals method of the Object class.
      * Precondition: The two edges must exist.
@@ -65,10 +79,10 @@ public class Edge extends Vector3d implements Serializable
     @Override
     public boolean equals (Object refEdge)
     {
-        if (refEdge instanceof Edge)
+        if (refEdge instanceof Edge edge)
         {
-            Edge edge = (Edge) refEdge;
-            return startVertex.equals(edge.startVertex) && endVertex.equals(edge.endVertex);
+            return startVertex.equals(edge.startVertex) && endVertex.equals(edge.endVertex) ||
+                    startVertex.equals(edge.endVertex) && endVertex.equals(edge.startVertex);
         }
         return false;
     }

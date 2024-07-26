@@ -222,4 +222,7 @@ public interface Strings
     String RECOVERED_TO_NEXT_TRIANGLE = "Recovered to next triangle. Bytes skipped: %d";
     String ATTRIBUTE_BYTES_NOT_FOUND = "Attribute bytes couldn't be found again. File reading will be aborted.";
     String RECOVERING_TO_NEXT_TRIANGLE = "Trying to recover to next triangle.";
+    String NUMBER_DUPLICATE_TRIANGLES_REMOVED = "Number of duplicate triangles removed: ";
+    String NUMBER_DEGENERATE_EDGES_FOUND = "Number of degenerate edges found: %d";
+    String NUMBER_MISSING_TRIANGLES_ADDED = "Number of missing triangles added: %d";
 }
