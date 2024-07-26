@@ -205,4 +205,7 @@ public interface Strings
     String STLV_MATERIAL_DESCRIPTION = "Material Description";
     String DEFAULT_MATERIAL = "No material selected";
     String DEFAULT_COLOR = "#FF0000";
+    String NUMBER_TRIANGLES_READ = "Number of triangles read: %d\n";
+    String TIMEOUT_OCCURRED_BEFORE_POLYHEDRON_WAS_FINISHED = "Timeout occurred before polyhedron was finished.";
+    String FINISHED_COMPILING_POLYHEDRON = "Finished compiling polyhedron.";
 }

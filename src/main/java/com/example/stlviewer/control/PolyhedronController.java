@@ -84,16 +84,15 @@ public class PolyhedronController implements Runnable
                     executorService.shutdown();
                     try {
                         if (executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
-                            System.out.println("All tasks are completed.");
+                            System.out.println(Strings.FINISHED_COMPILING_POLYHEDRON);
                         } else {
-                            System.out.println("Timeout occurred before all tasks were completed.");
+                            throw new InterruptedException(Strings.TIMEOUT_OCCURRED_BEFORE_POLYHEDRON_WAS_FINISHED);
                         }
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException interruptedException) {
                         Thread.currentThread().interrupt();
-                        System.out.println("Thread was interrupted.");
+                        System.out.println(Strings.THREAD_WAS_INTERRUPTED);
                     }
-                    System.out.println("Read " + idCounter + " triangles.");
-
+                    System.out.printf(Strings.NUMBER_TRIANGLES_READ, polyhedron.getTriangles().size());
                     break;
                 } else if (!blockingQueue.isEmpty())
                 {
