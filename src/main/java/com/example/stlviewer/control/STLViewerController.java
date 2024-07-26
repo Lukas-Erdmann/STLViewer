@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ObservableFloatArray;
 import javafx.collections.ObservableIntegerArray;
+import javafx.concurrent.Task;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
@@ -166,20 +167,27 @@ public class STLViewerController
         File stlFile = stlViewer.openFile(stage);
 
         // If a file is selected, open the file and display the model
-        if (stlFile != null)
-        {
-            // Clear the scene
-            if (isMeshLoaded.get())
-            {
+        if (stlFile != null) {
+            if (isMeshLoaded.get()) {
                 clearScene();
             }
             polyhedronController = new PolyhedronController();
             filePath = stlFile.getAbsolutePath();
-            masterController.openFile(filePath, polyhedronController);
-            // TODO: Wait for the polyhedronController thread from STLReader to finish
-            stlViewer.displayModel(polyhedronController.getPolyhedron());
-            // Update the title of the stage
-            updateWindowTitle(stlFile.getAbsolutePath());
+
+            Task<Void> loadFileTask = new Task<>() {
+                @Override
+                protected Void call() throws Exception {
+                    masterController.openFile(filePath, polyhedronController);
+                    return null;
+                }
+            };
+
+            loadFileTask.setOnSucceeded(event -> {
+                stlViewer.displayModel(polyhedronController.getPolyhedron());
+                updateWindowTitle(stlFile.getAbsolutePath());
+            });
+
+            new Thread(loadFileTask).start();
         }
     }
 

@@ -7,10 +7,7 @@ import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 
 import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 /**
  * Controller class for the Polyhedron object. This class is responsible for calculating the volume,
@@ -83,8 +80,20 @@ public class PolyhedronController implements Runnable
                 {
                     // When the polyhedron is complete, calculate the center
                     defineCenter();
+                    // Wait for all tasks to complete
                     executorService.shutdown();
+                    try {
+                        if (executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                            System.out.println("All tasks are completed.");
+                        } else {
+                            System.out.println("Timeout occurred before all tasks were completed.");
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        System.out.println("Thread was interrupted.");
+                    }
                     System.out.println("Read " + idCounter + " triangles.");
+
                     break;
                 } else if (!blockingQueue.isEmpty())
                 {
