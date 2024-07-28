@@ -234,4 +234,21 @@ public interface Strings
     String INVALID_FILE_PATH = "Invalid file path.";
     String FILE_TOO_LARGE = "File too large.";
     String LIKELY_DISCARDED_TRIANGLES_D = "Likely discarded triangles: %d";
+    String STLV_SET_UNITS = "Set Unit System...";
+    String STLV_UNIT_M = "m";
+    String STLV_UNIT_CM = "cm";
+    String STLV_UNIT_MM = "mm";
+    String STLV_UNIT_INCH = "inch";
+    String STLV_UNIT_KG = "kg";
+    String STLV_UNIT_G = "g";
+    String STLV_UNIT_LB = "lb";
+    String STLV_UNIT_LENGTH = "Unit Length:";
+    String STLV_UNIT_MASS = "Unit Mass:";
+    String STLV_UNIT_M3 = "m³";
+    String STLV_UNIT_M2 = "m²";
+    String EXP_DELIMITER_NEGATIVE = "E-";
+    String EXP_DELIMITER = "E";
+    char CHAR_DASH = '-';
+    char CHAR_DOT = '.';
+    char CHAR_ZERO = '0';
 }

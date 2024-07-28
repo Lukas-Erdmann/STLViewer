@@ -23,8 +23,12 @@ public interface Constants
     /**
      * The number 2.
      */
+    int N_TWO = 2;
+    /**
+     * The number 3.
+     */
+    int N_THREE = 3;
     int STL_BINARY_OFFSET_X = N_ZERO;
-    int NUMBER_TWO = 2;
     int TRIANGLE_VERTEX_COUNT = 3;
     int TRIANGLE_VERTEX1_INDEX = 0;
     int TRIANGLE_VERTEX2_INDEX = 1;
@@ -74,10 +78,13 @@ public interface Constants
     int Z_DISTANCE_FACTOR = 4;
     int BOUNDING_BOX_SIZE = 6;
     int THREAD_SLEEP_MILLIS = 10;
-    double FACTOR_KGM3_TO_KGMM3 = 1e-9;
     int ID_COUNTER_START = 0;
     double NORMAL_DIFFERENCE_ROUNDING_TOLERANCE = 0.0001;
     int DOT_PRODUCT_PRECISION = 5;
     int TRIANGLE_BYTE_SIZE = 50;
     int BYTES_TO_SKIP = 100;
+    double FACTOR_MASS_DEFAULT = 1.0;
+    double FACTOR_LENGTH_DEFAULT = 1.0;
+    double INCH_TO_METER = 0.0254;
+    double KG_TO_LB = 2.20462;
 }

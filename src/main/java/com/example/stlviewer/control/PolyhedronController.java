@@ -20,7 +20,6 @@ import static com.example.stlviewer.util.RuntimeHandler.logMessage;
  */
 public class PolyhedronController implements Runnable
 {
-
     /**
      * The Polyhedron object to be controlled.
      */
@@ -30,10 +29,20 @@ public class PolyhedronController implements Runnable
      */
     private AtomicInteger idCounter = new AtomicInteger(Constants.ID_COUNTER_START);
     /**
+     * The factor for the mass calculation.
+     */
+    private double massFactor = Constants.FACTOR_MASS_DEFAULT;
+    /**
+     * The factor for the length calculation.
+     */
+    private double lengthFactor = Constants.FACTOR_LENGTH_DEFAULT;
+    /**
      * The adjacency list for the polyhedron.
      */
     private ArrayList<ArrayList<Integer>> adjacencyList = new ArrayList<>();
-
+    /**
+     * The array list containing the degenerate edges.
+     */
     private ArrayList<Edge> degenerateEdges = new ArrayList<>();
 
     /**
@@ -330,8 +339,10 @@ public class PolyhedronController implements Runnable
      * the polyhedron.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The volume of the polyhedron is calculated.
+     *
+     * @return      The volume of the polyhedron.
      */
-    public void calculateVolume ()
+    public double calculateVolume ()
     {
         double volume = Constants.N_ZERO;
         // The arbitrary point is chosen to be the first vertex of the first triangle
@@ -341,7 +352,8 @@ public class PolyhedronController implements Runnable
         {
             volume += calculateVolumeOfTetrahedron(triangle, refPoint);
         }
-        polyhedron.setVolume(volume);
+        polyhedron.setVolume(volume / Math.pow(lengthFactor, Constants.N_THREE));
+        return polyhedron.getVolume();
     }
 
     /**
@@ -369,8 +381,10 @@ public class PolyhedronController implements Runnable
      * triangleMesh in the polyhedron.
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The surface area of the polyhedron is calculated.
+     *
+     * @return The surface area of the polyhedron.
      */
-    public void calculateSurfaceArea ()
+    public double calculateSurfaceArea ()
     {
         // Set the surface area of the polyhedron to 0 for recalculation
         polyhedron.setSurfaceArea(Constants.N_ZERO);
@@ -379,6 +393,9 @@ public class PolyhedronController implements Runnable
         {
             polyhedron.setSurfaceArea(triangle.getArea() + polyhedron.getSurfaceArea());
         }
+        // Scale the surface area to the length factor
+        polyhedron.setSurfaceArea(polyhedron.getSurfaceArea() / Math.pow(lengthFactor, Constants.N_TWO));
+        return polyhedron.getSurfaceArea();
     }
 
     /**
@@ -387,12 +404,12 @@ public class PolyhedronController implements Runnable
      * Pre-condition: The polyhedron is not null.
      * Post-condition: The weight of the polyhedron is calculated.
      *
-     * @param density - The density of the material.
+     * @param density   The density of the material.
+     * @return          The weight of the polyhedron.
      */
     public double calculateWeight (double density)
     {
-        // TODO: Make the factor settable by the user
-        polyhedron.setWeight(density * polyhedron.getVolume() * Constants.FACTOR_KGM3_TO_KGMM3);
+        polyhedron.setWeight(density * polyhedron.getVolume() * massFactor);
         return polyhedron.getWeight();
     }
 
@@ -425,10 +442,10 @@ public class PolyhedronController implements Runnable
         if (polyhedron.getBoundingBox() == null) {
             polyhedron.setBoundingBox(new double[Constants.BOUNDING_BOX_SIZE]);
             // Initialize the bounding box with the maximum possible values
-            for (int i = 0; i < Constants.BOUNDING_BOX_SIZE / Constants.NUMBER_TWO; i++) {
+            for (int i = 0; i < Constants.BOUNDING_BOX_SIZE / Constants.N_TWO; i++) {
                 polyhedron.getBoundingBox()[i] = Double.MAX_VALUE;
             }
-            for (int i = Constants.BOUNDING_BOX_SIZE / Constants.NUMBER_TWO; i < Constants.BOUNDING_BOX_SIZE; i++) {
+            for (int i = Constants.BOUNDING_BOX_SIZE / Constants.N_TWO; i < Constants.BOUNDING_BOX_SIZE; i++) {
                 polyhedron.getBoundingBox()[i] = Double.MIN_VALUE;
             }
         }
@@ -474,11 +491,11 @@ public class PolyhedronController implements Runnable
         {
             // Calculate the center of the bounding box
             double centerX = (polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_X_INDEX] +
-                    polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX]) / Constants.NUMBER_TWO;
+                    polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_X_INDEX]) / Constants.N_TWO;
             double centerY = (polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Y_INDEX] +
-                    polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Y_INDEX]) / Constants.NUMBER_TWO;
+                    polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Y_INDEX]) / Constants.N_TWO;
             double centerZ = (polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MIN_Z_INDEX] +
-                    polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX]) / Constants.NUMBER_TWO;
+                    polyhedron.getBoundingBox()[Constants.BOUNDING_BOX_MAX_Z_INDEX]) / Constants.N_TWO;
             polyhedron.setCenter(new Vertex(centerX, centerY, centerZ));
         } else
         {
@@ -566,6 +583,56 @@ public class PolyhedronController implements Runnable
     public int getIdCounter ()
     {
         return idCounter.get();
+    }
+
+    /**
+     * Sets the id counter.
+     *
+     * @param idCounter - The id counter.
+     */
+    public void setIdCounter (int idCounter)
+    {
+        this.idCounter.set(idCounter);
+    }
+
+    /**
+     * Gets the mass factor.
+     *
+     * @return The mass factor.
+     */
+    public double getMassFactor ()
+    {
+        return massFactor;
+    }
+
+    /**
+     * Sets the mass factor.
+     *
+     * @param massFactor - The mass factor.
+     */
+    public void setMassFactor (double massFactor)
+    {
+        this.massFactor = massFactor;
+    }
+
+    /**
+     * Gets the length factor.
+     *
+     * @return The length factor.
+     */
+    public double getLengthFactor ()
+    {
+        return lengthFactor;
+    }
+
+    /**
+     * Sets the length factor.
+     *
+     * @param lengthFactor - The length factor.
+     */
+    public void setLengthFactor (double lengthFactor)
+    {
+        this.lengthFactor = lengthFactor;
     }
 
     /**

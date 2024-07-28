@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -266,20 +267,21 @@ public class masterController
     }
 
     /**
-     * Sorts the triangles of the polyhedron by their area.
-     * Precondition: None
-     * Post-Condition: The triangles are sorted.
+     * Sorts the triangles of the polyhedron by their area. The triangles are sorted in ascending order into a new list.
+     * It then returns the sorted list of triangles.
+     *
+     * <p>Precondition: The polyhedron must exist and contain triangles.
+     * <p>Post-Condition: The triangles are sorted by their area and returned in a new list. The original list is not modified.
+     *
+     * @return The sorted list of triangles.
      */
-//    public void sortTriangles ()
-//    {
-//        polyhedronController.getPolyhedron().getTriangles().sort(Triangle::compareTo);
-//
-//        // Print the sorted triangles to the console
-//        for (Triangle triangle : polyhedronController.getPolyhedron().getTriangles())
-//        {
-//            System.out.println(triangle);
-//        }
-//    }
+    public ArrayList<Triangle> sortTrianglesByArea ()
+    {
+        // TODO: Output the sorted triangles to the console or some other output
+        ArrayList<Triangle> sortedTriangles = new ArrayList<>(polyhedronController.getPolyhedron().getTriangles().values());
+        sortedTriangles.sort(Triangle::compareTo);
+        return sortedTriangles;
+    }
 
     public void reinitializePolyhedronController() {
         this.polyhedronController = new PolyhedronController();

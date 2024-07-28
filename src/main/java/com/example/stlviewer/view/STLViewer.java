@@ -1,5 +1,6 @@
 package com.example.stlviewer.view;
 
+import com.example.stlviewer.control.PolyhedronController;
 import com.example.stlviewer.control.STLViewerController;
 import com.example.stlviewer.model.Polyhedron;
 import com.example.stlviewer.res.Constants;
@@ -20,6 +21,8 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import static com.example.stlviewer.util.MathUtil.roundToTwoNonZeroDigits;
 
 /**
  * The STLViewer class provides a JavaFX-based interface for viewing and interacting with 3D models in STL format.
@@ -214,9 +217,12 @@ public class STLViewer extends Application
         MenuItem menuItemSetMaterial = new MenuItem(Strings.STLV_SET_MATERIAL);
         menuItemSetMaterial.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
         menuItemSetMaterial.setOnAction(e -> openMaterialDialog());
-        // TODO: Menu to set unit system/scaling
+        // Unit system menu
+        MenuItem menuItemSetUnitSystem = new MenuItem(Strings.STLV_SET_UNITS);
+        menuItemSetUnitSystem.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
+        menuItemSetUnitSystem.setOnAction(e -> openUnitsDialog());
 
-        menuEdit.getItems().addAll(menuItemSetColor, menuItemSetMaterial);
+        menuEdit.getItems().addAll(menuItemSetColor, menuItemSetMaterial, menuItemSetUnitSystem);
         return menuEdit;
     }
 
@@ -240,6 +246,13 @@ public class STLViewer extends Application
         colorDialog.showAndWait();
     }
 
+    /**
+     * Configures the VBox for the color dialog with color pickers for the 3D model and background.
+     * Precondition: The supermenu item was selected.
+     * Postcondition: The VBox is configured with the color pickers for the 3D model and background.
+     *
+     * @return The configured VBox for the color dialog.
+     */
     private VBox configureColorDialogVBox ()
     {
         VBox dialogVBox = new VBox();
@@ -257,6 +270,11 @@ public class STLViewer extends Application
         return dialogVBox;
     }
 
+    /**
+     * Opens a dialog to allow the user to set the unit system and scaling factor for the 3D model.
+     * Precondition: The supermenu item was selected and the materials list is filled.
+     * Postcondition: The unit system dialog is displayed and the new unit system and scaling factor are applied to the model.
+     */
     public void openMaterialDialog() {
         Dialog<ButtonType> materialDialog = new Dialog<>();
         materialDialog.setTitle(Strings.STLV_SET_MATERIAL);
@@ -344,6 +362,46 @@ public class STLViewer extends Application
         // Set the new background color when the user selects a new color
         backgroundColorPicker.setOnAction(e -> threeDView.setFill(backgroundColorPicker.getValue()));
         return backgroundColorPicker;
+    }
+
+    public void openUnitsDialog ()
+    {
+        Dialog<ButtonType> unitSystemDialog = new Dialog<>();
+        unitSystemDialog.setTitle(Strings.STLV_SET_UNITS);
+
+        // Create the VBox for the dialog
+        VBox dialogVBox = new VBox();
+        // Add the dropdown for the unit of length
+        ComboBox<String> unitLengthComboBox = new ComboBox<>();
+        unitLengthComboBox.getItems().addAll(Strings.STLV_UNIT_M, Strings.STLV_UNIT_CM, Strings.STLV_UNIT_MM, Strings.STLV_UNIT_INCH);
+        unitLengthComboBox.setValue(stlViewerController.getUnitLength());
+        // Add the dropdown for the unit of mass
+        ComboBox<String> unitMassComboBox = new ComboBox<>();
+        unitMassComboBox.getItems().addAll(Strings.STLV_UNIT_KG, Strings.STLV_UNIT_G, Strings.STLV_UNIT_LB);
+        unitMassComboBox.setValue(stlViewerController.getUnitMass());
+
+        // Add the dropdown with label and scaling factor to the dialog VBox
+        dialogVBox.getChildren().addAll(
+                new Label(Strings.STLV_UNIT_LENGTH), unitLengthComboBox,
+                new Label(Strings.STLV_UNIT_MASS), unitMassComboBox
+        );
+
+        // Add the OK and Cancel buttons
+        unitSystemDialog.getDialogPane().setContent(dialogVBox);
+        unitSystemDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Handle the OK button click
+        unitSystemDialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                String newLengthUnit = unitLengthComboBox.getValue();
+                String newMassUnit = unitMassComboBox.getValue();
+                stlViewerController.setUnitSystem(newLengthUnit, newMassUnit);
+            }
+            return null;
+        });
+
+        // Show the dialog and wait for the user response
+        unitSystemDialog.showAndWait();
     }
 
     /**
@@ -593,6 +651,15 @@ public class STLViewer extends Application
         });
     }
 
+    public void updateWithNewUnits(double volume, double surfaceArea, double weight, String unitWeight) {
+        Platform.runLater(() -> {
+            // Recalculate the volume and weight with the new units
+            volumeLabel.setText(roundToTwoNonZeroDigits(volume) + Strings.SPACE + Strings.STLV_UNIT_M3);
+            surfaceAreaLabel.setText(roundToTwoNonZeroDigits(surfaceArea) + Strings.SPACE + Strings.STLV_UNIT_M2);
+            weightLabel.setText(roundToTwoNonZeroDigits(weight) + Strings.SPACE + unitWeight);
+        });
+    }
+
     /**
      * Creates a new Label with the specified text, font weight, and font size. The font family is set to Arial.
      * Precondition: None.
@@ -639,8 +706,8 @@ public class STLViewer extends Application
     {
         // Set the number of triangles, surface area, and volume labels
         numberOfTrianglesLabel.setText(String.valueOf(polyhedron.getTriangleCount()));
-        surfaceAreaLabel.setText(String.format(Strings.FORMAT_STRING_2F, polyhedron.getSurfaceArea()));
-        volumeLabel.setText(String.format(Strings.FORMAT_STRING_2F, polyhedron.getVolume()));
+        surfaceAreaLabel.setText(String.valueOf(roundToTwoNonZeroDigits(polyhedron.getSurfaceArea())));
+        volumeLabel.setText(String.valueOf(roundToTwoNonZeroDigits(polyhedron.getVolume())));
         // Apply the current material to the model
         updateMaterialData();
 

@@ -1043,4 +1043,78 @@ public class STLViewerController
             sendP2PData(collectP2PData(false));
         }
     }
+
+    public String getUnitLength ()
+    {
+        if (polyhedronController.getLengthFactor() == 1)
+        {
+            return "m";
+        } else if (polyhedronController.getLengthFactor() == 100)
+        {
+            return "cm";
+        } else if (polyhedronController.getLengthFactor() == 1000)
+        {
+            return "mm";
+        } else if (polyhedronController.getLengthFactor() == 1 / Constants.INCH_TO_METER)
+        {
+            return "in";
+        } else
+        {
+            polyhedronController.setLengthFactor(1);
+            return "m";
+        }
+    }
+
+    public String getUnitMass ()
+    {
+        if (polyhedronController.getMassFactor() == 1)
+        {
+            return "kg";
+        } else if (polyhedronController.getMassFactor() == 1000)
+        {
+            return "g";
+        } else if (polyhedronController.getMassFactor() == Constants.KG_TO_LB)
+        {
+            return "lb";
+        } else
+        {
+            polyhedronController.setMassFactor(1);
+            return "kg";
+        }
+    }
+
+    public void setUnitSystem (String newLengthUnit, String newMassUnit)
+    {
+        switch (newLengthUnit)
+        {
+            case "m":
+                polyhedronController.setLengthFactor(1);
+                break;
+            case "cm":
+                polyhedronController.setLengthFactor(100);
+                break;
+            case "mm":
+                polyhedronController.setLengthFactor(1000);
+                break;
+            case "inch":
+                polyhedronController.setLengthFactor(1 / Constants.INCH_TO_METER);
+                break;
+        }
+
+        switch (newMassUnit)
+        {
+            case "kg":
+                polyhedronController.setMassFactor(1);
+                break;
+            case "g":
+                polyhedronController.setMassFactor(1000);
+                break;
+            case "lb":
+                polyhedronController.setMassFactor(Constants.KG_TO_LB);
+                break;
+        }
+
+        stlViewer.updateWithNewUnits(polyhedronController.calculateVolume(),
+                polyhedronController.calculateSurfaceArea(), calculateWeight(currentMaterial), newMassUnit);
+    }
 }
