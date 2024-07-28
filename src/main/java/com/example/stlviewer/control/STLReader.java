@@ -4,6 +4,7 @@ import com.example.stlviewer.model.Triangle;
 import com.example.stlviewer.model.Vertex;
 import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
+import com.example.stlviewer.util.MathUtil;
 import com.example.stlviewer.util.RuntimeHandler;
 
 import javax.vecmath.Vector3d;
@@ -11,6 +12,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
@@ -88,9 +90,7 @@ public class STLReader
             // Fix simple holes in the mesh
             controller.fixSimpleHoles();
 
-            // TODO: Check for mismatch between given triangle normal and calculated normal/it's vertexes
             // TODO: Check for normals that point in the wrong direction
-            // TODO: Check for "complex" holes in the mesh (multiple triangles missing)
             // TODO: Account for overlapping triangles
 
             // Recalculate the volume, surface area, and other properties of the polyhedron
@@ -119,7 +119,7 @@ public class STLReader
         } else
         {
             logMessage(Strings.SOUT_READING_BINARY_FILE);
-            readSTLBinaryIntoMemory(controller, false);
+            readSTLBinary(controller, false);
         }
 
         // Calculate volume, surface area, and other properties of the polyhedron
@@ -147,7 +147,7 @@ public class STLReader
         } else
         {
             logMessage(Strings.SOUT_READING_BINARY_FILE);
-            readSTLBinaryIntoMemory(controller, true);
+            readSTLBinary(controller, true);
         }
 
         try
@@ -299,13 +299,13 @@ public class STLReader
         }
 
         // Read the three vertices of the triangle
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < Constants.TRIANGLE_VERTEX_COUNT; i++)
         {
             line = reader.readLine();
             vertices[i] = readVertexASCII(line);
         }
 
-        return new Triangle(vertices[0], vertices[1], vertices[2], normal);
+        return new Triangle(vertices[Constants.TRIANGLE_VERTEX1_INDEX], vertices[Constants.TRIANGLE_VERTEX2_INDEX], vertices[Constants.TRIANGLE_VERTEX3_INDEX], normal);
     }
 
     /**
@@ -343,87 +343,74 @@ public class STLReader
     /**
      * Reads an STL file in binary format from the given file path. If the parallelized flag is set to true,
      * the triangles are added to the controller's queue. Otherwise, the triangles are added directly to the controller.
-     * Precondition: The file path must be valid. The controller must be initialized.
-     * Postcondition: The triangles are read from the file and sent to the controller.
+     * After adding the triangles, the file is checked for discrepancies in the number of triangles read.
+     * <p>Precondition: The file path must be valid. The controller must be initialized.
+     * <p>Postcondition: The triangles are read from the file and sent to the controller.
      *
-     * @param controller   - The PolyhedronController instance to send the triangles to.
+     * @param controller - The PolyhedronController instance to send the triangles to.
      * @param parallelized - True if the file should be read in parallel, false otherwise.
+     * @throws IOException - If an error occurs while reading the file.
      */
-    public void readSTLBinary (PolyhedronController controller, boolean parallelized) throws IOException {
-        try (FileInputStream fileInputStream = new FileInputStream(filePath))
-        {
-            // Skip the header of the file and read the number of triangleMesh
-            fileInputStream.skip(Constants.STL_BINARY_HEADER_BYTE_SIZE);
-            byte[] triangleCountBytes = new byte[Constants.STL_BINARY_TRIANGLE_COUNT_BYTE_SIZE];
-            fileInputStream.read(triangleCountBytes, Constants.NUMBER_ZERO, Constants.STL_BINARY_TRIANGLE_COUNT_BYTE_SIZE);
-            // Convert the byte array to an integer using little endian byte order
-            int triangleCount = ByteBuffer.wrap(triangleCountBytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
-
-            for (int i = 0; i < triangleCount; i++)
-            {
-                if (parallelized)
-                {
-                    controller.addTriangleToQueue(readTriangleBinary(fileInputStream));
-                } else
-                {
-                    controller.addTriangle(readTriangleBinary(fileInputStream));
-                }
-            }
-            // If the number of triangles indicated by triangleCount were read, the file should be fully read
-            // If not, the file is corrupted. The discrepancy is calculated and an exception is thrown
-            if (fileInputStream.available() != 0)
-            {
-                throw new IOException(String.format(Strings.TRIANGLE_COUNT_DISCREPANCY, triangleCount));
-            }
-            // Set the reading finished flag to true
-            controller.setReadingFinished(true);
-        } catch (FileNotFoundException fileNotFoundException)
-        {
-            throw new FileNotFoundException(Strings.FILE_NOT_FOUND + filePath);
-        } catch (IOException ioException)
-        {
-            throw new IOException(String.format(Strings.ERROR_WHILE_READING_FILE, filePath) + ioException.getMessage());
-        }
-    }
-
-    public void readSTLBinaryIntoMemory (PolyhedronController controller, boolean parallelized) throws IOException
+    public void readSTLBinary (PolyhedronController controller, boolean parallelized) throws IOException
     {
         // Read the file into a byte buffer
-        byteBuffer = ByteBuffer.wrap(Files.readAllBytes(Paths.get(filePath)));
+        try
+        {
+            byteBuffer = ByteBuffer.wrap(Files.readAllBytes(Paths.get(filePath)));
+        } catch (InvalidPathException invalidPathException)
+        {
+            throw new IOException(Strings.INVALID_FILE_PATH + filePath);
+        } catch (OutOfMemoryError outOfMemoryError)
+        {
+            throw new IOException(Strings.FILE_TOO_LARGE);
+        }
         // Set the byte order to little endian
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         // Skip the header of the file and read the number of triangleMesh
         byteBuffer.position(Constants.STL_BINARY_HEADER_BYTE_SIZE);
         triangleCount = byteBuffer.getInt();
-        logMessage("Triangle count: %d", triangleCount);
+        logMessage(Strings.TRIANGLE_COUNT_D, triangleCount);
         for (currentTriangleIndex = 0; currentTriangleIndex < triangleCount; currentTriangleIndex++)
         {
             if (parallelized)
             {
-                controller.addTriangleToQueue(readTriangleBinaryFromBuffer());
+                controller.addTriangleToQueue(readTriangleBinary());
             } else
             {
-                controller.addTriangle(readTriangleBinaryFromBuffer());
+                controller.addTriangle(readTriangleBinary());
             }
         }
         // If the number of triangles indicated by triangleCount were read, the file should be fully read
         // If not, the file is corrupted. The discrepancy is calculated and an exception is thrown
-        if (byteBuffer.hasRemaining() && byteBuffer.remaining() % 50 == 0)
+        if (byteBuffer.hasRemaining() && byteBuffer.remaining() % Constants.TRIANGLE_BYTE_SIZE == Constants.N_ZERO)
         {
-            throw new IOException(String.format(Strings.TRIANGLE_COUNT_DISCREPANCY, byteBuffer.remaining()));
+            fileIsCorrupted = true;
+            logMessage(Strings.TRIANGLE_COUNT_DISCREPANCY, byteBuffer.remaining());
         }
 
         // Set the reading finished flag to true
         controller.setReadingFinished(true);
     }
 
-    private Triangle readTriangleBinaryFromBuffer() {
+    /**
+     * Reads a triangle from the byte buffer that contains the binary STL file. First reads the normal of the triangle,
+     * then reads the three vertices of the triangle. Stores the attribute bytes of the first triangle as a reference
+     * and compares the attribute bytes of the following triangles to the reference. If the attribute bytes are not equal,
+     * the file may be corrupted. The fileIsCorrupted flag is set to true the program tries to recover by finding the
+     * reference attribute bytes and skipping the current triangle.
+     * <p>Precondition: The byte buffer must be initialized and the next bytes must be the start of a triangle.
+     * <p>Postcondition: The triangle is read from the byte buffer and returned.
+     *
+     * @return The triangle read from the byte buffer or null if the triangle is corrupted.
+     * @throws IllegalArgumentException - If an error occurs while reading the triangle.
+     */
+    private Triangle readTriangleBinary () throws IllegalArgumentException {
         // Read the normal of the triangle
         Vector3d normal = new Vector3d(byteBuffer.getFloat(), byteBuffer.getFloat(), byteBuffer.getFloat());
 
         // Read the three vertices of the triangle
         Vertex[] vertices = new Vertex[Constants.TRIANGLE_VERTEX_COUNT];
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < Constants.TRIANGLE_VERTEX_COUNT; i++)
         {
             vertices[i] = new Vertex(byteBuffer.getFloat(), byteBuffer.getFloat(), byteBuffer.getFloat());
         }
@@ -445,37 +432,113 @@ public class STLReader
                 fileIsCorrupted = true;
                 logMessage(Strings.ATTRIBUTE_BYTE_DISCREPANCY);
                 // Try to recover by finding reference attribute bytes and skipping the current triangle
-                recoverToNextTriangleFromBuffer();
+                recoverToNextTriangle();
                 return null;
             }
         }
 
-        return new Triangle(vertices[Constants.TRIANGLE_VERTEX1_INDEX], vertices[Constants.TRIANGLE_VERTEX2_INDEX], vertices[Constants.TRIANGLE_VERTEX3_INDEX], normal);
+        Triangle triangle;
+        try
+        {
+            triangle = new Triangle(vertices[Constants.TRIANGLE_VERTEX1_INDEX], vertices[Constants.TRIANGLE_VERTEX2_INDEX], vertices[Constants.TRIANGLE_VERTEX3_INDEX], normal);
+        } catch (IllegalArgumentException illegalArgumentException)
+        {
+            // Set the fileIsCorrupted flag to true
+            fileIsCorrupted = true;
+            logMessage(Strings.ERROR_WHILE_READING_TRIANGLE + illegalArgumentException.getMessage());
+            // Discern if the exception was caused by a wrong vertex or a wrong normal
+            triangle = discernTriangleDamage(vertices, normal);
+        }
+
+        return triangle;
     }
 
-    private void recoverToNextTriangleFromBuffer() {
+    /**
+     * Discerns what caused the difference between the normal and the calculated normal of the triangle by comparing
+     * the dot products of the normal and the edges of the triangle. If the normal is wrong, all dot products will be
+     * non-zero. If one of the vertices is wrong, the dot product of the normal and the edge not connected to the vertex
+     * will be zero. Two wrong vertices are undetectable, as this is not discernible from a wrong normal.
+     * <p> If the normal is considered wrong, the normal is recalculated from the vertices. Otherwise, the method logs
+     * the error and returns null.
+     * <p>Precondition: The vertices and the normal must be initialized.
+     * <p>Postcondition: The triangle is returned with the correct normal or null if the triangle is corrupted.
+     *
+     * @param vertices  The vertices of the triangle.
+     * @param normal    The normal of the triangle.
+     * @return          The triangle with the correct normal or null if the triangle is corrupted.
+     */
+    private Triangle discernTriangleDamage (Vertex[] vertices, Vector3d normal)
+    {
+        // A difference between the normal and the calculated normal of the triangle can be caused by either a wrong
+        // normal or a wrong vertex. If the normal wrong, all dot products of the normal and the edges of the triangle
+        // will be non-zero. If one of the vertices is wrong, the dot product of the normal and the edge not connected
+        // to the vertex will be zero.
+        // Two wrong vertices are undetectable, as this is not discernible from a wrong normal.
+
+        // Construct the edges of the triangle
+        Vector3d edge1 = new Vector3d(vertices[Constants.TRIANGLE_VERTEX2_INDEX].getPosX() - vertices[Constants.TRIANGLE_VERTEX1_INDEX].getPosX(),
+                vertices[Constants.TRIANGLE_VERTEX2_INDEX].getPosY() - vertices[Constants.TRIANGLE_VERTEX1_INDEX].getPosY(),
+                vertices[Constants.TRIANGLE_VERTEX2_INDEX].getPosZ() - vertices[Constants.TRIANGLE_VERTEX1_INDEX].getPosZ());
+        Vector3d edge2 = new Vector3d(vertices[Constants.TRIANGLE_VERTEX3_INDEX].getPosX() - vertices[Constants.TRIANGLE_VERTEX2_INDEX].getPosX(),
+                vertices[Constants.TRIANGLE_VERTEX3_INDEX].getPosY() - vertices[Constants.TRIANGLE_VERTEX2_INDEX].getPosY(),
+                vertices[Constants.TRIANGLE_VERTEX3_INDEX].getPosZ() - vertices[Constants.TRIANGLE_VERTEX2_INDEX].getPosZ());
+        Vector3d edge3 = new Vector3d(vertices[Constants.TRIANGLE_VERTEX1_INDEX].getPosX() - vertices[Constants.TRIANGLE_VERTEX3_INDEX].getPosX(),
+                vertices[Constants.TRIANGLE_VERTEX1_INDEX].getPosY() - vertices[Constants.TRIANGLE_VERTEX3_INDEX].getPosY(),
+                vertices[Constants.TRIANGLE_VERTEX1_INDEX].getPosZ() - vertices[Constants.TRIANGLE_VERTEX3_INDEX].getPosZ());
+
+        // Calculate the dot products of the normal and the edges
+        int nonZeroDotProducts = Constants.N_ZERO;
+        if (MathUtil.roundToDigits(normal.dot(edge1), Constants.DOT_PRODUCT_PRECISION) != Constants.N_ZERO) nonZeroDotProducts++;
+        if (MathUtil.roundToDigits(normal.dot(edge2), Constants.DOT_PRODUCT_PRECISION) != Constants.N_ZERO) nonZeroDotProducts++;
+        if (MathUtil.roundToDigits(normal.dot(edge3), Constants.DOT_PRODUCT_PRECISION) != Constants.N_ZERO) nonZeroDotProducts++;
+
+        // If all dot products are non-zero, the normal is wrong
+        if (nonZeroDotProducts == Constants.TRIANGLE_VERTEX_COUNT)
+        {
+            logMessage(Strings.TRIANGLE_WRONG_NORMAL_OR_VERTICES);
+            logMessage(Strings.CALCULATING_NORMAL_FROM_VERTICES);
+            return new Triangle(vertices[Constants.TRIANGLE_VERTEX1_INDEX], vertices[Constants.TRIANGLE_VERTEX2_INDEX], vertices[Constants.TRIANGLE_VERTEX3_INDEX]);
+        } else if (nonZeroDotProducts == Constants.TRIANGLE_VERTEX_COUNT - Constants.N_ONE)
+        {
+            logMessage(Strings.TRIANGLE_WRONG_VERTEX);
+        }
+        return null;
+    }
+
+    /**
+     * Tries to recover from a corrupted triangle by finding the reference attribute bytes and skipping the current triangle.
+     * The method jumps back to the start of the corrupted triangle and skips up to 100 bytes one by one.
+     * If the attribute bytes of the next triangle are found, the recovery is successful. The method logs the recovery
+     * and the number of triangles that were likely discarded. If the attribute bytes are not found, an exception is thrown.
+     *
+     * <p>Precondition: The byte buffer must be initialized and the current triangle must be corrupted.
+     * <p>Postcondition: The byte buffer is positioned at the start of the next triangle.
+     *
+     * @throws IllegalArgumentException - If an error occurs while recovering the next triangle.
+     */
+    private void recoverToNextTriangle () {
         logMessage(Strings.RECOVERING_TO_NEXT_TRIANGLE);
         int bytesSkipped = 0;
         // Jump back to the start of the corrupted triangle
-        byteBuffer.position(byteBuffer.position() - 50);
+        byteBuffer.position(byteBuffer.position() - Constants.TRIANGLE_BYTE_SIZE);
         try {
             // Skip 100 bytes and check if the attribute bytes of the next triangle are found
-            while (bytesSkipped <= 100) {
+            while (bytesSkipped <= Constants.BYTES_TO_SKIP) {
                 // Read the next byte
                 int nextByte = byteBuffer.get();
                 bytesSkipped++;
                 // If the next byte is the first byte of the attribute bytes, check the next byte
-                if (nextByte == attributeBytesReference[0]) {
+                if (nextByte == attributeBytesReference[Constants.N_ZERO]) {
                     // Read the next byte
                     int nextNextByte = byteBuffer.get();
                     bytesSkipped++;
                     // If the next byte is the second byte of the attribute bytes, the attribute bytes are found
-                    if (nextNextByte == attributeBytesReference[1]) {
+                    if (nextNextByte == attributeBytesReference[Constants.N_ONE]) {
                         // Log the recovery and return
                         logMessage(Strings.RECOVERED_TO_NEXT_TRIANGLE, bytesSkipped);
-                        logMessage("Likely discarded triangles: %d", 1 + bytesSkipped / 50);
+                        logMessage(Strings.LIKELY_DISCARDED_TRIANGLES_D, Constants.N_ONE + bytesSkipped / Constants.TRIANGLE_BYTE_SIZE);
                         // Increment the triangle counter if more than 50 bytes were skipped
-                        if (bytesSkipped > 50) {
+                        if (bytesSkipped > Constants.TRIANGLE_BYTE_SIZE) {
                             currentTriangleIndex++;
                         }
                         return;
@@ -487,123 +550,5 @@ public class STLReader
         } catch (Exception e) {
             throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + e.getMessage());
         }
-    }
-
-    /**
-     * Reads a triangle from a file input stream in binary format.
-     * Precondition: The file input stream must be initialized and the next bytes must be the start of a triangle.
-     * Postcondition: The triangle is read from the file input stream and returned.
-     *
-     * @param fileInputStream - The FileInputStream to read the triangle from.
-     * @return The triangle read from the file input stream.
-     */
-    public Triangle readTriangleBinary (FileInputStream fileInputStream)
-    {
-        try
-        {
-            // Read the normal of the triangle
-            byte[] normalBytes = new byte[Constants.STL_BINARY_NORMAL_BYTE_SIZE];
-            fileInputStream.read(normalBytes, Constants.NUMBER_ZERO, Constants.STL_BINARY_NORMAL_BYTE_SIZE);
-            Vector3d normal = readNormalBinary(normalBytes);
-
-            // Read the three vertices of the triangle
-            Vertex[] vertices = new Vertex[Constants.TRIANGLE_VERTEX_COUNT];
-            for (int i = 0; i < 3; i++)
-            {
-                byte[] vertexBytes = new byte[Constants.STL_BINARY_TRIANGLES_BYTE_SIZE];
-                fileInputStream.read(vertexBytes, Constants.NUMBER_ZERO, Constants.STL_BINARY_TRIANGLES_BYTE_SIZE);
-                vertices[i] = readVertexBinary(vertexBytes);
-            }
-
-            // Skip the attribute byte count
-            if (firstTriangle) {
-                // The first triangle is read, and it's attribute byte count is stored as a reference
-                attributeBytesReference = fileInputStream.readNBytes(Constants.STL_BINARY_ATTR_BYTE_SIZE);
-                firstTriangle = false;
-            } else {
-                // Read the attribute byte count of the current triangle
-                byte[] attributeBytes = fileInputStream.readNBytes(Constants.STL_BINARY_ATTR_BYTE_SIZE);
-                // Compare the attribute byte count of the current triangle to the reference
-                // If they are not equal, the file is probably corrupted
-                if (!Arrays.equals(attributeBytesReference, attributeBytes)) {
-                    logMessage(Strings.ATTRIBUTE_BYTE_DISCREPANCY);
-                    // Try to recover by finding reference attribute bytes and skipping the current triangle
-                    recoverToNextTriangle(fileInputStream);
-                }
-            }
-
-            return new Triangle(vertices[Constants.TRIANGLE_VERTEX1_INDEX], vertices[Constants.TRIANGLE_VERTEX2_INDEX], vertices[Constants.TRIANGLE_VERTEX3_INDEX], normal);
-        } catch (IOException ioException)
-        {
-            throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + ioException.getMessage());
-        }
-
-    }
-
-    private void recoverToNextTriangle(FileInputStream fileInputStream) {
-        logMessage(Strings.RECOVERING_TO_NEXT_TRIANGLE);
-        int bytesSkipped = 0;
-        try {
-            // Skip 100 bytes and check if the attribute bytes of the next triangle are found
-            while (bytesSkipped < 100) {
-                // Read the next byte
-                int nextByte = fileInputStream.read();
-                bytesSkipped++;
-                logMessage(String.format("Byte: %d (Number of bytes skipped: %d)", nextByte, bytesSkipped));
-                // If the next byte is the first byte of the attribute bytes, check the next byte
-                if (nextByte == attributeBytesReference[0]) {
-                    // Read the next byte
-                    int nextNextByte = fileInputStream.read();
-                    bytesSkipped++;
-                    logMessage("Next byte: %d", nextNextByte);
-                    // If the next byte is the second byte of the attribute bytes, the attribute bytes are found
-                    if (nextNextByte == attributeBytesReference[1]) {
-                        // Log the recovery and return
-                        logMessage(Strings.RECOVERED_TO_NEXT_TRIANGLE, bytesSkipped);
-                        return;
-                    }
-                }
-            }
-            // If the attribute bytes are not found, throw an exception
-            throw new IllegalArgumentException(Strings.ATTRIBUTE_BYTES_NOT_FOUND);
-        } catch (IOException ioException) {
-            throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + ioException.getMessage());
-        }
-    }
-
-    /**
-     * Reads a vertex from a byte array in binary format. Each vertex is represented by 12 bytes, 4 bytes for each coordinate.
-     * As the coordinates are stored in little endian byte order, they are read accordingly.
-     * Precondition: The byte array must be initialized and contain the vertex data.
-     * Postcondition: The vertex is read from the byte array and returned.
-     *
-     * @param bytes - The byte array containing the vertex data.
-     * @return The vertex read from the byte array.
-     */
-    private Vertex readVertexBinary (byte[] bytes)
-    {
-        // Read the vertex from the byte array using little endian byte order
-        float x = ByteBuffer.wrap(bytes, Constants.STL_BINARY_OFFSET_X, Constants.STL_BINARY_VERTEX_BYTE_SIZE).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-        float y = ByteBuffer.wrap(bytes, Constants.STL_BINARY_OFFSET_Y, Constants.STL_BINARY_VERTEX_BYTE_SIZE).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-        float z = ByteBuffer.wrap(bytes, Constants.STL_BINARY_OFFSET_Z, Constants.STL_BINARY_VERTEX_BYTE_SIZE).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-        return new Vertex(x, y, z);
-    }
-
-    /**
-     * Reads a normal from a byte array in binary format. Each normal is represented by 12 bytes, 4 bytes for each coordinate.
-     * As the coordinates are stored in little endian byte order, they are read accordingly.
-     * Precondition: The byte array must be initialized and contain the normal data.
-     * Postcondition: The normal is read from the byte array and returned as a Vector3d.
-     *
-     * @param bytes - The byte array containing the normal data.
-     * @return The normal read from the byte array as a Vector3d.
-     */
-    private Vector3d readNormalBinary (byte[] bytes)
-    {
-        // Read the normal from the byte array using little endian byte order
-        float x = ByteBuffer.wrap(bytes, Constants.STL_BINARY_OFFSET_X, Constants.STL_BINARY_VERTEX_BYTE_SIZE).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-        float y = ByteBuffer.wrap(bytes, Constants.STL_BINARY_OFFSET_Y, Constants.STL_BINARY_VERTEX_BYTE_SIZE).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-        float z = ByteBuffer.wrap(bytes, Constants.STL_BINARY_OFFSET_Z, Constants.STL_BINARY_VERTEX_BYTE_SIZE).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-        return new Vector3d(x, y, z);
     }
 }

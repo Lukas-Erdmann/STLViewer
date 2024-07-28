@@ -23,15 +23,15 @@ public class Polyhedron implements Serializable
     /**
      * The volume of the polyhedron.
      */
-    private double volume = Constants.NUMBER_ZERO;
+    private double volume = Constants.N_ZERO;
     /**
      * The surface area of the polyhedron.
      */
-    private double surfaceArea = Constants.NUMBER_ZERO;
+    private double surfaceArea = Constants.N_ZERO;
     /**
      * The weight of the polyhedron.
      */
-    private double weight = Constants.NUMBER_ZERO;
+    private double weight = Constants.N_ZERO;
     /**
      * The bounding box of the polyhedron. The bounding box is an array of 6 doubles that represent the minimum and
      * maximum x, y, and z coordinates of the polyhedron.

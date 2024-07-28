@@ -160,7 +160,7 @@ public class TCPClient
                 System.out.println(Strings.INVALID_AMOUNT);
             }
         }
-        return Constants.NUMBER_ZERO;
+        return Constants.N_ZERO;
     }
 
     /**

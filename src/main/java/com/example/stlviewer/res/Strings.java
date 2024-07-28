@@ -226,4 +226,12 @@ public interface Strings
     String NUMBER_DEGENERATE_EDGES_FOUND = "Number of degenerate edges found: %d";
     String NUMBER_MISSING_TRIANGLES_ADDED = "Number of missing triangles added: %d";
     String DEGENERATE_TRIANGLE_FOUND = "Degenerate Triangle found: ";
+    String NORMAL_DIFFERENCE_TOLERANCE_EXCEEDED = "Calculated triangle and passed normal difference exceeds rounding error tolerance.";
+    String TRIANGLE_WRONG_NORMAL_OR_VERTICES = "Triangle has wrong normal or multiple wrong vertices.";
+    String CALCULATING_NORMAL_FROM_VERTICES = "Calculating normal from vertices.";
+    String TRIANGLE_WRONG_VERTEX = "Triangle contains a wrong vertex.";
+    String TRIANGLE_COUNT_D = "Triangle count: %d";
+    String INVALID_FILE_PATH = "Invalid file path.";
+    String FILE_TOO_LARGE = "File too large.";
+    String LIKELY_DISCARDED_TRIANGLES_D = "Likely discarded triangles: %d";
 }

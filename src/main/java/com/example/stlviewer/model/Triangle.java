@@ -1,10 +1,13 @@
 package com.example.stlviewer.model;
 
+import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 import com.example.stlviewer.util.MathUtil;
 
 import javax.vecmath.Vector3d;
 import java.io.Serializable;
+
+import static com.example.stlviewer.util.RuntimeHandler.logMessage;
 
 /**
  * The Triangle class represents a triangle in a 3D space. It is a polygon that lies in a plane and has 3 vertices and
@@ -38,7 +41,7 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
      */
     public Triangle (Vertex v1, Vertex v2, Vertex v3, Vector3d normal)
     {
-        super(3);
+        super(Constants.TRIANGLE_VERTEX_COUNT);
         // Set the vertices
         vertices.add(0, v1);
         vertices.add(1, v2);
@@ -53,6 +56,15 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         this.getNormal().cross(edges.get(0), edges.get(1));
         // Normalize the normal, bringing it to unit length (length = 1)
         this.getNormal().normalize();
+        // Compare the normal of the triangle with the normal passed as an argument
+        // The comparison normal via cross product of the calculated normal and the passed normal
+        // If the length of the comparison normal is greater than the rounding tolerance, the normals are not equal
+        Vector3d comparisonNormal = new Vector3d();
+        comparisonNormal.cross(this.getNormal(), normal);
+        if (comparisonNormal.length() > Constants.NORMAL_DIFFERENCE_ROUNDING_TOLERANCE)
+        {
+            throw new IllegalArgumentException("Calculated triangle and passed normal difference exceeds rounding error tolerance.");
+        }
         // Calculate the area of the triangle
         this.calculateArea();
     }

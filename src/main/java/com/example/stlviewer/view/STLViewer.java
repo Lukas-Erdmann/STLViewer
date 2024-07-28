@@ -388,11 +388,11 @@ public class STLViewer extends Application
         VBox dialogVBox = new VBox();
         // Add the text fields for the translation values
         TextField translateX = new TextField();
-        translateX.setText(String.valueOf(Constants.NUMBER_ZERO));
+        translateX.setText(String.valueOf(Constants.N_ZERO));
         TextField translateY = new TextField();
-        translateY.setText(String.valueOf(Constants.NUMBER_ZERO));
+        translateY.setText(String.valueOf(Constants.N_ZERO));
         TextField translateZ = new TextField();
-        translateZ.setText(String.valueOf(Constants.NUMBER_ZERO));
+        translateZ.setText(String.valueOf(Constants.N_ZERO));
 
         // Add the text fields with labels to the dialog VBox
         dialogVBox.getChildren().addAll(
@@ -438,9 +438,9 @@ public class STLViewer extends Application
         VBox dialogVBox = new VBox();
         // Add the text fields for the rotation values
         TextField rotateX = new TextField();
-        rotateX.setText(String.valueOf(String.valueOf(Constants.NUMBER_ZERO)));
+        rotateX.setText(String.valueOf(String.valueOf(Constants.N_ZERO)));
         TextField rotateY = new TextField();
-        rotateY.setText(String.valueOf(String.valueOf(Constants.NUMBER_ZERO)));
+        rotateY.setText(String.valueOf(String.valueOf(Constants.N_ZERO)));
 
         // Add the text fields with labels to the dialog VBox
         dialogVBox.getChildren().addAll(

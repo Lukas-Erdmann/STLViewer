@@ -133,7 +133,7 @@ public class PolyhedronController implements Runnable
             // Add the triangle to the polyhedron
             addTriangle(triangle);
             // Add the volume of the tetrahedron to the polyhedron
-            polyhedron.addVolume(calculateVolumeOfTetrahedron(triangle, new Vertex(Constants.NUMBER_ZERO, Constants.NUMBER_ZERO, Constants.NUMBER_ZERO)));
+            polyhedron.addVolume(calculateVolumeOfTetrahedron(triangle, new Vertex(Constants.N_ZERO, Constants.N_ZERO, Constants.N_ZERO)));
             // Add the surface area of the triangle to the polyhedron
             polyhedron.addSurfaceArea(triangle.getArea());
             // Expand the bounding box to include the triangle
@@ -313,7 +313,7 @@ public class PolyhedronController implements Runnable
      * @return  The number of duplicate triangles removed.
      */
     public String removeDuplicateTriangles() {
-        int duplicateCount = Constants.NUMBER_ZERO;
+        int duplicateCount = Constants.N_ZERO;
         TreeMap<Integer, Triangle> uniqueTriangles = new TreeMap<>();
         for (Triangle triangle : polyhedron.getTriangles().values()) {
             if (!uniqueTriangles.containsValue(triangle)) {
@@ -333,7 +333,7 @@ public class PolyhedronController implements Runnable
      */
     public void calculateVolume ()
     {
-        double volume = Constants.NUMBER_ZERO;
+        double volume = Constants.N_ZERO;
         // The arbitrary point is chosen to be the first vertex of the first triangle
         Vertex refPoint = polyhedron.getTriangles().firstEntry().getValue().getVertices().getFirst();
         // For each triangle in the polyhedron, calculate the volume of the tetrahedron formed
@@ -373,7 +373,7 @@ public class PolyhedronController implements Runnable
     public void calculateSurfaceArea ()
     {
         // Set the surface area of the polyhedron to 0 for recalculation
-        polyhedron.setSurfaceArea(Constants.NUMBER_ZERO);
+        polyhedron.setSurfaceArea(Constants.N_ZERO);
         // For each triangle in the polyhedron, calculate the area and add it to the surface area
         for (Triangle triangle : polyhedron.getTriangles().values())
         {
