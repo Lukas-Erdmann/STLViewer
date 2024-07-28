@@ -284,7 +284,7 @@ public class STLViewerController
         ObservableFloatArray texCoords = mesh.getTexCoords();
 
         // Add the vertices to the mesh
-        for (Triangle triangle : polyhedron.getTriangles())
+        for (Triangle triangle : polyhedron.getTriangles().values())
         {
             for (Vertex vertex : triangle.getVertices())
             {

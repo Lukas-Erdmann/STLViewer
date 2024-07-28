@@ -270,16 +270,16 @@ public class masterController
      * Precondition: None
      * Post-Condition: The triangles are sorted.
      */
-    public void sortTriangles ()
-    {
-        polyhedronController.getPolyhedron().getTriangles().sort(Triangle::compareTo);
-
-        // Print the sorted triangles to the console
-        for (Triangle triangle : polyhedronController.getPolyhedron().getTriangles())
-        {
-            System.out.println(triangle);
-        }
-    }
+//    public void sortTriangles ()
+//    {
+//        polyhedronController.getPolyhedron().getTriangles().sort(Triangle::compareTo);
+//
+//        // Print the sorted triangles to the console
+//        for (Triangle triangle : polyhedronController.getPolyhedron().getTriangles())
+//        {
+//            System.out.println(triangle);
+//        }
+//    }
 
     public void reinitializePolyhedronController() {
         this.polyhedronController = new PolyhedronController();

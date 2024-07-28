@@ -75,4 +75,5 @@ public interface Constants
     int BOUNDING_BOX_SIZE = 6;
     int THREAD_SLEEP_MILLIS = 10;
     double FACTOR_KGM3_TO_KGMM3 = 1e-9;
+    int ID_COUNTER_START = 0;
 }

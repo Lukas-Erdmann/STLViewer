@@ -6,6 +6,7 @@ import com.example.stlviewer.util.MathUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 /**
  * The Polyhedron class represents a polyhedron in a 3D space. It is a solid that is bounded by a finite number of
@@ -15,9 +16,10 @@ import java.util.ArrayList;
 public class Polyhedron implements Serializable
 {
     /**
-     * The list of triangles that make up the polyhedron.
+     * The tree map of triangles that make up the polyhedron. The key is the ID of the triangle and the value is the
+     * triangle itself.
      */
-    private ArrayList<Triangle> triangles;
+    private TreeMap<Integer, Triangle> triangles;
     /**
      * The volume of the polyhedron.
      */
@@ -49,11 +51,11 @@ public class Polyhedron implements Serializable
     /**
      * Creates a new polyhedron with the given list of triangles.
      *
-     * @param triangleArrayList - The list of triangles that make up the polyhedron.
+     * @param triangleTreeMap - The list of triangles that make up the polyhedron.
      */
-    public Polyhedron (ArrayList<Triangle> triangleArrayList)
+    public Polyhedron (TreeMap<Integer, Triangle> triangleTreeMap)
     {
-        this.triangles = triangleArrayList;
+        this.triangles = triangleTreeMap;
     }
 
     /**
@@ -61,7 +63,7 @@ public class Polyhedron implements Serializable
      */
     public Polyhedron ()
     {
-        this.triangles = new ArrayList<Triangle>();
+        this.triangles = new TreeMap<>();
     }
 
     /**
@@ -69,7 +71,7 @@ public class Polyhedron implements Serializable
      *
      * @param triangles The list of triangles that make up the polyhedron.
      */
-    public void setTriangles (ArrayList<Triangle> triangles)
+    public void setTriangles (TreeMap<Integer, Triangle> triangles)
     {
         this.triangles = triangles;
     }
@@ -79,7 +81,7 @@ public class Polyhedron implements Serializable
      *
      * @return The list of triangles that make up the polyhedron.
      */
-    public ArrayList<Triangle> getTriangles ()
+    public TreeMap<Integer, Triangle> getTriangles ()
     {
         return triangles;
     }
@@ -90,17 +92,9 @@ public class Polyhedron implements Serializable
      * @param id    The ID of the triangle.
      * @return      The triangle with the given ID.
      */
-    public Triangle getTriangleByID(int id)
+    public Triangle getTriangle (int id)
     {
-        // TODO: Replace this with a more efficient data structure
-        for (Triangle triangle : triangles)
-        {
-            if (triangle.getId() == id)
-            {
-                return triangle;
-            }
-        }
-        return null;
+        return triangles.get(id);
     }
 
     /**

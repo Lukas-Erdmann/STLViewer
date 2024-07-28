@@ -225,4 +225,5 @@ public interface Strings
     String NUMBER_DUPLICATE_TRIANGLES_REMOVED = "Number of duplicate triangles removed: ";
     String NUMBER_DEGENERATE_EDGES_FOUND = "Number of degenerate edges found: %d";
     String NUMBER_MISSING_TRIANGLES_ADDED = "Number of missing triangles added: %d";
+    String DEGENERATE_TRIANGLE_FOUND = "Degenerate Triangle found: ";
 }

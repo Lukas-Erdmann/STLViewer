@@ -8,8 +8,7 @@ import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.TreeMap;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,7 +28,7 @@ public class PolyhedronController implements Runnable
     /**
      * The counter for the triangle IDs.
      */
-    private AtomicInteger idCounter = new AtomicInteger(Constants.NUMBER_ZERO);
+    private AtomicInteger idCounter = new AtomicInteger(Constants.ID_COUNTER_START);
     /**
      * The adjacency list for the polyhedron.
      */
@@ -89,8 +88,6 @@ public class PolyhedronController implements Runnable
             {
                 if (isReadingFinished && blockingQueue.isEmpty())
                 {
-                    // When the polyhedron is complete, calculate the center
-                    defineCenter();
                     // Wait for all tasks to complete
                     executorService.shutdown();
                     try {
@@ -103,13 +100,14 @@ public class PolyhedronController implements Runnable
                         Thread.currentThread().interrupt();
                         System.out.println(Strings.THREAD_WAS_INTERRUPTED);
                     }
+                    // When the polyhedron is complete, calculate the center
                     logMessage(Strings.NUMBER_TRIANGLES_READ, polyhedron.getTriangles().size());
+                    defineCenter();
                     break;
                 } else if (!blockingQueue.isEmpty())
                 {
                     Triangle triangle = blockingQueue.take();
                     executorService.submit(() -> processTriangle(triangle));
-                    idCounter.incrementAndGet();
                 } else
                 {
                     Thread.sleep(Constants.THREAD_SLEEP_MILLIS);
@@ -134,7 +132,6 @@ public class PolyhedronController implements Runnable
         synchronized (polyhedron) {
             // Add the triangle to the polyhedron
             addTriangle(triangle);
-            triangle.setId(idCounter.get());
             // Add the volume of the tetrahedron to the polyhedron
             polyhedron.addVolume(calculateVolumeOfTetrahedron(triangle, new Vertex(Constants.NUMBER_ZERO, Constants.NUMBER_ZERO, Constants.NUMBER_ZERO)));
             // Add the surface area of the triangle to the polyhedron
@@ -154,13 +151,13 @@ public class PolyhedronController implements Runnable
      */
     public void populateAdjacencyList() {
         // Initialize the adjacency list with the triangles
-        for (int i = 0; i < polyhedron.getTriangles().size(); i++) {
+        for (int i = Constants.ID_COUNTER_START; i < polyhedron.getTriangles().size() + Constants.ID_COUNTER_START; i++) {
             adjacencyList.add(new ArrayList<>());
             // Add all the triangles to the adjacency list
             adjacencyList.get(i).add(polyhedron.getTriangles().get(i).getId());
         }
-        for (int i = 0; i < polyhedron.getTriangles().size(); i++) {
-            for (int j = 0; j < polyhedron.getTriangles().size(); j++) {
+        for (int i = Constants.ID_COUNTER_START; i < polyhedron.getTriangles().size() + Constants.ID_COUNTER_START; i++) {
+            for (int j = Constants.ID_COUNTER_START; j < polyhedron.getTriangles().size() + Constants.ID_COUNTER_START; j++) {
                 if (i != j) {
                     // If the triangle j is adjacent to triangle i, add it to the adjacency list of triangle i
                     if (polyhedron.getTriangles().get(i).isAdjacentTo(polyhedron.getTriangles().get(j))) {
@@ -180,7 +177,6 @@ public class PolyhedronController implements Runnable
      * <p>Post-condition: The simple holes in the polyhedron are fixed.
      */
     public void fixSimpleHoles () {
-        // TODO: Make this work for sequential reading and make it more reliable
         // Find the degenerate edges
         findDegenerateEdges();
         // Find the missing triangles
@@ -203,11 +199,11 @@ public class PolyhedronController implements Runnable
     public void findDegenerateEdges () {
         // Iterate over all the triangles in the adjacency list
         for (int i = 0; i < adjacencyList.size(); i++) {
-            // If the triangle has only 2 adjacent triangles, it is a degenerate triangle. This means that one of it's
+            // If the triangle has only 2 adjacent triangles, it is a degenerate triangle. This means that one of its
             // edges isn't shared with any other triangle, making it a degenerate edge.
             if (adjacencyList.get(i).size() == 3) {
-                logMessage("Degenerate Triangle found: " + polyhedron.getTriangleByID(adjacencyList.get(i).getFirst()).getId());
-                Triangle triangle = polyhedron.getTriangleByID(adjacencyList.get(i).getFirst());
+                logMessage(Strings.DEGENERATE_TRIANGLE_FOUND + polyhedron.getTriangle(adjacencyList.get(i).getFirst()));
+                Triangle triangle = polyhedron.getTriangle(adjacencyList.get(i).getFirst());
                 for (int j = 0; j < Constants.TRIANGLE_VERTEX_COUNT; j++) {
                     // First all the edges of the triangle are added to the degenerate edges list
                     Edge edge = triangle.getEdges().get(j);
@@ -215,7 +211,7 @@ public class PolyhedronController implements Runnable
                     boolean isShared = false;
                     for (int k = 1; k < adjacencyList.get(i).size(); k++)
                     {
-                        Triangle adjacentTriangle = polyhedron.getTriangleByID(adjacencyList.get(i).get(k));
+                        Triangle adjacentTriangle = polyhedron.getTriangle(adjacencyList.get(i).get(k));
                         if (adjacentTriangle.getEdges().contains(edge))
                         {
                             isShared = true;
@@ -318,10 +314,10 @@ public class PolyhedronController implements Runnable
      */
     public String removeDuplicateTriangles() {
         int duplicateCount = Constants.NUMBER_ZERO;
-        ArrayList<Triangle> uniqueTriangles = new ArrayList<>();
-        for (Triangle triangle : polyhedron.getTriangles()) {
-            if (!uniqueTriangles.contains(triangle)) {
-                uniqueTriangles.add(triangle);
+        TreeMap<Integer, Triangle> uniqueTriangles = new TreeMap<>();
+        for (Triangle triangle : polyhedron.getTriangles().values()) {
+            if (!uniqueTriangles.containsValue(triangle)) {
+                uniqueTriangles.put(triangle.getId(), triangle);
             }
         }
         polyhedron.setTriangles(uniqueTriangles);
@@ -339,9 +335,9 @@ public class PolyhedronController implements Runnable
     {
         double volume = Constants.NUMBER_ZERO;
         // The arbitrary point is chosen to be the first vertex of the first triangle
-        Vertex refPoint = polyhedron.getTriangles().getFirst().getVertices().getFirst();
+        Vertex refPoint = polyhedron.getTriangles().firstEntry().getValue().getVertices().getFirst();
         // For each triangle in the polyhedron, calculate the volume of the tetrahedron formed
-        for (Triangle triangle : polyhedron.getTriangles())
+        for (Triangle triangle : polyhedron.getTriangles().values())
         {
             volume += calculateVolumeOfTetrahedron(triangle, refPoint);
         }
@@ -376,7 +372,10 @@ public class PolyhedronController implements Runnable
      */
     public void calculateSurfaceArea ()
     {
-        for (Triangle triangle : polyhedron.getTriangles())
+        // Set the surface area of the polyhedron to 0 for recalculation
+        polyhedron.setSurfaceArea(Constants.NUMBER_ZERO);
+        // For each triangle in the polyhedron, calculate the area and add it to the surface area
+        for (Triangle triangle : polyhedron.getTriangles().values())
         {
             polyhedron.setSurfaceArea(triangle.getArea() + polyhedron.getSurfaceArea());
         }
@@ -408,7 +407,7 @@ public class PolyhedronController implements Runnable
     {
         // For each triangle in the polyhedron, check if the vertices are within the bounding box
         // If they are not, update the bounding box
-        for (Triangle triangle : polyhedron.getTriangles())
+        for (Triangle triangle : polyhedron.getTriangles().values())
         {
             expandBoundingBox(triangle);
         }
@@ -507,9 +506,21 @@ public class PolyhedronController implements Runnable
      */
     public void addTriangle (Triangle triangle)
     {
+        // Ignore null triangles, that are passed by the STL reader, when the triangle was damaged and discarded
         if (triangle != null)
         {
-            polyhedron.getTriangles().add(triangle);
+            triangle.setId(idCounter.get());
+            if (polyhedron.getTriangles().containsKey(triangle.getId()))
+            {
+                throw new IllegalArgumentException(String.format("Triangle with ID %d already exists in the polyhedron.", triangle.getId()));
+            } else
+            {
+                synchronized (polyhedron.getTriangles())
+                {
+                    polyhedron.getTriangles().put(triangle.getId(), triangle);
+                }
+                idCounter.incrementAndGet();
+            }
         }
     }
 
