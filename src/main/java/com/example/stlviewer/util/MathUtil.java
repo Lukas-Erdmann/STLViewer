@@ -12,9 +12,9 @@ public abstract class MathUtil
     /**
      * Rounds a double value to a specified number of decimal places.
      *
-     * @param value  - The value to round.
-     * @param digits - The number of decimal places to round to.
-     * @return The rounded value.
+     * @param value     The value to round.
+     * @param digits    The number of decimal places to round to.
+     * @return          The rounded value.
      */
     public static double roundToDigits(double value, int digits)
     {
@@ -22,11 +22,23 @@ public abstract class MathUtil
         return Math.round(value * factor) / factor;
     }
 
+    /**
+     * Rounds a double value to three decimal places.
+     *
+     * @param value     The value to round.
+     * @return          The rounded value.
+     */
     public static double roundToThreeDigits(double value)
     {
         return roundToDigits(value, 3);
     }
 
+    /**
+     * Rounds a double value so that the first two non-zero digits are preserved.
+     *
+     * @param value     The value to round.
+     * @return          The rounded value.
+     */
     public static double roundToTwoNonZeroDigits(double value) {
         String valueStr = Double.toString(value);
         int nonZeroCount = 0;
@@ -55,7 +67,6 @@ public abstract class MathUtil
             }
         }
 
-        System.out.println("value: " + value + " roundPosition: " + roundPosition);
         return roundToDigits(value, Math.max(roundPosition, Constants.N_TWO));
     }
 }

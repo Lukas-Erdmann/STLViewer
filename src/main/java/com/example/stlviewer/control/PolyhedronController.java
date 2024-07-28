@@ -529,7 +529,7 @@ public class PolyhedronController implements Runnable
             triangle.setId(idCounter.get());
             if (polyhedron.getTriangles().containsKey(triangle.getId()))
             {
-                throw new IllegalArgumentException(String.format("Triangle with ID %d already exists in the polyhedron.", triangle.getId()));
+                throw new IllegalArgumentException(String.format(Strings.TRIANGLE_ID_ALREADY_EXISTS, triangle.getId()));
             } else
             {
                 synchronized (polyhedron.getTriangles())

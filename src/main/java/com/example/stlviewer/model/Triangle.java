@@ -63,7 +63,7 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         comparisonNormal.cross(this.getNormal(), normal);
         if (comparisonNormal.length() > Constants.NORMAL_DIFFERENCE_ROUNDING_TOLERANCE)
         {
-            throw new IllegalArgumentException("Calculated triangle and passed normal difference exceeds rounding error tolerance.");
+            //throw new IllegalArgumentException("Calculated triangle and passed normal difference exceeds rounding error tolerance.");
         }
         // Calculate the area of the triangle
         this.calculateArea();

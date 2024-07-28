@@ -254,4 +254,10 @@ public interface Strings
     String STLV_FILE_ERROR = "File Error";
     String STLV_FILE_ERROR_MESSAGE = "An error occurred while reading the file.";
     String STLV_ERROR = "Error";
+    String MATERIAL_TO_STRING_1 = "Material{name='";
+    String MATERIAL_TO_STRING_2 = "', description='";
+    String MATERIAL_TO_STRING_3 = "', density=";
+    String MATERIAL_TO_STRING_4 = ", color=";
+    String STL_ASCII_VERTEX_START_TAG = "vertex";
+    String TRIANGLE_ID_ALREADY_EXISTS = "Triangle with ID %d already exists in the polyhedron.";
 }

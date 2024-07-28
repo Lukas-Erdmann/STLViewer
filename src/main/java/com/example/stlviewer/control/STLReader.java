@@ -61,10 +61,10 @@ public class STLReader
      * Precondition: The file path must be valid. The controller must be initialized.
      * Postcondition: The triangles are read from the file and sent to the controller.
      *
-     * @param filePath     - The file path of the STL file.
-     * @param controller   - The PolyhedronController instance to send the triangles to.
-     * @param parallelized - True if the file should be read in parallel, false otherwise.
-     * @throws IOException - If an error occurs while reading the file.
+     * @param filePath      The file path of the STL file.
+     * @param controller    The PolyhedronController instance to send the triangles to.
+     * @param parallelized  True if the file should be read in parallel, false otherwise.
+     * @throws IOException  If an error occurs while reading the file.
      */
     public void readSTLFile (String filePath, PolyhedronController controller, boolean parallelized) throws IOException
     {
@@ -236,6 +236,9 @@ public class STLReader
         } catch (IOException ioException)
         {
             throw new IOException(Strings.ERROR_WHILE_READING_FILE + filePath);
+        } catch (IllegalArgumentException illegalArgumentException)
+        {
+            throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + illegalArgumentException.getMessage());
         }
     }
 
@@ -322,7 +325,7 @@ public class STLReader
         // and remove leading and trailing whitespaces
         String[] words = line.trim().split(Strings.ANY_NUMBER_OF_WHITESPACES);
         // Check if the line has the correct number of words and starts with "vertex"
-        if (words.length != Constants.STL_ASCII_NORMAL_WORDCOUNT || !words[Constants.STL_ASCII_VERTEX_START_TAG_POS].equals(Constants.STL_ASCII_VERTEX_START_TAG))
+        if (words.length != Constants.STL_ASCII_NORMAL_WORDCOUNT || !words[Constants.STL_ASCII_VERTEX_START_TAG_POS].equals(Strings.STL_ASCII_VERTEX_START_TAG))
         {
             throw new IllegalArgumentException(Strings.INVALID_VERTEX_LINE + line);
         }

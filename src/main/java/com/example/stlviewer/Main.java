@@ -30,7 +30,7 @@ public class Main extends Application
         appController = new masterController(stage, arg1, arg2);
 
         // Set up the stage close request to terminate the application
-        stage.setOnCloseRequest(event -> {
+        stage.setOnCloseRequest(_ -> {
             logMessage(Strings.CLOSING_APPLICATION);
             try {
                 stop();

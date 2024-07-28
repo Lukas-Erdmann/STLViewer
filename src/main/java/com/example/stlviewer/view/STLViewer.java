@@ -220,15 +220,15 @@ public class STLViewer extends Application
         // Color menu
         MenuItem menuItemSetColor = new MenuItem(Strings.STLV_SET_COLOR);
         menuItemSetColor.disableProperty().bind(meshView.materialProperty().isNull());
-        menuItemSetColor.setOnAction(e -> openColorDialog());
+        menuItemSetColor.setOnAction(_ -> openColorDialog());
         // Material menu
         MenuItem menuItemSetMaterial = new MenuItem(Strings.STLV_SET_MATERIAL);
         menuItemSetMaterial.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
-        menuItemSetMaterial.setOnAction(e -> openMaterialDialog());
+        menuItemSetMaterial.setOnAction(_ -> openMaterialDialog());
         // Unit system menu
         MenuItem menuItemSetUnitSystem = new MenuItem(Strings.STLV_SET_UNITS);
         menuItemSetUnitSystem.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
-        menuItemSetUnitSystem.setOnAction(e -> openUnitsDialog());
+        menuItemSetUnitSystem.setOnAction(_ -> openUnitsDialog());
 
         menuEdit.getItems().addAll(menuItemSetColor, menuItemSetMaterial, menuItemSetUnitSystem);
         return menuEdit;

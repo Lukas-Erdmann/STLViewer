@@ -28,7 +28,7 @@ public interface Constants
      * The number 3.
      */
     int N_THREE = 3;
-    int STL_BINARY_OFFSET_X = N_ZERO;
+    int STL_BINARY_OFFSET_X = 0;
     int TRIANGLE_VERTEX_COUNT = 3;
     int TRIANGLE_VERTEX1_INDEX = 0;
     int TRIANGLE_VERTEX2_INDEX = 1;
@@ -36,7 +36,6 @@ public interface Constants
     int WINDOW_WIDTH = 1200;
     int WINDOW_HEIGHT = 800;
     int INFOBAR_WIDTH = 200;
-    String STL_ASCII_VERTEX_START_TAG = "vertex";
     int STL_ASCII_NORMAL_WORD_POS_X = 2;
     int STL_ASCII_NORMAL_WORD_POS_Y = 3;
     int STL_ASCII_NORMAL_WORD_POS_Z = 4;
@@ -87,4 +86,10 @@ public interface Constants
     double FACTOR_LENGTH_DEFAULT = 1.0;
     double INCH_TO_METER = 0.0254;
     double KG_TO_LB = 2.20462;
+    int MATERIAL_STRING_POS_NAME = 0;
+    int MATERIAL_TO_STRING_DESC = 1;
+    int MATERIAL_TO_STRING_DENSITY = 2;
+    int MATERIAL_TO_STRING_COLOR = 3;
+    int MATERIAL_TO_STRING_SPECULAR_COLOR = 4;
+    int MATERIAL_TO_STRING_SPECULAR_POWER = 5;
 }
