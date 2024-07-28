@@ -195,6 +195,12 @@ public class STLViewerController
                     onFileLoadedCallback.accept(null);
                 }
             });
+            loadFileTask.setOnFailed(event -> {
+                // Print the stack trace if the file could not be loaded
+                loadFileTask.getException().printStackTrace();
+                // Display an error dialog if the file could not be loaded
+                stlViewer.displayFileErrorDialog();
+            });
 
             new Thread(loadFileTask).start();
         }

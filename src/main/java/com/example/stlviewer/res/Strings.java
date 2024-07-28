@@ -251,4 +251,7 @@ public interface Strings
     char CHAR_DASH = '-';
     char CHAR_DOT = '.';
     char CHAR_ZERO = '0';
+    String STLV_FILE_ERROR = "File Error";
+    String STLV_FILE_ERROR_MESSAGE = "An error occurred while reading the file.";
+    String STLV_ERROR = "Error";
 }

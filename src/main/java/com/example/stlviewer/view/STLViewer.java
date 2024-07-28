@@ -1,6 +1,5 @@
 package com.example.stlviewer.view;
 
-import com.example.stlviewer.control.PolyhedronController;
 import com.example.stlviewer.control.STLViewerController;
 import com.example.stlviewer.model.Polyhedron;
 import com.example.stlviewer.res.Constants;
@@ -196,6 +195,15 @@ public class STLViewer extends Application
         fileChooser.setTitle(Strings.STLV_OPEN_STL_FILE);
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(Strings.STLV_STL_FILES, Strings.STL_FILE_SUFFIX_ALL));
         return fileChooser.showOpenDialog(stage);
+    }
+
+    public void displayFileErrorDialog ()
+    {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(Strings.STLV_ERROR);
+        alert.setHeaderText(Strings.STLV_FILE_ERROR);
+        alert.setContentText(Strings.STLV_FILE_ERROR_MESSAGE);
+        alert.showAndWait();
     }
 
     /**

@@ -130,6 +130,7 @@ public class masterController
      */
     public void openFile (String filePath, PolyhedronController polyhedronController)
     {
+        // TODO: Rework the Logger usage
         reinitializePolyhedronController();
         try
         {
@@ -139,7 +140,7 @@ public class masterController
         } catch (IOException ioException) {
             LOGGER.log(Level.SEVERE, "I/O error while reading the file: " + filePath, ioException);
         } catch (IllegalArgumentException illegalArgumentException) {
-            LOGGER.log(Level.WARNING, "Invalid argument: " + illegalArgumentException.getMessage(), illegalArgumentException);
+            throw new IllegalArgumentException("File is corrupted and cannot be read: " + filePath);
         } catch (Exception exception) {
             LOGGER.log(Level.SEVERE, "An unexpected error occurred while opening the file: " + filePath, exception);
         }
