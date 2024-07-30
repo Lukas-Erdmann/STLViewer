@@ -323,7 +323,7 @@ public class PolyhedronController implements Runnable
      */
     public String removeDuplicateTriangles() {
         int duplicateCount = Constants.N_ZERO;
-        TreeMap<Integer, Triangle> uniqueTriangles = new TreeMap<>();
+        ConcurrentHashMap<Integer, Triangle> uniqueTriangles = new ConcurrentHashMap<>();
         for (Triangle triangle : polyhedron.getTriangles().values()) {
             if (!uniqueTriangles.containsValue(triangle)) {
                 uniqueTriangles.put(triangle.getId(), triangle);
@@ -346,7 +346,7 @@ public class PolyhedronController implements Runnable
     {
         double volume = Constants.N_ZERO;
         // The arbitrary point is chosen to be the first vertex of the first triangle
-        Vertex refPoint = polyhedron.getTriangles().firstEntry().getValue().getVertices().getFirst();
+        Vertex refPoint = polyhedron.getTriangles().values().iterator().next().getVertices().getFirst();
         // For each triangle in the polyhedron, calculate the volume of the tetrahedron formed
         for (Triangle triangle : polyhedron.getTriangles().values())
         {
@@ -532,11 +532,9 @@ public class PolyhedronController implements Runnable
                 throw new IllegalArgumentException(String.format(Strings.TRIANGLE_ID_ALREADY_EXISTS, triangle.getId()));
             } else
             {
-                synchronized (polyhedron.getTriangles())
-                {
-                    polyhedron.getTriangles().put(triangle.getId(), triangle);
-                }
-                idCounter.incrementAndGet();
+
+            polyhedron.getTriangles().put(triangle.getId(), triangle);
+            idCounter.incrementAndGet();
             }
         }
     }

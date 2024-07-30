@@ -5,8 +5,7 @@ import com.example.stlviewer.res.Strings;
 import com.example.stlviewer.util.MathUtil;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The Polyhedron class represents a polyhedron in a 3D space. It is a solid that is bounded by a finite number of
@@ -16,10 +15,10 @@ import java.util.TreeMap;
 public class Polyhedron implements Serializable
 {
     /**
-     * The tree map of triangles that make up the polyhedron. The key is the ID of the triangle and the value is the
-     * triangle itself.
+     * The map of triangles that make up the polyhedron. The key is the ID of the triangle and the value is the
+     * triangle itself. The map is thread-safe.
      */
-    private TreeMap<Integer, Triangle> triangles;
+    private ConcurrentHashMap<Integer, Triangle> triangles;
     /**
      * The volume of the polyhedron.
      */
@@ -43,19 +42,13 @@ public class Polyhedron implements Serializable
     private Vertex center;
 
     /**
-     * The adjacency list of the polyhedron. The adjacency list is a list of lists of triangles. Each list of triangles
-     * represents the triangles that are adjacent to a particular triangle in the polyhedron.
-     */
-    private ArrayList<ArrayList<Triangle>> triangleAdjacencyList;
-
-    /**
      * Creates a new polyhedron with the given list of triangles.
      *
-     * @param triangleTreeMap - The list of triangles that make up the polyhedron.
+     * @param triangleMap - The list of triangles that make up the polyhedron.
      */
-    public Polyhedron (TreeMap<Integer, Triangle> triangleTreeMap)
+    public Polyhedron (ConcurrentHashMap<Integer, Triangle> triangleMap)
     {
-        this.triangles = triangleTreeMap;
+        this.triangles = triangleMap;
     }
 
     /**
@@ -63,7 +56,7 @@ public class Polyhedron implements Serializable
      */
     public Polyhedron ()
     {
-        this.triangles = new TreeMap<>();
+        this.triangles = new ConcurrentHashMap<>();
     }
 
     /**
@@ -71,7 +64,7 @@ public class Polyhedron implements Serializable
      *
      * @param triangles The list of triangles that make up the polyhedron.
      */
-    public void setTriangles (TreeMap<Integer, Triangle> triangles)
+    public void setTriangles (ConcurrentHashMap<Integer, Triangle> triangles)
     {
         this.triangles = triangles;
     }
@@ -81,7 +74,7 @@ public class Polyhedron implements Serializable
      *
      * @return The list of triangles that make up the polyhedron.
      */
-    public TreeMap<Integer, Triangle> getTriangles ()
+    public ConcurrentHashMap<Integer, Triangle> getTriangles ()
     {
         return triangles;
     }
