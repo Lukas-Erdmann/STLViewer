@@ -18,25 +18,25 @@ public class P2PController
      */
     private P2PServer p2pServer;
     /**
-     * The STLViewerController instance to handle viewer-related operations.
+     * The GUIController instance to handle viewer-related operations.
      */
-    private STLViewerController stlViewerController;
+    private GUIController GUIController;
     /**
      * A flag to indicate if the application is running.
      */
     private boolean closeApplication = false;
 
     /**
-     * Constructs a P2PController with the specified stlViewerController.
-     * Precondition: The stlViewerController should be initialized.
+     * Constructs a P2PController with the specified GUIController.
+     * Precondition: The GUIController should be initialized.
      * Postcondition: The P2PController is created.
      *
-     * @param stlViewerController - The corresponding STLViewerController instance to handle viewer-related operations.
+     * @param GUIController - The corresponding GUIController instance to handle viewer-related operations.
      */
-    public P2PController (STLViewerController stlViewerController)
+    public P2PController (GUIController GUIController)
     {
-        this.stlViewerController = stlViewerController;
-        this.stlViewerController.setP2PController(this);
+        this.GUIController = GUIController;
+        this.GUIController.setP2PController(this);
     }
 
     /**
@@ -65,7 +65,7 @@ public class P2PController
     public void startServer (int port)
     {
         new Thread(() -> {
-            p2pServer = new P2PServer(port, stlViewerController);
+            p2pServer = new P2PServer(port, GUIController);
             p2pServer.start();
         }).start();
     }

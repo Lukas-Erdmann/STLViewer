@@ -14,11 +14,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The masterController class is the main controller class of the application.
+ * The MainController class is the main controller class of the application.
  * It is responsible for managing the different controllers and starting the application.
  * It also provides methods to open files, read STL files, start the TCP connection, and sort triangles.
  */
-public class masterController
+public class MainController
 {
     /**
      * The mode of the application. (CONSOLE, TCP, P2P)
@@ -33,9 +33,9 @@ public class masterController
      */
     private final STLReader stlReader;
     /**
-     * The STLViewerController instance to manage the STL viewer.
+     * The GUIController instance to manage the STL viewer.
      */
-    private STLViewerController stlViewerController;
+    private GUIController GUIController;
     /**
      * The PolyhedronController instance to manage the polyhedron data when reading the file in the console.
      */
@@ -59,13 +59,13 @@ public class masterController
      */
     private P2PController p2pController2;
     /**
-     * The STLViewerController instance to manage the first peer-to-peer STL viewer.
+     * The GUIController instance to manage the first peer-to-peer STL viewer.
      */
-    private STLViewerController stlViewerControllerP2P1;
+    private GUIController GUIControllerP2P1;
     /**
-     * The STLViewerController instance to manage the second peer-to-peer STL viewer.
+     * The GUIController instance to manage the second peer-to-peer STL viewer.
      */
-    private STLViewerController stlViewerControllerP2P2;
+    private GUIController GUIControllerP2P2;
 
     // -- Stages --
     /**
@@ -78,16 +78,16 @@ public class masterController
     private Stage stageP2P2;
 
     /**
-     * The logger for the masterController class.
+     * The logger for the MainController class.
      */
-    private static final Logger LOGGER = Logger.getLogger(masterController.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
     /**
-     * Constructs an masterController with the default controllers.
+     * Constructs an MainController with the default controllers.
      * Precondition: None
-     * Post-Condition: An masterController instance is created.
+     * Post-Condition: An MainController instance is created.
      */
-    public masterController (Stage stage, String userOperationMode, boolean parallelized) throws IOException {
+    public MainController (Stage stage, String userOperationMode, boolean parallelized) throws IOException {
         this.mainStage = stage;
         this.parallelized = parallelized;
         // Reader always initialized
@@ -97,22 +97,22 @@ public class masterController
         {
             case Strings.CONSOLE_MODE: // Console mode
                 this.userOperationMode = Strings.CONSOLE_MODE;
-                this.stlViewerController = new STLViewerController(this);
+                this.GUIController = new GUIController(this);
                 this.consoleApplication = new ConsoleApplication();
                 readSTLFileInConsole(parallelized);
                 break;
             case Strings.TCP_MODE: // TCP mode
                 this.userOperationMode = Strings.TCP_MODE;
-                this.stlViewerController = new STLViewerController(this);
+                this.GUIController = new GUIController(this);
                 this.tcpController = new TCPController();
                 startTCPConnection();
                 break;
             case Strings.P2P_MODE: // Peer-to-peer mode
                 this.userOperationMode = Strings.P2P_MODE;
-                this.stlViewerControllerP2P1 = new STLViewerController(this);
-                this.stlViewerControllerP2P2 = new STLViewerController(this);
-                this.p2pController1 = new P2PController(stlViewerControllerP2P1);
-                this.p2pController2 = new P2PController(stlViewerControllerP2P2);
+                this.GUIControllerP2P1 = new GUIController(this);
+                this.GUIControllerP2P2 = new GUIController(this);
+                this.p2pController1 = new P2PController(GUIControllerP2P1);
+                this.p2pController2 = new P2PController(GUIControllerP2P2);
                 startP2PConnection();
                 break;
             default:
@@ -176,14 +176,14 @@ public class masterController
             startTCPServer(Constants.SERVER_PORT);
 
             // Set the callback to start the client after the file is loaded
-            stlViewerController.setOnFileLoadedCallback((_) ->
+            GUIController.setOnFileLoadedCallback((_) ->
                     startTCPClient(Strings.LOCALHOST, Constants.SERVER_PORT));
 
             // Start the STL viewer without blocking the main thread
             Platform.runLater(() -> {
                 try
                 {
-                    stlViewerController.startSTLViewer(mainStage);
+                    GUIController.startSTLViewer(mainStage);
                 } catch (Exception exception)
                 {
                     throw new RuntimeException(Strings.EXCEPTION_WHEN_ATTEMPTING_TO_START_STL_VIEWER, exception);
@@ -204,7 +204,7 @@ public class masterController
      */
     public void startTCPServer (int port)
     {
-        tcpController.startServer(port, stlViewerController);
+        tcpController.startServer(port, GUIController);
     }
 
     /**
@@ -240,9 +240,9 @@ public class masterController
             Platform.runLater(() -> {
                 try
                 {
-                    stlViewerControllerP2P1.startSTLViewer(mainStage);
+                    GUIControllerP2P1.startSTLViewer(mainStage);
                     stageP2P2 = new Stage();
-                    stlViewerControllerP2P2.startSTLViewer(stageP2P2);
+                    GUIControllerP2P2.startSTLViewer(stageP2P2);
                 } catch (Exception exception)
                 {
                     throw new RuntimeException(Strings.EXCEPTION_WHEN_ATTEMPTING_TO_START_STL_VIEWER, exception);

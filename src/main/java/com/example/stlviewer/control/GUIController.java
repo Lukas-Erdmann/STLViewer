@@ -28,12 +28,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public class STLViewerController
+public class GUIController
 {
     /**
-     * The masterController instance to manage the application.
+     * The MainController instance to manage the application.
      */
-    private final masterController masterController;
+    private final MainController MainController;
     /**
      * The polyhedronController instance to manage the polyhedron data.
      */
@@ -103,10 +103,6 @@ public class STLViewerController
      */
     private final DoubleProperty zoomCoefficient = new SimpleDoubleProperty(0.0001);
     /**
-     * The initial distance between the camera and the mesh.
-     */
-    private double initialDistance;
-    /**
      * The boolean property to check if the mesh is loaded.
      */
     private final BooleanProperty isMeshLoaded = new SimpleBooleanProperty(false);
@@ -120,13 +116,13 @@ public class STLViewerController
     private Consumer<Void> onFileLoadedCallback;
 
     /**
-     * Constructs a new STLViewerController instance.
+     * Constructs a new GUIController instance.
      *
-     * @param masterController - The masterController instance to manage the application.
+     * @param MainController - The MainController instance to manage the application.
      */
-    public STLViewerController (masterController masterController)
+    public GUIController (MainController MainController)
     {
-        this.masterController = masterController;
+        this.MainController = MainController;
         this.stlViewer = new STLViewer(this);
         // Create the materials for the mesh
         createMaterials();
@@ -182,7 +178,7 @@ public class STLViewerController
             Task<Void> loadFileTask = new Task<>() {
                 @Override
                 protected Void call() throws Exception {
-                    masterController.openFile(filePath, polyhedronController);
+                    MainController.openFile(filePath, polyhedronController);
                     return null;
                 }
             };
@@ -207,7 +203,8 @@ public class STLViewerController
     }
 
     /**
-     * Sets the consumer callback to execute when a file is loaded.
+     * Sets the consumer callback to execute when a file is loaded. This is used to prevent the controller from executing
+     * methods that rely on the file being loaded before the file is actually loaded.
      * Precondition: The callback must be valid.
      * Postcondition: The callback is set.
      *
@@ -358,8 +355,6 @@ public class STLViewerController
 
         // Set the initial camera position
         translation.setZ(-longestSideLength * Constants.Z_DISTANCE_FACTOR);
-        // Set the initial distance
-        initialDistance = getDistanceBetweenCameraAndMeshView3D();
 
         // Set camera properties
         stlViewer.getPerspectiveCamera().setNearClip(0.001);
@@ -542,6 +537,15 @@ public class STLViewerController
         sendP2PData(collectP2PData(false));
     }
 
+    /**
+     * Translates the model based on the given offset values. Used by the translation dialog of the GUI to translate the model.
+     * Precondition: The offset values must be valid doubles.
+     * Postcondition: The model is translated based on the offset values.
+     *
+     * @param offsetX The X offset to translate the model by.
+     * @param offsetY The Y offset to translate the model by.
+     * @param offsetZ The Z offset to translate the model by.
+     */
     public void translateModel (double offsetX, double offsetY, double offsetZ)
     {
         // Invert the X translation value to give the user the illusion of moving the model instead of the camera
@@ -698,6 +702,311 @@ public class STLViewerController
         rotationX.angleProperty().addListener((observable, oldValue, newValue) -> stlViewer.updateViewProperties());
         rotationY.angleProperty().addListener((observable, oldValue, newValue) -> stlViewer.updateViewProperties());
         // TODO: Find out how to use Listeners to trigger the sendP2PData method
+    }
+
+    // --- P2P methods --- //
+
+    /**
+     * Sends the P2P data to the connected peer, if the P2P controller is running.
+     * Precondition: The P2P controller must be running.
+     * Postcondition: The data is sent to the connected peer.
+     *
+     * @param p2pPackage - The P2P package to send.
+     */
+    public void sendP2PData (P2PPackage p2pPackage)
+    {
+        if (p2pController != null)
+        {
+            p2pController.sendData(p2pPackage);
+        }
+    }
+
+    /**
+     * Collects the P2P data to send to the connected peer.
+     * Precondition: None
+     * Postcondition: The P2P data is collected and returned.
+     *
+     * @return The collected P2P data.
+     */
+    public P2PPackage collectP2PData (boolean sendPolyhedron)
+    {
+        if (sendPolyhedron)
+        {
+            return new P2PPackage(
+                    polyhedronController.getPolyhedron(),
+                    translation.getX(),
+                    translation.getY(),
+                    translation.getZ(),
+                    rotationX.getAngle(),
+                    rotationY.getAngle(),
+                    zoomLimit.get(),
+                    zoomCoefficient.get(),
+                    currentMaterial
+            );
+        } else
+        {
+            return new P2PPackage(
+                    null,
+                    translation.getX(),
+                    translation.getY(),
+                    translation.getZ(),
+                    rotationX.getAngle(),
+                    rotationY.getAngle(),
+                    zoomLimit.get(),
+                    zoomCoefficient.get(),
+                    currentMaterial
+            );
+        }
+    }
+
+    /**
+     * Processes the P2P data by updating the model and the transformations.
+     * Precondition: The data must be a P2PPackage.
+     * Postcondition: The model and transformations are updated based on the data.
+     *
+     * @param data - The data to process.
+     */
+    public void processP2PData (Object data)
+    {
+        // If the data is a P2PPackage, process the package
+        if (data instanceof P2PPackage p2pPackage)
+        {
+            System.out.println("[" + java.time.LocalTime.now() + "] [" + this + "] P2P package: " + p2pPackage);
+            // runLater is used to update the JavaFX application thread and avoid concurrency issues
+            Platform.runLater(() -> {
+                // Only update the model if new
+                if (!isMeshLoaded.get() && p2pPackage.getPolyhedron() != null)
+                {
+                    // Create a new polyhedron controller with the received polyhedron
+                    polyhedronController = new PolyhedronController(p2pPackage.getPolyhedron());
+                    // Clear the scene of the old model
+                    clearScene();
+                    // Display the model
+                    stlViewer.displayModel(polyhedronController.getPolyhedron());
+                }
+                // Update the material separately if only it changed
+                else if (!currentMaterial.equals(p2pPackage.getMaterial()))
+                {
+                    currentMaterial = p2pPackage.getMaterial();
+                    stlViewer.updateMaterialData();
+                }
+                // Update translations if necessary
+                if (p2pPackage.getTranslationX() != translation.getX())
+                {
+                    translation.setX(p2pPackage.getTranslationX());
+                }
+                if (p2pPackage.getTranslationY() != translation.getY())
+                {
+                    translation.setY(p2pPackage.getTranslationY());
+                }
+                if (p2pPackage.getTranslationZ() != translation.getZ())
+                {
+                    translation.setZ(p2pPackage.getTranslationZ());
+                }
+
+                // Update rotations if necessary
+                if (p2pPackage.getRotationX() != rotationX.getAngle())
+                {
+                    rotationX.setAngle(p2pPackage.getRotationX());
+                }
+                if (p2pPackage.getRotationY() != rotationY.getAngle())
+                {
+                    rotationY.setAngle(p2pPackage.getRotationY());
+                }
+
+                // Update the zoom parameters if necessary
+                if (p2pPackage.getZoomLimit() != zoomLimit.get())
+                {
+                    zoomLimit.set(p2pPackage.getZoomLimit());
+                }
+                if (p2pPackage.getZoomCoefficient() != zoomCoefficient.get())
+                {
+                    zoomCoefficient.set(p2pPackage.getZoomCoefficient());
+                }
+            });
+        } else
+        {
+            System.out.println(Strings.INVALID_P2P_PACKAGE);
+        }
+    }
+
+    /**
+     * Setter for the P2PController instance.
+     * @param p2pController - The P2PController instance to set.
+     */
+    public void setP2PController (P2PController p2pController)
+    {
+        this.p2pController = p2pController;
+    }
+
+    // --- Material methods --- //
+
+    /**
+     * Creates the materials that can be applied to the 3D model. The materials are created based on the material data
+     * which contains the name, density, and color of the material. Additionally, a description of the material is added.
+     * The list of materials is then passed to the STL viewer.
+     * <p>Precondition: The stlViewer must be initialized and the material data must be valid.
+     * <p>Postcondition: The materials are created and set for the STL viewer.
+     */
+    public void createMaterials() {
+        String[][] materialData = {
+                Strings.MATERIAL_DATA_STEEL,
+                Strings.MATERIAL_DATA_ALUMINIUM,
+                Strings.MATERIAL_DATA_COPPER,
+                Strings.MATERIAL_DATA_BRASS,
+                Strings.MATERIAL_DATA_GOLD,
+                Strings.MATERIAL_DATA_SILVER,
+                Strings.MATERIAL_DATA_CHROME,
+                Strings.MATERIAL_DATA_TITANIUM,
+                Strings.MATERIAL_DATA_PLA
+        };
+        // TODO: Implement a way to add custom materials
+        // TODO: Import material data from JSON or CSV file
+
+        ArrayList<Material> materials = new ArrayList<>();
+        for (String[] data : materialData) {
+            Material material = new Material(data[Constants.MAT_POS_NAME], Integer.parseInt(data[Constants.MAT_POS_DENSITY]), data[Constants.MAT_POS_COLORHEX]);
+            material.setDescription(data[Constants.MAT_POS_DESC]);
+            materials.add(material);
+        }
+        stlViewer.setMaterials(materials);
+    }
+
+    /**
+     * Calculates the mass of the 3D model based on the density of the material. The weight is calculated by the polyhedron controller.
+     * Precondition: The polyhedron's volume must be calculated and the controller must be initialized.
+     * Postcondition: The mass of the 3D model is returned.
+     *
+     * @param material - The material to calculate the weight with.
+     * @return The weight of the 3D model.
+     */
+    public double calculateMass (Material material)
+    {
+        return polyhedronController.calculateWeight(material.getDensity());
+    }
+
+    /**
+     * Gets the current material applied to the 3D model.
+     *
+     * @return The current material applied to the 3D model.
+     */
+    public com.example.stlviewer.model.Material getCurrentMaterial() {
+        return currentMaterial;
+    }
+
+    /**
+     * Sets the current material applied to the 3D model and triggers the sendP2PData method.
+     *
+     * @param currentMaterial - The current material applied to the 3D model.
+     */
+    public void setCurrentMaterial(com.example.stlviewer.model.Material currentMaterial) {
+        this.currentMaterial = currentMaterial;
+        if (MainController.getUserOperationMode().equals("P2P")) {
+            sendP2PData(collectP2PData(false));
+        }
+    }
+
+    // --- Getters and Setters --- //
+
+    /**
+     * Gets the current unit of length. The unit of length is determined by the length factor of the polyhedron controller.
+     * If the length factor has no matching unit, the length factor is set to 1 and the unit is set to meters.
+     * <p>Precondition: The polyhedron controller must be initialized.
+     * <p>Postcondition: The unit of length is returned.
+     *
+     * @return The unit of length.
+     */
+    public String getUnitLength ()
+    {
+        if (polyhedronController.getLengthFactor() == 1)
+        {
+            return "m";
+        } else if (polyhedronController.getLengthFactor() == 100)
+        {
+            return "cm";
+        } else if (polyhedronController.getLengthFactor() == 1000)
+        {
+            return "mm";
+        } else if (polyhedronController.getLengthFactor() == 1 / Constants.INCH_TO_METER)
+        {
+            return "in";
+        } else
+        {
+            polyhedronController.setLengthFactor(1);
+            return "m";
+        }
+    }
+
+    /**
+     * Gets the current unit of mass. The unit of mass is determined by the mass factor of the polyhedron controller.
+     * If the mass factor has no matching unit, the mass factor is set to 1 and the unit is set to kilograms.
+     * <p>Precondition: The polyhedron controller must be initialized.
+     * <p>Postcondition: The unit of mass is returned.
+     *
+     * @return The unit of mass.
+     */
+    public String getUnitMass ()
+    {
+        if (polyhedronController.getMassFactor() == 1)
+        {
+            return "kg";
+        } else if (polyhedronController.getMassFactor() == 1000)
+        {
+            return "g";
+        } else if (polyhedronController.getMassFactor() == Constants.KG_TO_LB)
+        {
+            return "lb";
+        } else
+        {
+            polyhedronController.setMassFactor(1);
+            return "kg";
+        }
+    }
+
+    /**
+     * Sets the unit system of the 3D model. The unit system is set based on the length and mass units.
+     * The length unit is used to set the length factor of the polyhedron controller. The mass unit is used to set the mass factor.
+     * The volume, surface area, and mass of the 3D model are recalculated based on the new units.
+     * The STL viewer is then updated with the new volume, surface area, and mass.
+     * <p>Precondition: The length unit and mass unit must be valid strings.
+     * <p>Postcondition: The unit system of the 3D model is set.
+     *
+     * @param newLengthUnit - The new length unit to set.
+     * @param newMassUnit - The new mass unit to set.
+     */
+    public void setUnitSystem (String newLengthUnit, String newMassUnit)
+    {
+        switch (newLengthUnit)
+        {
+            case "m":
+                polyhedronController.setLengthFactor(1);
+                break;
+            case "cm":
+                polyhedronController.setLengthFactor(100);
+                break;
+            case "mm":
+                polyhedronController.setLengthFactor(1000);
+                break;
+            case "inch":
+                polyhedronController.setLengthFactor(1 / Constants.INCH_TO_METER);
+                break;
+        }
+
+        switch (newMassUnit)
+        {
+            case "kg":
+                polyhedronController.setMassFactor(1);
+                break;
+            case "g":
+                polyhedronController.setMassFactor(1000);
+                break;
+            case "lb":
+                polyhedronController.setMassFactor(Constants.KG_TO_LB);
+                break;
+        }
+
+        stlViewer.updateWithNewUnits(polyhedronController.calculateVolume(),
+                polyhedronController.calculateSurfaceArea(), calculateMass(currentMaterial), newMassUnit);
     }
 
     /**
@@ -863,264 +1172,5 @@ public class STLViewerController
     public void setMeshLoaded(boolean isLoaded)
     {
         isMeshLoaded.set(isLoaded);
-    }
-
-    // --- P2P methods --- //
-
-    /**
-     * Sends the P2P data to the connected peer, if the P2P controller is running.
-     * Precondition: The P2P controller must be running.
-     * Postcondition: The data is sent to the connected peer.
-     *
-     * @param p2pPackage - The P2P package to send.
-     */
-    public void sendP2PData (P2PPackage p2pPackage)
-    {
-        if (p2pController != null)
-        {
-            p2pController.sendData(p2pPackage);
-        }
-    }
-
-    /**
-     * Collects the P2P data to send to the connected peer.
-     * Precondition: None
-     * Postcondition: The P2P data is collected and returned.
-     *
-     * @return The collected P2P data.
-     */
-    public P2PPackage collectP2PData (boolean sendPolyhedron)
-    {
-        if (sendPolyhedron)
-        {
-            return new P2PPackage(
-                    polyhedronController.getPolyhedron(),
-                    translation.getX(),
-                    translation.getY(),
-                    translation.getZ(),
-                    rotationX.getAngle(),
-                    rotationY.getAngle(),
-                    zoomLimit.get(),
-                    zoomCoefficient.get(),
-                    currentMaterial
-            );
-        } else
-        {
-            return new P2PPackage(
-                    null,
-                    translation.getX(),
-                    translation.getY(),
-                    translation.getZ(),
-                    rotationX.getAngle(),
-                    rotationY.getAngle(),
-                    zoomLimit.get(),
-                    zoomCoefficient.get(),
-                    currentMaterial
-            );
-        }
-    }
-
-    /**
-     * Processes the P2P data by updating the model and the transformations.
-     * Precondition: The data must be a P2PPackage.
-     * Postcondition: The model and transformations are updated based on the data.
-     *
-     * @param data - The data to process.
-     */
-    public void processP2PData (Object data)
-    {
-        // If the data is a P2PPackage, process the package
-        if (data instanceof P2PPackage p2pPackage)
-        {
-            System.out.println("[" + java.time.LocalTime.now() + "] [" + this + "] P2P package: " + p2pPackage);
-            // runLater is used to update the JavaFX application thread and avoid concurrency issues
-            Platform.runLater(() -> {
-                // Only update the model if new
-                if (!isMeshLoaded.get() && p2pPackage.getPolyhedron() != null)
-                {
-                    // Create a new polyhedron controller with the received polyhedron
-                    polyhedronController = new PolyhedronController(p2pPackage.getPolyhedron());
-                    // Clear the scene of the old model
-                    clearScene();
-                    // Display the model
-                    stlViewer.displayModel(polyhedronController.getPolyhedron());
-                }
-                // Update the material separately if only it changed
-                else if (!currentMaterial.equals(p2pPackage.getMaterial()))
-                {
-                    currentMaterial = p2pPackage.getMaterial();
-                    stlViewer.updateMaterialData();
-                }
-                // Update translations if necessary
-                if (p2pPackage.getTranslationX() != translation.getX())
-                {
-                    translation.setX(p2pPackage.getTranslationX());
-                }
-                if (p2pPackage.getTranslationY() != translation.getY())
-                {
-                    translation.setY(p2pPackage.getTranslationY());
-                }
-                if (p2pPackage.getTranslationZ() != translation.getZ())
-                {
-                    translation.setZ(p2pPackage.getTranslationZ());
-                }
-
-                // Update rotations if necessary
-                if (p2pPackage.getRotationX() != rotationX.getAngle())
-                {
-                    rotationX.setAngle(p2pPackage.getRotationX());
-                }
-                if (p2pPackage.getRotationY() != rotationY.getAngle())
-                {
-                    rotationY.setAngle(p2pPackage.getRotationY());
-                }
-
-                // Update the zoom parameters if necessary
-                if (p2pPackage.getZoomLimit() != zoomLimit.get())
-                {
-                    zoomLimit.set(p2pPackage.getZoomLimit());
-                }
-                if (p2pPackage.getZoomCoefficient() != zoomCoefficient.get())
-                {
-                    zoomCoefficient.set(p2pPackage.getZoomCoefficient());
-                }
-            });
-        } else
-        {
-            System.out.println(Strings.INVALID_P2P_PACKAGE);
-        }
-    }
-
-    /**
-     * Setter for the P2PController instance.
-     * @param p2pController - The P2PController instance to set.
-     */
-    public void setP2PController (P2PController p2pController)
-    {
-        this.p2pController = p2pController;
-    }
-
-    public void createMaterials() {
-        String[][] materialData = {
-                {"Steel", "7900", "#888B8D", "Steel is a strong alloy of iron and carbon.\nDensity: 7900 kg/m³"},
-                {"Aluminium", "2710", "#D0D5D9", "Aluminium is a lightweight metal with good thermal and electrical conductivity.\nDensity: 2710 kg/m³"},
-                {"Copper", "8960", "#B77729", "Copper is a ductile metal with high thermal and electrical conductivity.\nDensity: 8960 kg/m³"},
-                {"Brass", "8600", "#AC9F3C", "Brass is an alloy of copper and zinc.\nDensity: 8600 kg/m³"},
-                {"Gold", "19320", "#CBA135", "Gold is a precious metal with high thermal and electrical conductivity.\nDensity: 19320 kg/m³"},
-                {"Silver", "10490", "#C0C0C0", "Silver is a precious metal with high thermal and electrical conductivity.\nDensity: 10490 kg/m³"},
-                {"Chrome", "7190", "#DBE2E9", "Chrome is a shiny metal with good corrosion resistance.\nDensity: 7190 kg/m³"},
-                {"Titanium", "4506", "#878681", "Titanium is a strong, lightweight metal with good corrosion resistance.\nDensity: 4506 kg/m³"},
-                {"Plastic (PLA)", "1240", "#FF9913", "PLA is a biodegradable plastic made from renewable resources.\nDensity: 1240 kg/m³"}
-        };
-        // TODO: Implement a way to add custom materials
-        // TODO: Import material data from JSON or CSV file
-
-        ArrayList<Material> materials = new ArrayList<>();
-        for (String[] data : materialData) {
-            Material material = new Material(data[0], Integer.parseInt(data[1]), data[2]);
-            material.setDescription(data[3]);
-            materials.add(material);
-        }
-        stlViewer.setMaterials(materials);
-    }
-
-    public double calculateWeight (Material material)
-    {
-        return polyhedronController.calculateWeight(material.getDensity());
-    }
-
-    /**
-     * Gets the current material applied to the 3D model.
-     *
-     * @return The current material applied to the 3D model.
-     */
-    public com.example.stlviewer.model.Material getCurrentMaterial() {
-        return currentMaterial;
-    }
-
-    /**
-     * Sets the current material applied to the 3D model and triggers the sendP2PData method.
-     *
-     * @param currentMaterial - The current material applied to the 3D model.
-     */
-    public void setCurrentMaterial(com.example.stlviewer.model.Material currentMaterial) {
-        this.currentMaterial = currentMaterial;
-        if (masterController.getUserOperationMode().equals("P2P")) {
-            sendP2PData(collectP2PData(false));
-        }
-    }
-
-    public String getUnitLength ()
-    {
-        if (polyhedronController.getLengthFactor() == 1)
-        {
-            return "m";
-        } else if (polyhedronController.getLengthFactor() == 100)
-        {
-            return "cm";
-        } else if (polyhedronController.getLengthFactor() == 1000)
-        {
-            return "mm";
-        } else if (polyhedronController.getLengthFactor() == 1 / Constants.INCH_TO_METER)
-        {
-            return "in";
-        } else
-        {
-            polyhedronController.setLengthFactor(1);
-            return "m";
-        }
-    }
-
-    public String getUnitMass ()
-    {
-        if (polyhedronController.getMassFactor() == 1)
-        {
-            return "kg";
-        } else if (polyhedronController.getMassFactor() == 1000)
-        {
-            return "g";
-        } else if (polyhedronController.getMassFactor() == Constants.KG_TO_LB)
-        {
-            return "lb";
-        } else
-        {
-            polyhedronController.setMassFactor(1);
-            return "kg";
-        }
-    }
-
-    public void setUnitSystem (String newLengthUnit, String newMassUnit)
-    {
-        switch (newLengthUnit)
-        {
-            case "m":
-                polyhedronController.setLengthFactor(1);
-                break;
-            case "cm":
-                polyhedronController.setLengthFactor(100);
-                break;
-            case "mm":
-                polyhedronController.setLengthFactor(1000);
-                break;
-            case "inch":
-                polyhedronController.setLengthFactor(1 / Constants.INCH_TO_METER);
-                break;
-        }
-
-        switch (newMassUnit)
-        {
-            case "kg":
-                polyhedronController.setMassFactor(1);
-                break;
-            case "g":
-                polyhedronController.setMassFactor(1000);
-                break;
-            case "lb":
-                polyhedronController.setMassFactor(Constants.KG_TO_LB);
-                break;
-        }
-
-        stlViewer.updateWithNewUnits(polyhedronController.calculateVolume(),
-                polyhedronController.calculateSurfaceArea(), calculateWeight(currentMaterial), newMassUnit);
     }
 }

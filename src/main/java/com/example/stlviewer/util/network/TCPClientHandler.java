@@ -1,6 +1,6 @@
 package com.example.stlviewer.util.network;
 
-import com.example.stlviewer.control.STLViewerController;
+import com.example.stlviewer.control.GUIController;
 import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 
@@ -23,7 +23,7 @@ public class TCPClientHandler extends Thread
     /**
      * The controller for the STL viewer application.
      */
-    private final STLViewerController stlViewerController;
+    private final GUIController GUIController;
 
     /**
      * Constructs a TCPClientHandler with the specified client socket and controller.
@@ -31,12 +31,12 @@ public class TCPClientHandler extends Thread
      * Postcondition: A TCPClientHandler instance is created with the given client socket and controller.
      *
      * @param clientSocket        - The client socket for communication with the client.
-     * @param stlViewerController - The controller for the STL viewer application.
+     * @param GUIController - The controller for the STL viewer application.
      */
-    public TCPClientHandler (Socket clientSocket, STLViewerController stlViewerController)
+    public TCPClientHandler (Socket clientSocket, GUIController GUIController)
     {
         this.clientSocket = clientSocket;
-        this.stlViewerController = stlViewerController;
+        this.GUIController = GUIController;
     }
 
     /**
@@ -128,10 +128,10 @@ public class TCPClientHandler extends Thread
         switch (commandType)
         {
             case Strings.COMMAND_TYPE_TRANSLATE:
-                stlViewerController.translateModel(axis, amount);
+                GUIController.translateModel(axis, amount);
                 break;
             case Strings.COMMAND_TYPE_ROTATE:
-                stlViewerController.rotateModel(axis, amount);
+                GUIController.rotateModel(axis, amount);
                 break;
             default:
                 output.println(Strings.COMMAND_COULDN_T_BE_EXECUTED + commandType);

@@ -1,6 +1,6 @@
 package com.example.stlviewer.view;
 
-import com.example.stlviewer.control.STLViewerController;
+import com.example.stlviewer.control.GUIController;
 import com.example.stlviewer.model.Polyhedron;
 import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
@@ -86,7 +86,7 @@ public class STLViewer extends Application
     /**
      * The controller for the STL viewer application.
      */
-    private STLViewerController stlViewerController;
+    private GUIController GUIController;
     /**
      * The SubScene object for the 3D view.
      */
@@ -101,11 +101,11 @@ public class STLViewer extends Application
      * Precondition: The controller should be initialized.
      * Postcondition: An STLViewer instance is created with the given controller.
      *
-     * @param stlViewerController - The controller for the STL viewer application.
+     * @param GUIController - The controller for the STL viewer application.
      */
-    public STLViewer (STLViewerController stlViewerController)
+    public STLViewer (GUIController GUIController)
     {
-        this.stlViewerController = stlViewerController;
+        this.GUIController = GUIController;
     }
 
     /**
@@ -174,7 +174,7 @@ public class STLViewer extends Application
         Menu menuFile = new Menu(Strings.STLV_MENU);
         // Add menu items
         MenuItem menuItemOpen = new MenuItem(Strings.STLV_OPEN_FILE);
-        menuItemOpen.setOnAction(e -> stlViewerController.openFile(stage));
+        menuItemOpen.setOnAction(e -> GUIController.openFile(stage));
         MenuItem menuItemExit = new MenuItem(Strings.STLV_EXIT);
         menuItemExit.setOnAction(e -> System.exit(0));
         menuFile.getItems().addAll(menuItemOpen, menuItemExit);
@@ -223,11 +223,11 @@ public class STLViewer extends Application
         menuItemSetColor.setOnAction(_ -> openColorDialog());
         // Material menu
         MenuItem menuItemSetMaterial = new MenuItem(Strings.STLV_SET_MATERIAL);
-        menuItemSetMaterial.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
+        menuItemSetMaterial.disableProperty().bind(GUIController.isMeshLoadedProperty().not());
         menuItemSetMaterial.setOnAction(_ -> openMaterialDialog());
         // Unit system menu
         MenuItem menuItemSetUnitSystem = new MenuItem(Strings.STLV_SET_UNITS);
-        menuItemSetUnitSystem.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
+        menuItemSetUnitSystem.disableProperty().bind(GUIController.isMeshLoadedProperty().not());
         menuItemSetUnitSystem.setOnAction(_ -> openUnitsDialog());
 
         menuEdit.getItems().addAll(menuItemSetColor, menuItemSetMaterial, menuItemSetUnitSystem);
@@ -294,9 +294,9 @@ public class STLViewer extends Application
         for (com.example.stlviewer.model.Material material : materials) {
             materialComboBox.getItems().add(material.getName());
         }
-        materialComboBox.setValue(stlViewerController.getCurrentMaterial().getName()); // Default material is the first one
+        materialComboBox.setValue(GUIController.getCurrentMaterial().getName()); // Default material is the first one
         // The description of the selected material is displayed beneath the dropdown menu
-        Label materialDescription = new Label(stlViewerController.getCurrentMaterial().getDescription());
+        Label materialDescription = new Label(GUIController.getCurrentMaterial().getDescription());
 
         // Add the dropdown with label and description to the dialog VBox
         dialogVBox.getChildren().addAll(
@@ -325,7 +325,7 @@ public class STLViewer extends Application
                     // Get material with the selected name
                     if (material.getName().equals(selectedMaterial)) {
                         // Apply the new material to the model
-                        stlViewerController.setCurrentMaterial(material);
+                        GUIController.setCurrentMaterial(material);
                         // Update the labels and recalculate the weight
                         updateMaterialData();
                         break;
@@ -382,11 +382,11 @@ public class STLViewer extends Application
         // Add the dropdown for the unit of length
         ComboBox<String> unitLengthComboBox = new ComboBox<>();
         unitLengthComboBox.getItems().addAll(Strings.STLV_UNIT_M, Strings.STLV_UNIT_CM, Strings.STLV_UNIT_MM, Strings.STLV_UNIT_INCH);
-        unitLengthComboBox.setValue(stlViewerController.getUnitLength());
+        unitLengthComboBox.setValue(GUIController.getUnitLength());
         // Add the dropdown for the unit of mass
         ComboBox<String> unitMassComboBox = new ComboBox<>();
         unitMassComboBox.getItems().addAll(Strings.STLV_UNIT_KG, Strings.STLV_UNIT_G, Strings.STLV_UNIT_LB);
-        unitMassComboBox.setValue(stlViewerController.getUnitMass());
+        unitMassComboBox.setValue(GUIController.getUnitMass());
 
         // Add the dropdown with label and scaling factor to the dialog VBox
         dialogVBox.getChildren().addAll(
@@ -403,7 +403,7 @@ public class STLViewer extends Application
             if (dialogButton == ButtonType.OK) {
                 String newLengthUnit = unitLengthComboBox.getValue();
                 String newMassUnit = unitMassComboBox.getValue();
-                stlViewerController.setUnitSystem(newLengthUnit, newMassUnit);
+                GUIController.setUnitSystem(newLengthUnit, newMassUnit);
             }
             return null;
         });
@@ -424,17 +424,17 @@ public class STLViewer extends Application
         Menu menuView = new Menu(Strings.STLV_VIEW);
         // Add menu items
         MenuItem menuItemTranslate = new MenuItem(Strings.STLV_TRANSLATE);
-        menuItemTranslate.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
+        menuItemTranslate.disableProperty().bind(GUIController.isMeshLoadedProperty().not());
         menuItemTranslate.setOnAction(e -> openTranslateDialog());
         MenuItem menuItemRotate = new MenuItem(Strings.STLV_ROTATE);
-        menuItemRotate.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
+        menuItemRotate.disableProperty().bind(GUIController.isMeshLoadedProperty().not());
         menuItemRotate.setOnAction(e -> openRotateDialog());
         MenuItem menuItemSetZoom = new MenuItem(Strings.STLV_SET_ZOOM);
-        menuItemSetZoom.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
+        menuItemSetZoom.disableProperty().bind(GUIController.isMeshLoadedProperty().not());
         menuItemSetZoom.setOnAction(e -> openZoomDialog());
         MenuItem menuItemResetZoom = new MenuItem(Strings.STLV_RESET_VIEW);
-        menuItemResetZoom.disableProperty().bind(stlViewerController.isMeshLoadedProperty().not());
-        menuItemResetZoom.setOnAction(e -> stlViewerController.resetView());
+        menuItemResetZoom.disableProperty().bind(GUIController.isMeshLoadedProperty().not());
+        menuItemResetZoom.setOnAction(e -> GUIController.resetView());
         menuView.getItems().addAll(menuItemTranslate, menuItemRotate, menuItemSetZoom, menuItemResetZoom);
         return menuView;
     }
@@ -477,7 +477,7 @@ public class STLViewer extends Application
                     double newTranslateX = Double.parseDouble(translateX.getText());
                     double newTranslateY = Double.parseDouble(translateY.getText());
                     double newTranslateZ = Double.parseDouble(translateZ.getText());
-                    stlViewerController.translateModel(newTranslateX, newTranslateY, newTranslateZ);
+                    GUIController.translateModel(newTranslateX, newTranslateY, newTranslateZ);
                 } catch (NumberFormatException e) {
                     // TODO: Handle invalid input
                 }
@@ -523,9 +523,9 @@ public class STLViewer extends Application
             if (dialogButton == ButtonType.OK) {
                 try {
                     double newRotateX = Double.parseDouble(rotateX.getText());
-                    stlViewerController.rotateModel(Strings.AXIS_X, newRotateX);
+                    GUIController.rotateModel(Strings.AXIS_X, newRotateX);
                     double newRotateY = Double.parseDouble(rotateY.getText());
-                    stlViewerController.rotateModel(Strings.AXIS_Y, newRotateY);
+                    GUIController.rotateModel(Strings.AXIS_Y, newRotateY);
                 } catch (NumberFormatException e) {
                     // TODO: Handle invalid input
                 }
@@ -554,10 +554,10 @@ public class STLViewer extends Application
         // Add the text field for the zoom values
         TextField zoomLimit = new TextField();
         zoomLimit.setPromptText(Strings.STLV_ZOOM_LIMIT);
-        zoomLimit.setText(String.valueOf(stlViewerController.getZoomLimit()));
+        zoomLimit.setText(String.valueOf(GUIController.getZoomLimit()));
         TextField zoomCoefficient = new TextField();
         zoomCoefficient.setPromptText(Strings.STLV_ZOOM_COEFF);
-        zoomCoefficient.setText(String.valueOf(stlViewerController.getZoomCoefficient()));
+        zoomCoefficient.setText(String.valueOf(GUIController.getZoomCoefficient()));
 
         // Add the text field with label to the dialog VBox
         dialogVBox.getChildren().addAll(
@@ -574,9 +574,9 @@ public class STLViewer extends Application
             if (dialogButton == ButtonType.OK) {
                 try {
                     double newZoomLimit = Double.parseDouble(zoomLimit.getText());
-                    stlViewerController.setZoomLimit(newZoomLimit);
+                    GUIController.setZoomLimit(newZoomLimit);
                     double newZoomCoefficient = Double.parseDouble(zoomCoefficient.getText());
-                    stlViewerController.setZoomCoefficient(newZoomCoefficient);
+                    GUIController.setZoomCoefficient(newZoomCoefficient);
                 } catch (NumberFormatException e) {
                     // TODO: Handle invalid input
                 }
@@ -636,26 +636,26 @@ public class STLViewer extends Application
         Platform.runLater(() -> {
             rotationLabel.setText(String.format(
                     Strings.STLV_VIEWPROP_ROTATE,
-                    stlViewerController.getRotationX().getAngle(),
-                    stlViewerController.getRotationY().getAngle()
+                    GUIController.getRotationX().getAngle(),
+                    GUIController.getRotationY().getAngle()
             ));
             translationLabel.setText(String.format(
                     Strings.STLV_VIEWPROP_TRANSLATE,
-                    stlViewerController.getTranslation().getX(),
-                    stlViewerController.getTranslation().getY(),
-                    stlViewerController.getTranslation().getZ()
+                    GUIController.getTranslation().getX(),
+                    GUIController.getTranslation().getY(),
+                    GUIController.getTranslation().getZ()
             ));
         });
     }
 
     public void updateMaterialData ()
     {
-        meshView.setMaterial(stlViewerController.getCurrentMaterial());
+        meshView.setMaterial(GUIController.getCurrentMaterial());
         Platform.runLater(() -> {
-            materialLabel.setText(stlViewerController.getCurrentMaterial().getName());
-            densityLabel.setText(String.format(Strings.FORMAT_STRING_2F, stlViewerController.getCurrentMaterial().getDensity()));
-            weightLabel.setText(String.format(Strings.FORMAT_STRING_2F, stlViewerController.calculateWeight(stlViewerController.getCurrentMaterial())) + " kg");
-            materialDescriptionLabel.setText(stlViewerController.getCurrentMaterial().getDescription());
+            materialLabel.setText(GUIController.getCurrentMaterial().getName());
+            densityLabel.setText(String.format(Strings.FORMAT_STRING_2F, GUIController.getCurrentMaterial().getDensity()));
+            weightLabel.setText(String.format(Strings.FORMAT_STRING_2F, GUIController.calculateMass(GUIController.getCurrentMaterial())) + " kg");
+            materialDescriptionLabel.setText(GUIController.getCurrentMaterial().getDescription());
         });
     }
 
@@ -720,7 +720,7 @@ public class STLViewer extends Application
         updateMaterialData();
 
         // Render the 3D model
-        stlViewerController.renderModel(polyhedron);
+        GUIController.renderModel(polyhedron);
     }
 
     /**

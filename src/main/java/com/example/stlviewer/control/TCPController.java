@@ -20,18 +20,18 @@ public class TCPController
 
     /**
      * Starts the server on its own thread.
-     * Precondition: The port must be valid and the stlViewerController must be initialized.
+     * Precondition: The port must be valid and the GUIController must be initialized.
      * Postcondition: The server is started on a new thread.
      *
      * @param port                - The port the server should listen on.
-     * @param stlViewerController - The STLViewerController that handles viewer operations.
+     * @param GUIController - The GUIController that handles viewer operations.
      */
-    public void startServer (int port, STLViewerController stlViewerController)
+    public void startServer (int port, GUIController GUIController)
     {
         new Thread(() -> {
             try
             {
-                tcpServer = new TCPServer(port, stlViewerController);
+                tcpServer = new TCPServer(port, GUIController);
                 tcpServer.start();
             } catch (Exception exception)
             {

@@ -92,4 +92,8 @@ public interface Constants
     int MATERIAL_TO_STRING_COLOR = 3;
     int MATERIAL_TO_STRING_SPECULAR_COLOR = 4;
     int MATERIAL_TO_STRING_SPECULAR_POWER = 5;
+    int MAT_POS_NAME = 0;
+    int MAT_POS_DENSITY = 1;
+    int MAT_POS_COLORHEX = 2;
+    int MAT_POS_DESC = 3;
 }

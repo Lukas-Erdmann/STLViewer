@@ -1,6 +1,6 @@
 package com.example.stlviewer.util.network;
 
-import com.example.stlviewer.control.STLViewerController;
+import com.example.stlviewer.control.GUIController;
 import com.example.stlviewer.res.Strings;
 
 import java.io.IOException;
@@ -11,7 +11,7 @@ import static com.example.stlviewer.util.RuntimeHandler.logMessage;
 
 /**
  * The TCPServer class listens for client connections and delegates the handling of each client to a
- * CPClientHandler instance. It runs on a specified port and communicates with the STLViewerController.
+ * CPClientHandler instance. It runs on a specified port and communicates with the GUIController.
  */
 public class TCPServer
 {
@@ -22,7 +22,7 @@ public class TCPServer
     /**
      * The controller for the STL viewer application.
      */
-    private final STLViewerController stlViewerController;
+    private final GUIController GUIController;
     /**
      * A flag to indicate if the application is running.
      */
@@ -34,12 +34,12 @@ public class TCPServer
      * Postcondition: A TCPServer instance is created with the given port and controller.
      *
      * @param port                - The port number on which the server listens for connections.
-     * @param stlViewerController - The controller for the STL viewer application.
+     * @param GUIController - The controller for the STL viewer application.
      */
-    public TCPServer (int port, STLViewerController stlViewerController)
+    public TCPServer (int port, GUIController GUIController)
     {
         this.port = port;
-        this.stlViewerController = stlViewerController;
+        this.GUIController = GUIController;
     }
 
     /**
@@ -105,7 +105,7 @@ public class TCPServer
      */
     private void handleClient (Socket clientSocket)
     {
-        new TCPClientHandler(clientSocket, stlViewerController).start();
+        new TCPClientHandler(clientSocket, GUIController).start();
     }
 
     /**

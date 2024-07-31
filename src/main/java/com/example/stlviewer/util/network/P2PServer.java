@@ -1,6 +1,6 @@
 package com.example.stlviewer.util.network;
 
-import com.example.stlviewer.control.STLViewerController;
+import com.example.stlviewer.control.GUIController;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -18,24 +18,24 @@ public class P2PServer extends Thread
      */
     private final int port;
     /**
-     * The stlViewerController instance that creates the displayinh application.
+     * The GUIController instance that creates the displayinh application.
      */
-    private final STLViewerController stlViewerController;
+    private final GUIController GUIController;
     /**
      * The server socket to listen for incoming connections.
      */
     private ServerSocket serverSocket;
 
     /**
-     * Constructs a P2PServer with the specified port and stlViewerController.
+     * Constructs a P2PServer with the specified port and GUIController.
      *
      * @param port                - The port to listen on.
-     * @param stlViewerController - The PolyhedronViewerController instance to handle client connections.
+     * @param GUIController - The PolyhedronViewerController instance to handle client connections.
      */
-    public P2PServer (int port, STLViewerController stlViewerController)
+    public P2PServer (int port, GUIController GUIController)
     {
         this.port = port;
-        this.stlViewerController = stlViewerController;
+        this.GUIController = GUIController;
     }
 
     /**
@@ -53,7 +53,7 @@ public class P2PServer extends Thread
             while (!serverSocket.isClosed())
             {
                 Socket clientSocket = serverSocket.accept();
-                new P2PClientHandler(clientSocket, stlViewerController).start();
+                new P2PClientHandler(clientSocket, GUIController).start();
             }
         } catch (IOException ioException)
         {

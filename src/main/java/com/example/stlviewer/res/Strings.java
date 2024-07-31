@@ -260,4 +260,13 @@ public interface Strings
     String MATERIAL_TO_STRING_4 = ", color=";
     String STL_ASCII_VERTEX_START_TAG = "vertex";
     String TRIANGLE_ID_ALREADY_EXISTS = "Triangle with ID %d already exists in the polyhedron.";
+    String[] MATERIAL_DATA_STEEL = {"Steel", "7900", "#888B8D", "Steel is a strong alloy of iron and carbon.\nDensity: 7900 kg/m³"};
+    String[] MATERIAL_DATA_ALUMINIUM = {"Aluminium", "2710", "#D0D5D9", "Aluminium is a lightweight metal with good thermal and electrical conductivity.\nDensity: 2710 kg/m³"};
+    String[] MATERIAL_DATA_COPPER = {"Copper", "8960", "#B77729", "Copper is a ductile metal with high thermal and electrical conductivity.\nDensity: 8960 kg/m³"};
+    String[] MATERIAL_DATA_BRASS = {"Brass", "8600", "#AC9F3C", "Brass is an alloy of copper and zinc.\nDensity: 8600 kg/m³"};
+    String[] MATERIAL_DATA_GOLD = {"Gold", "19320", "#CBA135", "Gold is a precious metal with high thermal and electrical conductivity.\nDensity: 19320 kg/m³"};
+    String[] MATERIAL_DATA_SILVER = {"Silver", "10490", "#C0C0C0", "Silver is a precious metal with high thermal and electrical conductivity.\nDensity: 10490 kg/m³"};
+    String[] MATERIAL_DATA_CHROME = {"Chrome", "7190", "#DBE2E9", "Chrome is a shiny metal with good corrosion resistance.\nDensity: 7190 kg/m³"};
+    String[] MATERIAL_DATA_TITANIUM = {"Titanium", "4506", "#878681", "Titanium is a strong, lightweight metal with good corrosion resistance.\nDensity: 4506 kg/m³"};
+    String[] MATERIAL_DATA_PLA = {"Plastic (PLA)", "1240", "#FF9913", "PLA is a biodegradable plastic made from renewable resources.\nDensity: 1240 kg/m³"};
 }
