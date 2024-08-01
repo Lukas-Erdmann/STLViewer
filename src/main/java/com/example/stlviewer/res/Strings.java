@@ -269,4 +269,11 @@ public interface Strings
     String[] MATERIAL_DATA_CHROME = {"Chrome", "7190", "#DBE2E9", "Chrome is a shiny metal with good corrosion resistance.\nDensity: 7190 kg/m³"};
     String[] MATERIAL_DATA_TITANIUM = {"Titanium", "4506", "#878681", "Titanium is a strong, lightweight metal with good corrosion resistance.\nDensity: 4506 kg/m³"};
     String[] MATERIAL_DATA_PLA = {"Plastic (PLA)", "1240", "#FF9913", "PLA is a biodegradable plastic made from renewable resources.\nDensity: 1240 kg/m³"};
+    String I_O_ERROR_WHILE_READING_THE_FILE = "I/O error while reading the file: ";
+    String FILE_IS_CORRUPTED_AND_CANNOT_BE_READ = "File is corrupted and cannot be read: ";
+    String AN_UNEXPECTED_ERROR_OCCURRED_WHILE_OPENING_THE_FILE = "An unexpected error occurred while opening the file: ";
+    String SORTED_TRIANGLES_BY_AREA = "Sorted triangles by area";
+    String DIVIDER = "==============================";
+    String NORMAL_DIRECTION_INCORRECT = "Normal is pointing in the wrong direction.";
+    String LOG_MESSAGE_FORMAT_STRING = "[%s][%s@%s] %s%n";
 }

@@ -45,17 +45,17 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
     {
         super(Constants.TRIANGLE_VERTEX_COUNT);
         // Set the vertices
-        vertices.add(0, v1);
-        vertices.add(1, v2);
-        vertices.add(2, v3);
+        vertices.add(Constants.TRIANGLE_VERTEX1_INDEX, v1);
+        vertices.add(Constants.TRIANGLE_VERTEX2_INDEX, v2);
+        vertices.add(Constants.TRIANGLE_VERTEX3_INDEX, v3);
 
         // Set the normal
-        edges.add(0, new Edge(v2, v1));
-        edges.add(1, new Edge(v3, v2));
-        edges.add(2, new Edge(v1, v3));
+        edges.add(Constants.TRIANGLE_VERTEX1_INDEX, new Edge(v2, v1));
+        edges.add(Constants.TRIANGLE_VERTEX2_INDEX, new Edge(v3, v2));
+        edges.add(Constants.TRIANGLE_VERTEX3_INDEX, new Edge(v1, v3));
 
         // The normal is the cross product of two edges in counter-clockwise order
-        this.getNormal().cross(edges.get(0), edges.get(1));
+        this.getNormal().cross(edges.get(Constants.N_ZERO), edges.get(Constants.N_ONE));
         // Normalize the normal, bringing it to unit length (length = 1)
         this.getNormal().normalize();
         // Compare the normal of the triangle with the normal passed as an argument
@@ -65,7 +65,12 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         comparisonNormal.cross(this.getNormal(), normal);
         if (comparisonNormal.length() > Constants.NORMAL_DIFFERENCE_ROUNDING_TOLERANCE)
         {
-            throw new IllegalArgumentException("Calculated triangle and passed normal difference exceeds rounding error tolerance.");
+            throw new IllegalArgumentException(Strings.NORMAL_DIFFERENCE_TOLERANCE_EXCEEDED);
+        }
+        // Check if the normal is pointing in the right direction
+        if (this.getNormal().dot(normal) < Constants.N_ZERO)
+        {
+            throw new IllegalArgumentException(Strings.NORMAL_DIRECTION_INCORRECT);
         }
         // Calculate the area of the triangle
         this.calculateArea();
@@ -82,19 +87,20 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
      */
     public Triangle (Vertex v1, Vertex v2, Vertex v3)
     {
-        super(3);
+        super(Constants.TRIANGLE_VERTEX_COUNT);
         // Set the vertices
-        vertices.add(0, v1);
-        vertices.add(1, v2);
-        vertices.add(2, v3);
+        // Set the vertices
+        vertices.add(Constants.TRIANGLE_VERTEX1_INDEX, v1);
+        vertices.add(Constants.TRIANGLE_VERTEX2_INDEX, v2);
+        vertices.add(Constants.TRIANGLE_VERTEX3_INDEX, v3);
 
         // Set the normal
-        edges.add(0, new Edge(v2, v1));
-        edges.add(1, new Edge(v3, v2));
-        edges.add(2, new Edge(v1, v3));
+        edges.add(Constants.TRIANGLE_VERTEX1_INDEX, new Edge(v2, v1));
+        edges.add(Constants.TRIANGLE_VERTEX2_INDEX, new Edge(v3, v2));
+        edges.add(Constants.TRIANGLE_VERTEX3_INDEX, new Edge(v1, v3));
 
         // The normal is the cross product of two edges in counter-clockwise order
-        this.getNormal().cross(edges.get(0), edges.get(1));
+        this.getNormal().cross(edges.get(Constants.N_ZERO), edges.get(Constants.N_ONE));
         // Normalize the normal, bringing it to unit length (length = 1)
         this.getNormal().normalize();
         // Calculate the area of the triangle
@@ -109,12 +115,12 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
     private void calculateArea ()
     {
         // Calculate the area of the triangle using Heron's formula
-        double a = edges.get(0).length();
-        double b = edges.get(1).length();
-        double c = edges.get(2).length();
+        double a = edges.get(Constants.TRIANGLE_VERTEX1_INDEX).length();
+        double b = edges.get(Constants.TRIANGLE_VERTEX2_INDEX).length();
+        double c = edges.get(Constants.TRIANGLE_VERTEX3_INDEX).length();
 
         // Calculate the semi-perimeter
-        double s = (a + b + c) / 2;
+        double s = (a + b + c) / Constants.N_TWO;
 
         // Calculate the area
         this.area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
@@ -134,22 +140,22 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
     public double calculateVolumeWithReferenceVertex (Vertex refVertex)
     {
         // where a, b, c are the vertices of the triangle and d is the reference vertex
-        Vector3d a = new Vector3d(vertices.get(0).getPosX() - refVertex.getPosX(),
-                vertices.get(0).getPosY() - refVertex.getPosY(),
-                vertices.get(0).getPosZ() - refVertex.getPosZ());
-        Vector3d b = new Vector3d(vertices.get(1).getPosX() - refVertex.getPosX(),
-                vertices.get(1).getPosY() - refVertex.getPosY(),
-                vertices.get(1).getPosZ() - refVertex.getPosZ());
-        Vector3d c = new Vector3d(vertices.get(2).getPosX() - refVertex.getPosX(),
-                vertices.get(2).getPosY() - refVertex.getPosY(),
-                vertices.get(2).getPosZ() - refVertex.getPosZ());
+        Vector3d a = new Vector3d(vertices.get(Constants.TRIANGLE_VERTEX1_INDEX).getPosX() - refVertex.getPosX(),
+                vertices.get(Constants.TRIANGLE_VERTEX1_INDEX).getPosY() - refVertex.getPosY(),
+                vertices.get(Constants.TRIANGLE_VERTEX1_INDEX).getPosZ() - refVertex.getPosZ());
+        Vector3d b = new Vector3d(vertices.get(Constants.TRIANGLE_VERTEX2_INDEX).getPosX() - refVertex.getPosX(),
+                vertices.get(Constants.TRIANGLE_VERTEX2_INDEX).getPosY() - refVertex.getPosY(),
+                vertices.get(Constants.TRIANGLE_VERTEX2_INDEX).getPosZ() - refVertex.getPosZ());
+        Vector3d c = new Vector3d(vertices.get(Constants.TRIANGLE_VERTEX3_INDEX).getPosX() - refVertex.getPosX(),
+                vertices.get(Constants.TRIANGLE_VERTEX3_INDEX).getPosY() - refVertex.getPosY(),
+                vertices.get(Constants.TRIANGLE_VERTEX3_INDEX).getPosZ() - refVertex.getPosZ());
         // Calculate the cross product of b and c
         Vector3d crossProduct = new Vector3d();
         crossProduct.cross(b, c);
         // Calculate the scalar triple product of a, b, and c
         double scalarTripleProduct = a.dot(crossProduct);
         // Divide the absolute value of the scalar triple product by 6 to get the volume of the tetrahedron
-        return Math.abs(scalarTripleProduct) / 6;
+        return Math.abs(scalarTripleProduct) / Constants.N_SIX;
     }
 
     /**
@@ -164,9 +170,9 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
     {
         if (centroid == null)
         {
-            double x = (vertices.get(0).getPosX() + vertices.get(1).getPosX() + vertices.get(2).getPosX()) / 3;
-            double y = (vertices.get(0).getPosY() + vertices.get(1).getPosY() + vertices.get(2).getPosY()) / 3;
-            double z = (vertices.get(0).getPosZ() + vertices.get(1).getPosZ() + vertices.get(2).getPosZ()) / 3;
+            double x = (vertices.get(Constants.TRIANGLE_VERTEX1_INDEX).getPosX() + vertices.get(Constants.TRIANGLE_VERTEX2_INDEX).getPosX() + vertices.get(Constants.TRIANGLE_VERTEX3_INDEX).getPosX()) / Constants.N_THREE;
+            double y = (vertices.get(Constants.TRIANGLE_VERTEX1_INDEX).getPosY() + vertices.get(Constants.TRIANGLE_VERTEX2_INDEX).getPosY() + vertices.get(Constants.TRIANGLE_VERTEX3_INDEX).getPosY()) / Constants.N_THREE;
+            double z = (vertices.get(Constants.TRIANGLE_VERTEX1_INDEX).getPosZ() + vertices.get(Constants.TRIANGLE_VERTEX2_INDEX).getPosZ() + vertices.get(Constants.TRIANGLE_VERTEX3_INDEX).getPosZ()) / Constants.N_THREE;
             centroid = new Vertex(x, y, z);
         }
         return centroid;
@@ -191,7 +197,7 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
                 refVertex.getPosZ() - centroid.getPosZ());
         double dotProduct = getNormal().dot(referenceToCentroid);
         // If the dot product is positive, the normal points away from the reference vertex
-        return dotProduct > 0;
+        return dotProduct > Constants.N_ZERO;
     }
 
     /**
@@ -236,7 +242,7 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         StringBuilder builder = new StringBuilder();
         builder.append(Strings.TRIANGLE_TOSTRING);
         builder.append(Strings.TRIANGLE_TOSTRING_2);
-        builder.append(MathUtil.roundToDigits(area, 2)).append(Strings.COMMA_SPACE);
+        builder.append(MathUtil.roundToDigits(area, Constants.N_TWO)).append(Strings.COMMA_SPACE);
         for (Edge edge : edges)
         {
             builder.append(edge.toString());
@@ -288,7 +294,7 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
      */
     public boolean isAdjacentTo (Triangle triangle)
     {
-        int count = 0;
+        int count = Constants.N_ZERO;
         for (Vertex vertex : vertices)
         {
             if (triangle.vertices.contains(vertex))
@@ -296,7 +302,7 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
                 count++;
             }
         }
-        return count == 2;
+        return count == Constants.N_TWO;
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.example.stlviewer.util;
 
+import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class RuntimeHandler
      */
     public static <T> T exceptionHandler (Callable<T> function, int maxTries)
     {
-        int tries = 0;
+        int tries = Constants.N_ZERO;
         // Try to execute the function until it succeeds or the maximum number of tries is reached
         while (tries++ <= maxTries)
         {
@@ -56,7 +57,7 @@ public class RuntimeHandler
         }
         // If the maximum number of tries is reached, display the exit message and exit the program
         System.out.println(Strings.EXCEPTION_HANDLER_EXIT);
-        System.exit(1);
+        System.exit(Constants.N_ONE);
         return null;
     }
 
@@ -73,7 +74,7 @@ public class RuntimeHandler
      */
     public static void exceptionHandler (Runnable function, int maxTries)
     {
-        int tries = 0;
+        int tries = Constants.N_ZERO;
         // Try to execute the function until it succeeds or the maximum number of tries is reached
         while (tries++ <= maxTries)
         {
@@ -93,7 +94,7 @@ public class RuntimeHandler
         }
         // If the maximum number of tries is reached, display the exit message and exit the program
         System.out.println(Strings.EXCEPTION_HANDLER_EXIT);
-        System.exit(1);
+        System.exit(Constants.N_ONE);
     }
 
     /**
@@ -155,14 +156,14 @@ public class RuntimeHandler
 
         // Get the caller class name and instance address
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        String callerClassName = stackTrace[2].getClassName();
-        String simpleClassName = callerClassName.substring(callerClassName.lastIndexOf(Strings.CHAR_DOT) + 1);
-        String callerInstanceAddress = Integer.toHexString(System.identityHashCode(stackTrace[2]));
+        String callerClassName = stackTrace[Constants.N_TWO].getClassName();
+        String simpleClassName = callerClassName.substring(callerClassName.lastIndexOf(Strings.CHAR_DOT) + Constants.N_ONE);
+        String callerInstanceAddress = Integer.toHexString(System.identityHashCode(stackTrace[Constants.N_TWO]));
 
         // Format the message with the provided arguments
         String formattedMessage = String.format(message, args);
 
         // Print the formatted message to the console
-        System.out.printf("[%s][%s@%s] %s%n", currentTime, simpleClassName, callerInstanceAddress, formattedMessage);
+        System.out.printf(Strings.LOG_MESSAGE_FORMAT_STRING, currentTime, simpleClassName, callerInstanceAddress, formattedMessage);
     }
 }

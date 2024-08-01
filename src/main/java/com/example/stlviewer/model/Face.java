@@ -1,5 +1,6 @@
 package com.example.stlviewer.model;
 
+import com.example.stlviewer.res.Strings;
 import com.example.stlviewer.util.MathUtil;
 
 import javax.vecmath.Vector3d;
@@ -69,7 +70,7 @@ public class Face extends Polygon implements Serializable
      */
     public String getNormalString()
     {
-        return MathUtil.roundToThreeDigits(normal.getX()) + " " + MathUtil.roundToThreeDigits(normal.getY()) +
-                " " + MathUtil.roundToThreeDigits(normal.getZ());
+        return MathUtil.roundToThreeDigits(normal.getX()) + Strings.SPACE + MathUtil.roundToThreeDigits(normal.getY()) +
+                Strings.SPACE + MathUtil.roundToThreeDigits(normal.getZ());
     }
 }

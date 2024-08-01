@@ -136,13 +136,13 @@ public class MainController
         {
             this.stlReader.readSTLFile(filePath, polyhedronController, parallelized);
         } catch (FileNotFoundException fileNotFoundException) {
-            LOGGER.log(Level.SEVERE, "File not found: " + filePath, fileNotFoundException);
+            LOGGER.log(Level.SEVERE, Strings.FILE_NOT_FOUND + filePath, fileNotFoundException);
         } catch (IOException ioException) {
-            LOGGER.log(Level.SEVERE, "I/O error while reading the file: " + filePath, ioException);
+            LOGGER.log(Level.SEVERE, Strings.I_O_ERROR_WHILE_READING_THE_FILE + filePath, ioException);
         } catch (IllegalArgumentException illegalArgumentException) {
-            throw new IllegalArgumentException("File is corrupted and cannot be read: " + filePath);
+            throw new IllegalArgumentException(Strings.FILE_IS_CORRUPTED_AND_CANNOT_BE_READ + filePath);
         } catch (Exception exception) {
-            LOGGER.log(Level.SEVERE, "An unexpected error occurred while opening the file: " + filePath, exception);
+            LOGGER.log(Level.SEVERE, Strings.AN_UNEXPECTED_ERROR_OCCURRED_WHILE_OPENING_THE_FILE + filePath, exception);
         }
     }
 
@@ -281,6 +281,13 @@ public class MainController
         // TODO: Output the sorted triangles to the console or some other output
         ArrayList<Triangle> sortedTriangles = new ArrayList<>(polyhedronController.getPolyhedron().getTriangles().values());
         sortedTriangles.sort(Triangle::compareTo);
+        // Output the sorted triangles to the console
+        System.out.println(Strings.SORTED_TRIANGLES_BY_AREA);
+        System.out.println(Strings.DIVIDER);
+        for (Triangle triangle : sortedTriangles)
+        {
+            System.out.println(triangle.toString());
+        }
         return sortedTriangles;
     }
 

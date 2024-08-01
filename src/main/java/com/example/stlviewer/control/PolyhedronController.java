@@ -210,7 +210,7 @@ public class PolyhedronController implements Runnable
         for (int i = 0; i < adjacencyList.size(); i++) {
             // If the triangle has only 2 adjacent triangles, it is a degenerate triangle. This means that one of its
             // edges isn't shared with any other triangle, making it a degenerate edge.
-            if (adjacencyList.get(i).size() == 3) {
+            if (adjacencyList.get(i).size() == Constants.N_THREE) {
                 logMessage(Strings.DEGENERATE_TRIANGLE_FOUND + polyhedron.getTriangle(adjacencyList.get(i).getFirst()));
                 Triangle triangle = polyhedron.getTriangle(adjacencyList.get(i).getFirst());
                 for (int j = 0; j < Constants.TRIANGLE_VERTEX_COUNT; j++) {
@@ -275,7 +275,6 @@ public class PolyhedronController implements Runnable
                             // Remove the degenerate edges from the degenerate edges list
                             // Consequence: This method can only fix holes with three edges
                             // Remove list element with the highest index first to prevent index out of bounds
-                            // TODO: Find a more efficient way to remove the degenerate edges
                             if (i > j && i > k) {
                                 degenerateEdges.remove(i);
                                 if (j > k) {

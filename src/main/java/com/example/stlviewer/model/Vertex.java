@@ -1,5 +1,6 @@
 package com.example.stlviewer.model;
 
+import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 import com.example.stlviewer.util.MathUtil;
 
@@ -143,9 +144,9 @@ public class Vertex implements Comparable<Vertex>, Serializable
     {
         if (refVertex instanceof Vertex vertex)
         {
-            return Double.compare(vertex.posX, posX) == 0 &&
-                    Double.compare(vertex.posY, posY) == 0 &&
-                    Double.compare(vertex.posZ, posZ) == 0;
+            return Double.compare(vertex.posX, posX) == Constants.N_ZERO &&
+                    Double.compare(vertex.posY, posY) == Constants.N_ZERO &&
+                    Double.compare(vertex.posZ, posZ) == Constants.N_ZERO;
         }
         return false;
     }

@@ -8,8 +8,17 @@ import javafx.scene.paint.PhongMaterial;
  * The Material class represents a material with a name, description, density, and color and optionally specular properties.
  */
 public class Material extends PhongMaterial implements java.io.Serializable{
+    /**
+     * The name of the material.
+     */
     private final String name;
+    /**
+     * The description of the material.
+     */
     private String description;
+    /**
+     * The density of the material.
+     */
     private final double density;
 
     /**
@@ -131,7 +140,6 @@ public class Material extends PhongMaterial implements java.io.Serializable{
     @Override
     public String toString ()
     {
-        // TODO: Put into interface
         return Strings.MATERIAL_TO_STRING_1 + name
                 + Strings.MATERIAL_TO_STRING_2 + description
                 + Strings.MATERIAL_TO_STRING_3 + density

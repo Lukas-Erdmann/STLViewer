@@ -90,9 +90,6 @@ public class STLReader
             // Fix simple holes in the mesh
             controller.fixSimpleHoles();
 
-            // TODO: Check for normals that point in the wrong direction
-            // TODO: Account for overlapping triangles
-
             // Recalculate the volume, surface area, and other properties of the polyhedron
             controller.calculatePolyhedronProperties();
         }

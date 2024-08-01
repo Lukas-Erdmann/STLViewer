@@ -18,7 +18,7 @@ public abstract class MathUtil
      */
     public static double roundToDigits(double value, int digits)
     {
-        double factor = Math.pow(10, digits);
+        double factor = Math.pow(Constants.N_TEN, digits);
         return Math.round(value * factor) / factor;
     }
 
@@ -30,7 +30,7 @@ public abstract class MathUtil
      */
     public static double roundToThreeDigits(double value)
     {
-        return roundToDigits(value, 3);
+        return roundToDigits(value, Constants.N_THREE);
     }
 
     /**
@@ -41,8 +41,8 @@ public abstract class MathUtil
      */
     public static double roundToTwoNonZeroDigits(double value) {
         String valueStr = Double.toString(value);
-        int nonZeroCount = 0;
-        int roundPosition = 0;
+        int nonZeroCount = Constants.N_ZERO;
+        int roundPosition = Constants.N_ZERO;
 
         // Detect if the number is so small it's represented in exponential notation
         if (valueStr.contains(Strings.EXP_DELIMITER_NEGATIVE)) {

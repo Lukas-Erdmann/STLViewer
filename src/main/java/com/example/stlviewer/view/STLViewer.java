@@ -176,7 +176,7 @@ public class STLViewer extends Application
         MenuItem menuItemOpen = new MenuItem(Strings.STLV_OPEN_FILE);
         menuItemOpen.setOnAction(e -> GUIController.openFile(stage));
         MenuItem menuItemExit = new MenuItem(Strings.STLV_EXIT);
-        menuItemExit.setOnAction(e -> System.exit(0));
+        menuItemExit.setOnAction(e -> System.exit(Constants.N_ZERO));
         menuFile.getItems().addAll(menuItemOpen, menuItemExit);
         return menuFile;
     }
@@ -609,26 +609,26 @@ public class STLViewer extends Application
     {
         VBox infoLabels = new VBox();
         // Set dimensions and padding for the VBox
-        infoLabels.setPrefWidth(200);
-        infoLabels.setPadding(new javafx.geometry.Insets(10));
-        infoLabels.setSpacing(10);
+        infoLabels.setPrefWidth(Constants.INFO_LABELS_WIDTH);
+        infoLabels.setPadding(new javafx.geometry.Insets(Constants.INFO_LABELS_PADDING));
+        infoLabels.setSpacing(Constants.INFO_LABELS_SPACING);
 
         // Make the description label wrap text
         materialDescriptionLabel.setWrapText(true);
-        materialLabel.setFont(Font.font(Strings.ARIAL, FontWeight.NORMAL, 14));
+        materialLabel.setFont(Font.font(Strings.ARIAL, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT));
 
         // Add the labels for the number of triangles, surface area, and volume
         infoLabels.getChildren().addAll(
-                makeLabelArial(Strings.STLV_MODEL_INFORMATION, FontWeight.BOLD, 16),
-                makeLabelArial(Strings.STLV_NUMBER_OF_TRIANGLES, FontWeight.NORMAL, 14), numberOfTrianglesLabel,
-                makeLabelArial(Strings.STLV_SURFACE_AREA, FontWeight.NORMAL, 14), surfaceAreaLabel,
-                makeLabelArial(Strings.STLV_VOLUME, FontWeight.NORMAL, 14), volumeLabel,
-                makeLabelArial(Strings.STLV_VIEW_PROPERTIES, FontWeight.BOLD, 16),
-                makeLabelArial(Strings.STLC_ROTATION_LABEL, FontWeight.NORMAL, 14), rotationLabel,
-                makeLabelArial(Strings.STLV_TRANSLATION_LABEL, FontWeight.NORMAL, 14), translationLabel,
-                makeLabelArial(Strings.STLV_MATERIAL_INFORMATION, FontWeight.BOLD, 16),
+                makeLabelArial(Strings.STLV_MODEL_INFORMATION, FontWeight.BOLD, Constants.FONT_SIZE_LABELS_TITLE),
+                makeLabelArial(Strings.STLV_NUMBER_OF_TRIANGLES, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT), numberOfTrianglesLabel,
+                makeLabelArial(Strings.STLV_SURFACE_AREA, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT), surfaceAreaLabel,
+                makeLabelArial(Strings.STLV_VOLUME, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT), volumeLabel,
+                makeLabelArial(Strings.STLV_VIEW_PROPERTIES, FontWeight.BOLD, Constants.FONT_SIZE_LABELS_TITLE),
+                makeLabelArial(Strings.STLC_ROTATION_LABEL, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT), rotationLabel,
+                makeLabelArial(Strings.STLV_TRANSLATION_LABEL, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT), translationLabel,
+                makeLabelArial(Strings.STLV_MATERIAL_INFORMATION, FontWeight.BOLD, Constants.FONT_SIZE_LABELS_TITLE),
                 materialLabel, materialDescriptionLabel,
-                makeLabelArial(Strings.STLV_WEIGHT, FontWeight.NORMAL, 14), weightLabel
+                makeLabelArial(Strings.STLV_WEIGHT, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT), weightLabel
         );
         return infoLabels;
     }

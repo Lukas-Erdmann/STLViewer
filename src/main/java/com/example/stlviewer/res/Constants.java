@@ -114,4 +114,11 @@ public interface Constants
     int UNIT_FACTOR_MM = 1000;
     int UNIT_FACTOR_KG = 1;
     int UNIT_FACTOR_G = 1000;
+    int N_SIX = 6;
+    int N_TEN = 10;
+    int INFO_LABELS_WIDTH = 200;
+    int INFO_LABELS_PADDING = 10;
+    int INFO_LABELS_SPACING = 10;
+    int FONT_SIZE_LABEL_TEXT = 14;
+    int FONT_SIZE_LABELS_TITLE = 16;
 }
