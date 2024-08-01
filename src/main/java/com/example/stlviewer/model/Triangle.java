@@ -31,7 +31,9 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
 
     /**
      * Creates a new triangle with the given vertices and normal vector. The normal vector is calculated as the cross
-     * product of two edges in counter-clockwise order. The normal vector is then normalized to unit length.
+     * product of two edges in counter-clockwise order. The normal vector is then normalized to unit length. It is then
+     * compared with the normal passed as an argument. If the difference between the two normals exceeds the rounding
+     * error tolerance, an exception is thrown.
      * The area of the triangle is calculated using Heron's formula.
      *
      * @param v1     - The first vertex of the triangle.
@@ -63,12 +65,21 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         comparisonNormal.cross(this.getNormal(), normal);
         if (comparisonNormal.length() > Constants.NORMAL_DIFFERENCE_ROUNDING_TOLERANCE)
         {
-            //throw new IllegalArgumentException("Calculated triangle and passed normal difference exceeds rounding error tolerance.");
+            throw new IllegalArgumentException("Calculated triangle and passed normal difference exceeds rounding error tolerance.");
         }
         // Calculate the area of the triangle
         this.calculateArea();
     }
 
+    /**
+     * Creates a new triangle with the given vertices. The normal vector is calculated as the cross product of two edges
+     * in counter-clockwise order. The normal vector is then normalized to unit length. The area of the triangle is
+     * calculated using Heron's formula.
+     *
+     * @param v1 - The first vertex of the triangle.
+     * @param v2 - The second vertex of the triangle.
+     * @param v3 - The third vertex of the triangle.
+     */
     public Triangle (Vertex v1, Vertex v2, Vertex v3)
     {
         super(3);
@@ -237,12 +248,25 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         return builder.toString();
     }
 
+    /**
+     * Overrides the compareTo method of the Comparable interface to compare the area of two triangles.
+     * <p>Precondition: The triangle to compare to must exist.
+     * <p>Post-Condition: The comparison of the two triangles is returned.
+     *
+     * @param other     The triangle to compare to.
+     * @return          The comparison of the two triangles.
+     */
     @Override
     public int compareTo (Triangle other)
     {
         return Double.compare(this.area, other.area);
     }
 
+    /**
+     * Returns the string representation of the normal vector of the triangle.
+     *
+     * @return The string representation of the normal vector of the triangle.
+     */
     @Override
     public boolean equals (Object refTriangle)
     {
@@ -253,6 +277,15 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         return false;
     }
 
+    /**
+     * Compares the triangle with another triangle to check if they are adjacent. Two triangles are adjacent if they
+     * share exactly two vertices or rather one edge.
+     * <p>Precondition: The triangle to compare to must exist.
+     * <p>Post-Condition: The adjacency of the two triangles is returned.
+     *
+     * @param triangle  The triangle to compare to.
+     * @return          True if the triangles are adjacent, false otherwise.
+     */
     public boolean isAdjacentTo (Triangle triangle)
     {
         int count = 0;
@@ -266,6 +299,15 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         return count == 2;
     }
 
+    /**
+     * Compares the triangle with another triangle to check if they are equal. Two triangles are equal if they have the
+     * same vertices or same edges.
+     * <p>Precondition: The triangle to compare to must exist.
+     * <p>Post-Condition: The equality of the two triangles is returned.
+     *
+     * @param triangle  The triangle to compare to.
+     * @return          True if the triangles are equal, false otherwise.
+     */
     public boolean isSameAs (Triangle triangle)
     {
         return vertices.containsAll(triangle.vertices);

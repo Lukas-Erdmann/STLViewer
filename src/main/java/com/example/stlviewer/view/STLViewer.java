@@ -372,6 +372,13 @@ public class STLViewer extends Application
         return backgroundColorPicker;
     }
 
+    /**
+     * Opens the dialog which allows the user to set the unit system consisting of the unit of length and mass. The
+     * dialog contains dropdowns for selecting the unit of length and mass. The user can choose between meters, centimeters,
+     * millimeters, and inches for the unit of length, and kilograms, grams, and pounds for the unit of mass. <br>
+     * Precondition: The supermenu item was selected. <br>
+     * Post-Condition: The unit system dialog is displayed and the new unit system is applied to the model.
+     */
     public void openUnitsDialog ()
     {
         Dialog<ButtonType> unitSystemDialog = new Dialog<>();
@@ -648,6 +655,11 @@ public class STLViewer extends Application
         });
     }
 
+    /**
+     * Updates the material data labels with the current material properties. <br>
+     * Precondition: The controller must be initialized. <br>
+     * Post-Condition: The labels are updated with the current material properties.
+     */
     public void updateMaterialData ()
     {
         meshView.setMaterial(GUIController.getCurrentMaterial());
@@ -659,6 +671,16 @@ public class STLViewer extends Application
         });
     }
 
+    /**
+     * Updates the information labels with the new model properties. The values are displayed with two decimal places. <br>
+     * Precondition: The model must be initialized. <br>
+     * Post-Condition: The information labels are updated with the new model properties.
+     *
+     * @param volume      The volume of the model.
+     * @param surfaceArea The surface area of the model.
+     * @param weight      The weight of the model.
+     * @param unitWeight  The unit of weight for the model.
+     */
     public void updateWithNewUnits(double volume, double surfaceArea, double weight, String unitWeight) {
         Platform.runLater(() -> {
             // Recalculate the volume and weight with the new units

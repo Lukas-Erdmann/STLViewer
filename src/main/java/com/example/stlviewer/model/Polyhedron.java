@@ -180,6 +180,11 @@ public class Polyhedron implements Serializable
         return boundingBox;
     }
 
+    /**
+     * Returns the bounding box of the polyhedron as a string.
+     *
+     * @return  The bounding box of the polyhedron as a string.
+     */
     public String getBoundingBoxString()
     {
         return  Strings.BOUNDING_BOX_XMIN + MathUtil.roundToThreeDigits(boundingBox[0]) +

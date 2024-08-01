@@ -96,4 +96,22 @@ public interface Constants
     int MAT_POS_DENSITY = 1;
     int MAT_POS_COLORHEX = 2;
     int MAT_POS_DESC = 3;
+    int ARGS_MODE = 0;
+    int ARGS_PARALLEL = 1;
+    int ZOOM_LIMIT_DEFAULT = 100;
+    double ZOOM_COEFF_DEFAULT = 0.0001;
+    int DENSITY_DEFAULT = 1;
+    double CAMERA_NEAR_CLIP_VALUE = 0.001;
+    int CAMERA_FAR_CLIP_VALUE = 10000;
+    int DEGREES_90 = 90;
+    int DEGREES_270 = 270;
+    int DEGREES_360 = 360;
+    int ZOOM_SPEED_MIN = 1;
+    int TRANSLATION_MAX = 0;
+    float FLOATPOINT5 = 0.5f;
+    int UNIT_FACTOR_M = 1;
+    int UNIT_FACTOR_CM = 100;
+    int UNIT_FACTOR_MM = 1000;
+    int UNIT_FACTOR_KG = 1;
+    int UNIT_FACTOR_G = 1000;
 }

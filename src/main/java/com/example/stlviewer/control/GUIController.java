@@ -25,6 +25,7 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.lang.invoke.ConstantCallSite;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -49,11 +50,11 @@ public class GUIController
     /**
      * The Rotate instance for the X axis.
      */
-    private final Rotate rotationX = new Rotate(0, Rotate.X_AXIS);
+    private final Rotate rotationX = new Rotate(Constants.N_ZERO, Rotate.X_AXIS);
     /**
      * The Rotate instance for the Y axis.
      */
-    private final Rotate rotationY = new Rotate(0, Rotate.Y_AXIS);
+    private final Rotate rotationY = new Rotate(Constants.N_ZERO, Rotate.Y_AXIS);
     /**
      * The Group instance to store the objects to rotate.
      */
@@ -97,11 +98,11 @@ public class GUIController
     /**
      * The zoom speed limit for the camera.
      */
-    private final DoubleProperty zoomLimit = new SimpleDoubleProperty(100);
+    private final DoubleProperty zoomLimit = new SimpleDoubleProperty(Constants.ZOOM_LIMIT_DEFAULT);
     /**
      * The zoom coefficient for the camera.
      */
-    private final DoubleProperty zoomCoefficient = new SimpleDoubleProperty(0.0001);
+    private final DoubleProperty zoomCoefficient = new SimpleDoubleProperty(Constants.ZOOM_COEFF_DEFAULT);
     /**
      * The boolean property to check if the mesh is loaded.
      */
@@ -109,7 +110,7 @@ public class GUIController
     /**
      * The current material applied to the 3D model.
      */
-    private com.example.stlviewer.model.Material currentMaterial = new com.example.stlviewer.model.Material(Strings.DEFAULT_MATERIAL, 1, Strings.DEFAULT_COLOR);
+    private com.example.stlviewer.model.Material currentMaterial = new com.example.stlviewer.model.Material(Strings.DEFAULT_MATERIAL, Constants.DENSITY_DEFAULT, Strings.DEFAULT_COLOR);
     /**
      * The callback to execute when a file is loaded.
      */
@@ -298,12 +299,12 @@ public class GUIController
                     (float) (polyhedron.getCenter().getPosY() - vertex.getPosY())
                 );
                 // Add texture coordinates
-                texCoords.addAll(0, 0);
+                texCoords.addAll(Constants.N_ZERO, Constants.N_ZERO);
             }
         }
 
         // Add the faces to the mesh
-        for (int i = 0; i < polyhedron.getTriangleCount() * 3; i += 3)
+        for (int i = 0; i < polyhedron.getTriangleCount() * Constants.TRIANGLE_VERTEX_COUNT; i += Constants.TRIANGLE_VERTEX_COUNT)
         {
             faces.addAll(
                     i + Constants.FACE_FIRST, Constants.FACE_FIRST,
@@ -357,8 +358,8 @@ public class GUIController
         translation.setZ(-longestSideLength * Constants.Z_DISTANCE_FACTOR);
 
         // Set camera properties
-        stlViewer.getPerspectiveCamera().setNearClip(0.001);
-        stlViewer.getPerspectiveCamera().setFarClip(10000);
+        stlViewer.getPerspectiveCamera().setNearClip(Constants.CAMERA_NEAR_CLIP_VALUE);
+        stlViewer.getPerspectiveCamera().setFarClip(Constants.CAMERA_FAR_CLIP_VALUE);
     }
 
     /**
@@ -369,13 +370,13 @@ public class GUIController
     public void resetView ()
     {
         // Reset the transformations
-        rotationX.setAngle(0);
-        rotationY.setAngle(0);
-        translation.setX(0);
-        translation.setY(0);
+        rotationX.setAngle(Constants.N_ZERO);
+        rotationY.setAngle(Constants.N_ZERO);
+        translation.setX(Constants.N_ZERO);
+        translation.setY(Constants.N_ZERO);
         translation.setZ(-longestSideLength * Constants.Z_DISTANCE_FACTOR);
-        zoomLimit.set(100);
-        zoomCoefficient.set(0.0001);
+        zoomLimit.set(Constants.ZOOM_LIMIT_DEFAULT);
+        zoomCoefficient.set(Constants.ZOOM_COEFF_DEFAULT);
         sendP2PData(collectP2PData(false));
     }
 
@@ -405,7 +406,7 @@ public class GUIController
         anchorX = event.getSceneX();
         anchorY = event.getSceneY();
         // Invert the Y-axis for rotation, if the mesh is upside down
-        objectIsUpsideDown = rotationX.getAngle() > 90 && rotationX.getAngle() < 270;
+        objectIsUpsideDown = rotationX.getAngle() > Constants.DEGREES_90 && rotationX.getAngle() < Constants.DEGREES_270;
         // If the left mouse button is pressed, rotate the mesh
         if (event.isPrimaryButtonDown())
         {
@@ -467,16 +468,16 @@ public class GUIController
     public double limitAngle (double angle)
     {
         // Calculate how many times the angle is over 360 or under 0
-        int over = Math.abs((int) (angle / 360));
+        int over = Math.abs((int) (angle / Constants.DEGREES_360));
         // Limit the angle to 0 <= angle <= 360
-        if (angle < 0)
+        if (angle < Constants.N_ZERO)
         {
             // If the angle is less than 0, set it to 360. The factor needs to be increased by 1.
-            return 360 * (over + 1) + angle;
-        } else if (angle >= 360)
+            return Constants.DEGREES_360 * (over + Constants.N_ONE) + angle;
+        } else if (angle >= Constants.DEGREES_360)
         {
             // If the angle is greater than 360, set it to 0.
-            return angle - 360 * over;
+            return angle - Constants.DEGREES_360 * over;
         }
         return angle;
     }
@@ -495,13 +496,13 @@ public class GUIController
         // Zoom the mesh based on the scroll direction
         double delta = event.getDeltaY();
         double distance = getDistanceBetweenCameraAndMeshView3D();
-        double zoomSpeed = Math.max(1, zoomLimit.get() - (zoomLimit.get() * Math.exp(-zoomCoefficient.get() * distance)));
+        double zoomSpeed = Math.max(Constants.ZOOM_SPEED_MIN, zoomLimit.get() - (zoomLimit.get() * Math.exp(-zoomCoefficient.get() * distance)));
 
-        if (delta > 0)
+        if (delta > Constants.N_ZERO)
         {
             double newZ = translation.getZ() + zoomSpeed;
             // Assure the camera does not go through the mesh
-            translation.setZ(Math.min(newZ, 0));
+            translation.setZ(Math.min(newZ, Constants.TRANSLATION_MAX));
         } else
         {
             translation.setZ(translation.getZ() - zoomSpeed);
@@ -634,9 +635,9 @@ public class GUIController
      */
     public double findLongestSideLength(double[] bounds)
     {
-        double xLength = Math.abs(bounds[0] - bounds[3]);
-        double yLength = Math.abs(bounds[1] - bounds[4]);
-        double zLength = Math.abs(bounds[2] - bounds[5]);
+        double xLength = Math.abs(bounds[Constants.BOUNDING_BOX_MIN_X_INDEX] - bounds[Constants.BOUNDING_BOX_MAX_X_INDEX]);
+        double yLength = Math.abs(bounds[Constants.BOUNDING_BOX_MIN_Y_INDEX] - bounds[Constants.BOUNDING_BOX_MAX_Y_INDEX]);
+        double zLength = Math.abs(bounds[Constants.BOUNDING_BOX_MIN_Z_INDEX] - bounds[Constants.BOUNDING_BOX_MAX_Z_INDEX]);
         return Math.max(xLength, Math.max(yLength, zLength));
     }
 
@@ -654,9 +655,9 @@ public class GUIController
         Bounds meshBoundsInThreeDGroup = rotationGroup.localToParent(stlViewer.getMeshView().getBoundsInLocal());
         // Get the center of the mesh
         return new Point3D(
-                (meshBoundsInThreeDGroup.getMinX() + meshBoundsInThreeDGroup.getMaxX()) / 2,
-                (meshBoundsInThreeDGroup.getMinY() + meshBoundsInThreeDGroup.getMaxY()) / 2,
-                (meshBoundsInThreeDGroup.getMinZ() + meshBoundsInThreeDGroup.getMaxZ()) / 2
+                (meshBoundsInThreeDGroup.getMinX() + meshBoundsInThreeDGroup.getMaxX()) / Constants.N_TWO,
+                (meshBoundsInThreeDGroup.getMinY() + meshBoundsInThreeDGroup.getMaxY()) / Constants.N_TWO,
+                (meshBoundsInThreeDGroup.getMinZ() + meshBoundsInThreeDGroup.getMaxZ()) / Constants.N_TWO
         );
     }
 
@@ -677,20 +678,20 @@ public class GUIController
      */
     public Point3D mouseToWorldCoordinates(double sceneX, double sceneY, double sceneWidth, double sceneHeight) {
         // Get the viewing angle at the scene border
-        double angleHalfFOV = Math.toRadians(stlViewer.getFieldOfView() * 0.5f);
+        double angleHalfFOV = Math.toRadians(stlViewer.getFieldOfView() * Constants.FLOATPOINT5);
         // Calculate the distance from (camX, camY, 0) to the scene border along the X and Y axis
         // The signs are switched because the camera moves instead of the model. Thus, all motions are inverted.
         // Normally y would increase downword and x would increase to the right.
         double distanceYHalfFOV = -Math.tan(angleHalfFOV) * translation.getZ();
         double distanceXHalfFOV = -distanceYHalfFOV * sceneWidth / sceneHeight;
         // Calculate the normalized device coordinates (NDC) of the mouse position
-        double ndcX = 2 * sceneX / sceneWidth - 1;
-        double ndcY = 1 - 2 * sceneY / sceneHeight;
+        double ndcX = Constants.N_TWO * sceneX / sceneWidth - Constants.N_ONE;
+        double ndcY = Constants.N_ONE - Constants.N_TWO * sceneY / sceneHeight;
         // Calculate the corresponding point in world space in the z = 0 plane
         return new Point3D(
                 ndcX * distanceXHalfFOV,
                 ndcY * distanceYHalfFOV,
-                0
+                Constants.N_ZERO
         );
     }
 
@@ -771,7 +772,6 @@ public class GUIController
         // If the data is a P2PPackage, process the package
         if (data instanceof P2PPackage p2pPackage)
         {
-            System.out.println("[" + java.time.LocalTime.now() + "] [" + this + "] P2P package: " + p2pPackage);
             // runLater is used to update the JavaFX application thread and avoid concurrency issues
             Platform.runLater(() -> {
                 // Only update the model if new
@@ -860,8 +860,6 @@ public class GUIController
                 Strings.MATERIAL_DATA_TITANIUM,
                 Strings.MATERIAL_DATA_PLA
         };
-        // TODO: Implement a way to add custom materials
-        // TODO: Import material data from JSON or CSV file
 
         ArrayList<Material> materials = new ArrayList<>();
         for (String[] data : materialData) {
@@ -901,7 +899,7 @@ public class GUIController
      */
     public void setCurrentMaterial(com.example.stlviewer.model.Material currentMaterial) {
         this.currentMaterial = currentMaterial;
-        if (MainController.getUserOperationMode().equals("P2P")) {
+        if (MainController.getUserOperationMode().equals(Strings.P2P_MODE)) {
             sendP2PData(collectP2PData(false));
         }
     }
@@ -918,22 +916,22 @@ public class GUIController
      */
     public String getUnitLength ()
     {
-        if (polyhedronController.getLengthFactor() == 1)
+        if (polyhedronController.getLengthFactor() == Constants.UNIT_FACTOR_M)
         {
-            return "m";
-        } else if (polyhedronController.getLengthFactor() == 100)
+            return Strings.STLV_UNIT_M;
+        } else if (polyhedronController.getLengthFactor() == Constants.UNIT_FACTOR_CM)
         {
-            return "cm";
-        } else if (polyhedronController.getLengthFactor() == 1000)
+            return Strings.STLV_UNIT_CM;
+        } else if (polyhedronController.getLengthFactor() == Constants.UNIT_FACTOR_MM)
         {
-            return "mm";
-        } else if (polyhedronController.getLengthFactor() == 1 / Constants.INCH_TO_METER)
+            return Strings.STLV_UNIT_MM;
+        } else if (polyhedronController.getLengthFactor() == Constants.N_ONE / Constants.INCH_TO_METER)
         {
-            return "in";
+            return Strings.STLV_UNIT_INCH;
         } else
         {
-            polyhedronController.setLengthFactor(1);
-            return "m";
+            polyhedronController.setLengthFactor(Constants.UNIT_FACTOR_M);
+            return Strings.STLV_UNIT_M;
         }
     }
 
@@ -947,19 +945,19 @@ public class GUIController
      */
     public String getUnitMass ()
     {
-        if (polyhedronController.getMassFactor() == 1)
+        if (polyhedronController.getMassFactor() == Constants.UNIT_FACTOR_KG)
         {
-            return "kg";
-        } else if (polyhedronController.getMassFactor() == 1000)
+            return Strings.STLV_UNIT_KG;
+        } else if (polyhedronController.getMassFactor() == Constants.UNIT_FACTOR_G)
         {
-            return "g";
+            return Strings.STLV_UNIT_G;
         } else if (polyhedronController.getMassFactor() == Constants.KG_TO_LB)
         {
-            return "lb";
+            return Strings.STLV_UNIT_LB;
         } else
         {
-            polyhedronController.setMassFactor(1);
-            return "kg";
+            polyhedronController.setMassFactor(Constants.UNIT_FACTOR_KG);
+            return Strings.STLV_UNIT_KG;
         }
     }
 
@@ -978,29 +976,29 @@ public class GUIController
     {
         switch (newLengthUnit)
         {
-            case "m":
-                polyhedronController.setLengthFactor(1);
+            case Strings.STLV_UNIT_M:
+                polyhedronController.setLengthFactor(Constants.UNIT_FACTOR_M);
                 break;
-            case "cm":
-                polyhedronController.setLengthFactor(100);
+            case Strings.STLV_UNIT_CM:
+                polyhedronController.setLengthFactor(Constants.UNIT_FACTOR_CM);
                 break;
-            case "mm":
-                polyhedronController.setLengthFactor(1000);
+            case Strings.STLV_UNIT_MM:
+                polyhedronController.setLengthFactor(Constants.UNIT_FACTOR_MM);
                 break;
-            case "inch":
-                polyhedronController.setLengthFactor(1 / Constants.INCH_TO_METER);
+            case Strings.STLV_UNIT_INCH:
+                polyhedronController.setLengthFactor(Constants.N_ONE / Constants.INCH_TO_METER);
                 break;
         }
 
         switch (newMassUnit)
         {
-            case "kg":
-                polyhedronController.setMassFactor(1);
+            case Strings.STLV_UNIT_KG:
+                polyhedronController.setMassFactor(Constants.UNIT_FACTOR_KG);
                 break;
-            case "g":
-                polyhedronController.setMassFactor(1000);
+            case Strings.STLV_UNIT_G:
+                polyhedronController.setMassFactor(Constants.UNIT_FACTOR_G);
                 break;
-            case "lb":
+            case Strings.STLV_UNIT_LB:
                 polyhedronController.setMassFactor(Constants.KG_TO_LB);
                 break;
         }

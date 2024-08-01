@@ -123,6 +123,11 @@ public class Material extends PhongMaterial implements java.io.Serializable{
         return stringBuilder.toString();
     }
 
+    /**
+     * Returns the string representation of the material.
+     *
+     * @return The string representation of the material.
+     */
     @Override
     public String toString ()
     {

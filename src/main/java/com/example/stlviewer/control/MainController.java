@@ -284,14 +284,30 @@ public class MainController
         return sortedTriangles;
     }
 
+    /**
+     * Reinitializes the polyhedron controller with a new instance.
+     * Precondition: None
+     * Post-Condition: The polyhedron controller is reinitialized.
+     */
     public void reinitializePolyhedronController() {
         this.polyhedronController = new PolyhedronController();
     }
 
+    /**
+     * Gets the user operation mode.
+     *
+     * @return The user operation mode.
+     */
     public String getUserOperationMode() {
         return userOperationMode;
     }
 
+    /**
+     * Terminates the application by closing the different controllers corresponding to the user operation mode.
+     *
+     * <p>Precondition: The controllers must exist.
+     * <p>Post-Condition: The application is terminated.
+     */
     public void terminate() {
         switch (userOperationMode)
         {

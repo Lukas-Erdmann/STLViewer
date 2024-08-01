@@ -63,6 +63,11 @@ public class ConsoleApplication
         System.out.println(polyhedron.toString());
     }
 
+    /**
+     * Terminates the Scanner object used for user input. <br>
+     * Precondition: None. <br>
+     * Post-Condition: The Scanner object is closed.
+     */
     public void terminate ()
     {
         scanner.close();

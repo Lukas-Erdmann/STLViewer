@@ -140,6 +140,15 @@ public class RuntimeHandler
         return endTime - startTime;
     }
 
+    /**
+     * Logs a message to the console with the current date and time, the caller class name, and the caller instance address.
+     * The message is formatted with the provided arguments. This method is used for debugging purposes. <br>
+     * Pre-condition: none <br>
+     * Post-condition: The message is printed to the console.
+     *
+     * @param message The message to log
+     * @param args    Arguments to format the message
+     */
     public static void logMessage(String message, Object... args) {
         // Get the current local date and time
         LocalDateTime currentTime = LocalDateTime.now();
@@ -147,7 +156,7 @@ public class RuntimeHandler
         // Get the caller class name and instance address
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         String callerClassName = stackTrace[2].getClassName();
-        String simpleClassName = callerClassName.substring(callerClassName.lastIndexOf('.') + 1);
+        String simpleClassName = callerClassName.substring(callerClassName.lastIndexOf(Strings.CHAR_DOT) + 1);
         String callerInstanceAddress = Integer.toHexString(System.identityHashCode(stackTrace[2]));
 
         // Format the message with the provided arguments

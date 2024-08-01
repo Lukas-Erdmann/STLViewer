@@ -62,6 +62,11 @@ public class Face extends Polygon implements Serializable
         this.normal = normal;
     }
 
+    /**
+     * Returns the normal vector of the face as a string.
+     *
+     * @return The normal vector of the face as a string.
+     */
     public String getNormalString()
     {
         return MathUtil.roundToThreeDigits(normal.getX()) + " " + MathUtil.roundToThreeDigits(normal.getY()) +
