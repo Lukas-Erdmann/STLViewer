@@ -132,7 +132,6 @@ public class MainController
      */
     public void openFile (String filePath, PolyhedronController polyhedronController) throws IOException
     {
-        // TODO: Rework the Logger usage
         reinitializePolyhedronController();
         try
         {
@@ -285,7 +284,6 @@ public class MainController
      */
     public ArrayList<Triangle> sortTrianglesByArea ()
     {
-        // TODO: Output the sorted triangles to the console or some other output
         ArrayList<Triangle> sortedTriangles = new ArrayList<>(polyhedronController.getPolyhedron().getTriangles().values());
         sortedTriangles.sort(Triangle::compareTo);
         // Output the sorted triangles to the console

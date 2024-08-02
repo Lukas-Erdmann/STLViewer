@@ -228,19 +228,25 @@ public class STLReader
             while ((line = reader.readLine()) != null)
             {
                 // Check for the start of a new triangle struct
-                if (line.trim().startsWith(Strings.STL_ASCII_FACET_START_TAG))
+                try
                 {
-                    // Read the normal and the triangle
-                    Vector3d normal = readNormalASCII(line);
-                    Triangle triangle = readTriangleASCII(reader, normal);
-                    // Send the triangle to the controller
-                    if (parallelized)
+                    if (line.trim().startsWith(Strings.STL_ASCII_FACET_START_TAG))
                     {
-                        controller.addTriangleToQueue(triangle);
-                    } else
-                    {
-                        controller.addTriangle(triangle);
+                        // Read the normal and the triangle
+                        Vector3d normal = readNormalASCII(line);
+                        Triangle triangle = readTriangleASCII(reader, normal);
+                        // Send the triangle to the controller
+                        if (parallelized)
+                        {
+                            controller.addTriangleToQueue(triangle);
+                        } else
+                        {
+                            controller.addTriangle(triangle);
+                        }
                     }
+                } catch (IllegalArgumentException illegalArgumentException)
+                {
+                    logMessage(Strings.EXCEPTION_ERROR_WHILE_READING_TRIANGLE + illegalArgumentException.getMessage());
                 }
             }
             // Set the reading finished flag to true
@@ -251,9 +257,6 @@ public class STLReader
         } catch (IOException ioException)
         {
             throw new IOException(Strings.EXCEPTION_WHILE_READING_FILE + filePath);
-        } catch (IllegalArgumentException illegalArgumentException)
-        {
-            throw new IllegalArgumentException(Strings.EXCEPTION_ERROR_WHILE_READING_TRIANGLE + illegalArgumentException.getMessage());
         }
     }
 

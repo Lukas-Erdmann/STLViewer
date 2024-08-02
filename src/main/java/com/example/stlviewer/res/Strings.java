@@ -205,47 +205,173 @@ public interface Strings
 
     // Other
 
+    /**
+     * The start tag for an ASCII STL file.
+     */
     String STL_ASCII_START_TAG = "solid";
+    /**
+     * The start tag for a triangle in an ASCII STL file.
+     */
     String STL_ASCII_FACET_START_TAG = "facet";
+    /**
+     * The normal tag for a triangle in an ASCII STL file.
+     */
     String STL_ASCII_NORMAL_TAG = "normal";
+    /**
+     * The start tag for a vertex in an ASCII STL file.
+     */
     String STL_ASCII_VERTEX_START_TAG = "vertex";
+    /**
+     * The start tag for the outer loop of a triangle in an ASCII STL file.
+     */
     String STL_ASCII_TRIANGLE_START_TAG = "outer loop";
+    /**
+     * The data type suffix for an STL file.
+     */
     String STL_FILE_SUFFIX = ".stl";
+    /**
+     * The string for all files with the STL file suffix.
+     */
     String STL_FILE_SUFFIX_ALL = "*.stl";
+    /**
+     * The string for the x-axis.
+     */
     String AXIS_X = "x";
+    /**
+     * The string for the y-axis.
+     */
     String AXIS_Y = "y";
+    /**
+     * The string for the z-axis.
+     */
     String AXIS_Z = "z";
+    /**
+     * The message for an invalid axis.
+     */
     String INVALID_AXIS = "Invalid axis!";
+    /**
+     * The static window title.
+     */
     String WINDOW_TITLE = "STL Viewer | ";
+    /**
+     * The message when an ASCII file is being read.
+     */
     String SOUT_READING_ASCII_FILE = "Reading ASCII file";
+    /**
+     * The message when a binary file is being read.
+     */
     String SOUT_READING_BINARY_FILE = "Reading binary file";
+    /**
+     * The message when a thread is interrupted.
+     */
     String THREAD_WAS_INTERRUPTED = "Thread was interrupted";
+    /**
+     * The message when the supplied file doesn't exist.
+     */
     String CONSAPP_FILE_DOESNT_EXIST = "The file does not exist or is not an STL file. Please enter a valid STL file path.";
+    /**
+     * The message that prompts the user to enter the file name and path.
+     */
     String CONSAPP_PLEASE_ENTER_THE_FILE_NAME_AND_PATH = "Please enter the file name and path:";
+    /**
+     * The format string for the elapsed time.
+     */
     String SOUT_ELAPSED_TIME = "Elapsed time: %d ms";
+    /**
+     * The message when the reading is finished.
+     */
     String SOUT_READING_FINISHED = "Reading finished";
+    /**
+     * The string for the local host.
+     */
     String LOCALHOST = "localhost";
+    /**
+     * The start of the polygonal chain string.
+     */
     String POLYGONAL_CHAIN_TOSTRING = "PolygonalChain{";
+    /**
+     * The start of the polyhedron string.
+     */
     String POLYHEDRON_TOSTRING = "Polyhedron{";
+    /**
+     * The start tag for the volume in the polyhedron string.
+     */
     String POLYHEDRON_TOSTRING_2 = "volume=";
+    /**
+     * The start tag for the surface area in the polyhedron string.
+     */
     String POLYHEDRON_TOSTRING_3 = ", surfaceArea=";
+    /**
+     * The start tag for the bounding box in the polyhedron string.
+     */
     String POLYHEDRON_TOSTRING_4 = ", boundingBox=";
+    /**
+     * The start tag for the center in the polyhedron string.
+     */
     String POLYHEDRON_TOSTRING_5 = ", center=";
+    /**
+     * The start tag for the triangles in the polyhedron string.
+     */
     String POLYHEDRON_TOSTRING_6 = ", triangles=";
+    /**
+     * The start of the vertex string.
+     */
     String VERTEX_TOSTRING = "Vertex{";
+    /**
+     * The message when the server is connected.
+     */
     String CONNECTING_TO_SERVER_AT = "Connecting to server at %s:%d";
+    /**
+     * The message displayed when the user should enter a command type.
+     */
     String ENTER_COMMAND_TYPE = "Enter command type (rotate, translate): ";
+    /**
+     * The string for the rotate command type.
+     */
     String COMMAND_TYPE_ROTATE = "rotate";
+    /**
+     * The string for the translate command type.
+     */
     String COMMAND_TYPE_TRANSLATE = "translate";
+    /**
+     * The message when the command type is invalid.
+     */
     String INVALID_COMMAND_TYPE = "Invalid command type. Please enter rotate or translate.";
+    /**
+     * The message when the user should enter an axis.
+     */
     String ENTER_AXIS = "Enter axis (x, y, z || x, y for rotate): ";
+    /**
+     * The message when the axis is invalid.
+     */
     String INVALID_AXIS_REPEAT = "Invalid axis. Please enter x, y, or z.";
+    /**
+     * The message when the user should enter an amount.
+     */
     String ENTER_AMOUNT = "Enter amount: ";
+    /**
+     * The message when the amount is invalid.
+     */
     String INVALID_AMOUNT = "Invalid amount. Please enter a valid number.";
+    /**
+     * The message the application executes a command.
+     */
     String EXECUTED_COMMAND = "Executed command: ";
+    /**
+     * The message when the user inputs an invalid command.
+     */
     String INVALID_COMMAND_EXPECTED_FORMAT = "Invalid command: %s. Expected format: <command> <axis> <amount>";
+    /**
+     * The message when the user enters an invalid value for the amount.
+     */
     String INVALID_VALUE_FOR_AMOUNT = "Invalid value for amount: ";
+    /**
+     * The message when the command couldn't be executed.
+     */
     String COMMAND_COULDN_T_BE_EXECUTED = "Command couldn't be executed: ";
+    /**
+     * The message when the server is started and listening on a port.
+     */
     String SERVER_IS_AVAILABLE_ON_PORT = "The server is available on port: ";
     String STLV_MENU = "File";
     String STLV_OPEN_FILE = "Open File...";

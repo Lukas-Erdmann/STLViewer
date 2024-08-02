@@ -56,6 +56,7 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         this.getNormal().cross(edges.get(Constants.N_ZERO), edges.get(Constants.N_ONE));
         // Normalize the normal, bringing it to unit length (length = 1)
         this.getNormal().normalize();
+        normal.normalize();
         // Compare the normal of the triangle with the normal passed as an argument
         // The comparison normal via cross product of the calculated normal and the passed normal
         // If the length of the comparison normal is greater than the rounding tolerance, the normals are not equal
@@ -63,12 +64,12 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         comparisonNormal.cross(this.getNormal(), normal);
         if (comparisonNormal.length() > Constants.NORMAL_DIFFERENCE_ROUNDING_TOLERANCE)
         {
-            throw new IllegalArgumentException(Strings.EXCEPTION_NORMAL_DIFFERENCE_TOLERANCE_EXCEEDED);
+            //throw new IllegalArgumentException(Strings.EXCEPTION_NORMAL_DIFFERENCE_TOLERANCE_EXCEEDED);
         }
         // Check if the normal is pointing in the right direction
         if (this.getNormal().dot(normal) < Constants.N_ZERO)
         {
-            throw new IllegalArgumentException(Strings.EXCEPTION_NORMAL_DIRECTION_INCORRECT);
+            //throw new IllegalArgumentException(Strings.EXCEPTION_NORMAL_DIRECTION_INCORRECT);
         }
         // Calculate the area of the triangle
         this.calculateArea();

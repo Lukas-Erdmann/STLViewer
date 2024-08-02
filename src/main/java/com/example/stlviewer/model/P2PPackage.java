@@ -5,6 +5,10 @@ import com.example.stlviewer.res.Strings;
 import java.io.Serializable;
 import java.util.Arrays;
 
+/**
+ * The P2PPackage class represents a package that is sent between two clients in a peer-to-peer connection. It contains
+ * a Polyhedron object and transformation properties.
+ */
 public class P2PPackage implements Serializable
 {
     /**

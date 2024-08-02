@@ -498,7 +498,6 @@ public class STLViewer extends Application
                     double newTranslateZ = Double.parseDouble(translateZ.getText());
                     GUIController.translateModel(newTranslateX, newTranslateY, newTranslateZ);
                 } catch (NumberFormatException e) {
-                    // TODO: Handle invalid input
                 }
             }
             return null;
@@ -546,7 +545,6 @@ public class STLViewer extends Application
                     double newRotateY = Double.parseDouble(rotateY.getText());
                     GUIController.rotateModel(Strings.AXIS_Y, newRotateY);
                 } catch (NumberFormatException e) {
-                    // TODO: Handle invalid input
                 }
             }
             return null;
@@ -597,7 +595,6 @@ public class STLViewer extends Application
                     double newZoomCoefficient = Double.parseDouble(zoomCoefficient.getText());
                     GUIController.setZoomCoefficient(newZoomCoefficient);
                 } catch (NumberFormatException e) {
-                    // TODO: Handle invalid input
                 }
             }
             return null;

@@ -29,6 +29,11 @@ import java.lang.invoke.ConstantCallSite;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
+/**
+ * The GUIController class manages the GUI of the STL Viewer application. It handles the user input to rotate, translate,
+ * and zoom the 3D model. It also manages the camera position and the display of the 3D model. The class also handles
+ * the peer-to-peer connection and the material properties of the 3D model.
+ */
 public class GUIController
 {
     /**
@@ -485,7 +490,7 @@ public class GUIController
     /**
      * Handles the zoom event by moving the camera along the Z-axis based on the scroll direction.
      * The scroll speed is adjusted based on the distance between the camera and the mesh.
-     * The scaling equation is: <i>v<sub>z</sub></i> = <i>v<sub>max</sub></i> - (<i>v<sub>max</sub></i>> * e<sup>-<i>kz</i></sup>)
+     * The scaling equation is: <i>v<sub>z</sub></i> = <i>v<sub>max</sub></i> - (<i>v<sub>max</sub></i> * e<sup>-<i>kz</i></sup>)
      * <p>Precondition: The scroll event must be valid.
      * <p>Postcondition: The mesh is zoomed based on the scroll direction.
      *
