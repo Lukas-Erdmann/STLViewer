@@ -124,4 +124,5 @@ public interface Constants
     double ZOOM_LIMIT_MAX = 10000;
     int ZOOM_LIMIT_MAJOR_TICK_UNIT = 1000;
     double BUTTON_WIDTH_FACTOR = 0.75;
+    int MAX_TRIES = 5;
 }

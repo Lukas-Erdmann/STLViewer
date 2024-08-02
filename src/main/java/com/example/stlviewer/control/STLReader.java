@@ -61,10 +61,10 @@ public class STLReader
      * Precondition: The file path must be valid. The controller must be initialized.
      * Postcondition: The triangles are read from the file and sent to the controller.
      *
-     * @param filePath      The file path of the STL file.
-     * @param controller    The PolyhedronController instance to send the triangles to.
-     * @param parallelized  True if the file should be read in parallel, false otherwise.
-     * @throws IOException  If an error occurs while reading the file.
+     * @param filePath     The file path of the STL file.
+     * @param controller   The PolyhedronController instance to send the triangles to.
+     * @param parallelized True if the file should be read in parallel, false otherwise.
+     * @throws IOException If an error occurs while reading the file.
      */
     public void readSTLFile (String filePath, PolyhedronController controller, boolean parallelized) throws IOException
     {
@@ -190,7 +190,7 @@ public class STLReader
             throw new FileNotFoundException(Strings.EXCEPTION_FILE_NOT_FOUND + filePath);
         } catch (IOException ioException)
         {
-            throw new IOException(Strings.EXCEPTION_WHILE_READING_FILE + filePath);
+            throw new IOException(Strings.EXCEPTION_WHILE_READING_FILE + ioException.getMessage());
         }
     }
 

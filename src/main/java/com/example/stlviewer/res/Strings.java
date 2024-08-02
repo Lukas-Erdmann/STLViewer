@@ -39,7 +39,7 @@ public interface Strings
     /**
      * Exception message for when reading the file fails.
      */
-    String EXCEPTION_WHILE_READING_FILE = "Error while reading file (%s): ";
+    String EXCEPTION_WHILE_READING_FILE = "Error while reading file: ";
     /**
      * Generic exception message if the user enters an invalid input.
      */

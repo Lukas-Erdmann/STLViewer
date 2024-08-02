@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.example.stlviewer.util.RuntimeHandler.exceptionHandler;
+
 /**
  * The MainController class is the main controller class of the application.
  * It is responsible for managing the different controllers and starting the application.
@@ -158,8 +160,13 @@ public class MainController
     public void readSTLFileInConsole (boolean parallelized) throws IOException
     {
         reinitializePolyhedronController();
-        stlReader.readSTLFile(consoleApplication.askForFileName(), polyhedronController, parallelized);
+        // Execute the stlReader.readSTLFile method with exception handling
+        exceptionHandler(() -> {
+            stlReader.readSTLFile(consoleApplication.askForFileName(), polyhedronController, parallelized);
+            return null;}, Constants.MAX_TRIES);
         System.out.println(polyhedronController.getPolyhedron().toString());
+        sortTrianglesByArea();
+        System.exit(Constants.N_ZERO);
     }
 
     /**
