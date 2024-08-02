@@ -7,8 +7,6 @@ import com.example.stlviewer.util.MathUtil;
 import javax.vecmath.Vector3d;
 import java.io.Serializable;
 
-import static com.example.stlviewer.util.RuntimeHandler.logMessage;
-
 /**
  * The Triangle class represents a triangle in a 3D space. It is a polygon that lies in a plane and has 3 vertices and
  * 3 edges. Perpendicular to the plane of the triangle is the normal vector. The class extends the Face class.
@@ -65,12 +63,12 @@ public class Triangle extends Face implements Comparable<Triangle>, Serializable
         comparisonNormal.cross(this.getNormal(), normal);
         if (comparisonNormal.length() > Constants.NORMAL_DIFFERENCE_ROUNDING_TOLERANCE)
         {
-            throw new IllegalArgumentException(Strings.NORMAL_DIFFERENCE_TOLERANCE_EXCEEDED);
+            throw new IllegalArgumentException(Strings.EXCEPTION_NORMAL_DIFFERENCE_TOLERANCE_EXCEEDED);
         }
         // Check if the normal is pointing in the right direction
         if (this.getNormal().dot(normal) < Constants.N_ZERO)
         {
-            throw new IllegalArgumentException(Strings.NORMAL_DIRECTION_INCORRECT);
+            throw new IllegalArgumentException(Strings.EXCEPTION_NORMAL_DIRECTION_INCORRECT);
         }
         // Calculate the area of the triangle
         this.calculateArea();

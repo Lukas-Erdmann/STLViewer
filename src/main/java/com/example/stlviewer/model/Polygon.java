@@ -46,7 +46,7 @@ public class Polygon extends PolygonalChain implements Serializable
             super.addEdge(edge);
         } else
         {
-            throw new IllegalArgumentException(Strings.THE_POLYGON_IS_ALREADY_CLOSED);
+            throw new IllegalArgumentException(Strings.EXCEPTION_POLYGON_ALREADY_CLOSED);
         }
     }
 }

@@ -64,7 +64,7 @@ public class PolygonalChain implements Serializable
         {
             if (edges.contains(edge))
             {
-                throw new IllegalArgumentException(Strings.THE_EDGE_IS_ALREADY_IN_THE_CHAIN);
+                throw new IllegalArgumentException(Strings.EXCEPTION_EDGE_ALREADY_IN_CHAIN);
             } else if (vertices.contains(edge.getStartVertex()))
             {
                 if (vertices.contains(edge.getEndVertex()))
@@ -76,7 +76,7 @@ public class PolygonalChain implements Serializable
                 }
             } else
             {
-                throw new IllegalArgumentException(Strings.THE_START_VERTEX_OF_THE_EDGE_IS_NOT_THE_LAST_VERTEX_OF_THE_CHAIN);
+                throw new IllegalArgumentException(Strings.EXCEPTION_START_VERTEX_NOT_LAST_VERTEX);
             }
         }
 

@@ -171,7 +171,7 @@ public class STLReader
         // Check if the file exists
         if (!stlFile.exists())
         {
-            throw new FileNotFoundException(Strings.FILE_NOT_FOUND + filePath);
+            throw new FileNotFoundException(Strings.EXCEPTION_FILE_NOT_FOUND + filePath);
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(stlFile)))
@@ -181,16 +181,16 @@ public class STLReader
             // Check if the file is empty
             if (headerLine == null)
             {
-                throw new IOException(Strings.FILE_IS_EMPTY + filePath);
+                throw new IOException(Strings.EXCEPTION_FILE_IS_EMPTY + filePath);
             }
             // Return true if the first line starts with "solid"
             return headerLine.trim().startsWith(Strings.STL_ASCII_START_TAG);
         } catch (FileNotFoundException fileNotFoundException)
         {
-            throw new FileNotFoundException(Strings.FILE_NOT_FOUND + filePath);
+            throw new FileNotFoundException(Strings.EXCEPTION_FILE_NOT_FOUND + filePath);
         } catch (IOException ioException)
         {
-            throw new IOException(Strings.ERROR_WHILE_READING_FILE + filePath);
+            throw new IOException(Strings.EXCEPTION_WHILE_READING_FILE + filePath);
         }
     }
 
@@ -229,13 +229,13 @@ public class STLReader
             controller.setReadingFinished(true);
         } catch (FileNotFoundException fileNotFoundException)
         {
-            throw new FileNotFoundException(Strings.FILE_NOT_FOUND + filePath);
+            throw new FileNotFoundException(Strings.EXCEPTION_FILE_NOT_FOUND + filePath);
         } catch (IOException ioException)
         {
-            throw new IOException(Strings.ERROR_WHILE_READING_FILE + filePath);
+            throw new IOException(Strings.EXCEPTION_WHILE_READING_FILE + filePath);
         } catch (IllegalArgumentException illegalArgumentException)
         {
-            throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + illegalArgumentException.getMessage());
+            throw new IllegalArgumentException(Strings.EXCEPTION_ERROR_WHILE_READING_TRIANGLE + illegalArgumentException.getMessage());
         }
     }
 
@@ -255,7 +255,7 @@ public class STLReader
         // Check if the line has the correct number of words and starts with "facet normal"
         if (words.length != Constants.STL_ASCII_FACET_WORDCOUNT || !words[Constants.STL_ASCII_FACET_START_TAG_POS].equals(Strings.STL_ASCII_FACET_START_TAG) || !words[Constants.STL_ASCII_NORMAL_TAG_POS].equals(Strings.STL_ASCII_NORMAL_TAG))
         {
-            throw new IllegalArgumentException(Strings.INVALID_NORMAL_LINE + line);
+            throw new IllegalArgumentException(Strings.EXCEPTION_INVALID_NORMAL_LINE + line);
         }
         // Read the normal from the words
         try
@@ -266,7 +266,7 @@ public class STLReader
             return new Vector3d(x, y, z);
         } catch (NumberFormatException numberFormatException)
         {
-            throw new IllegalArgumentException(Strings.ERROR_PARSING_NORMAL + line);
+            throw new IllegalArgumentException(Strings.EXCEPTION_ERROR_PARSING_NORMAL + line);
         }
     }
 
@@ -291,11 +291,11 @@ public class STLReader
             line = reader.readLine();
             if (line == null || !line.trim().equals(Strings.STL_ASCII_TRIANGLE_START_TAG))
             {
-                throw new IllegalArgumentException(Strings.INVALID_TRIANGLE_LINE + line);
+                throw new IllegalArgumentException(Strings.EXCEPTION_INVALID_TRIANGLE_LINE + line);
             }
         } catch (IOException ioException)
         {
-            throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + ioException.getMessage());
+            throw new IllegalArgumentException(Strings.EXCEPTION_ERROR_WHILE_READING_TRIANGLE + ioException.getMessage());
         }
 
         // Read the three vertices of the triangle
@@ -324,7 +324,7 @@ public class STLReader
         // Check if the line has the correct number of words and starts with "vertex"
         if (words.length != Constants.STL_ASCII_NORMAL_WORDCOUNT || !words[Constants.STL_ASCII_VERTEX_START_TAG_POS].equals(Strings.STL_ASCII_VERTEX_START_TAG))
         {
-            throw new IllegalArgumentException(Strings.INVALID_VERTEX_LINE + line);
+            throw new IllegalArgumentException(Strings.EXCEPTION_INVALID_VERTEX_LINE + line);
         }
 
         // Read the vertex from the words
@@ -336,7 +336,7 @@ public class STLReader
             return new Vertex(x, y, z);
         } catch (NumberFormatException numberFormatException)
         {
-            throw new IllegalArgumentException(Strings.ERROR_PARSING_VERTEX + line);
+            throw new IllegalArgumentException(Strings.EXCEPTION_ERROR_PARSING_VERTEX + line);
         }
     }
 
@@ -359,7 +359,7 @@ public class STLReader
             byteBuffer = ByteBuffer.wrap(Files.readAllBytes(Paths.get(filePath)));
         } catch (InvalidPathException invalidPathException)
         {
-            throw new IOException(Strings.INVALID_FILE_PATH + filePath);
+            throw new IOException(Strings.EXCEPTION_INVALID_FILE_PATH + filePath);
         } catch (OutOfMemoryError outOfMemoryError)
         {
             throw new IOException(Strings.FILE_TOO_LARGE);
@@ -445,7 +445,7 @@ public class STLReader
         {
             // Set the fileIsCorrupted flag to true
             fileIsCorrupted = true;
-            logMessage(Strings.ERROR_WHILE_READING_TRIANGLE + illegalArgumentException.getMessage());
+            logMessage(Strings.EXCEPTION_ERROR_WHILE_READING_TRIANGLE + illegalArgumentException.getMessage());
             // Discern if the exception was caused by a wrong vertex or a wrong normal
             triangle = discernTriangleDamage(vertices, normal);
         }
@@ -546,9 +546,9 @@ public class STLReader
                 }
             }
             // If the attribute bytes are not found, throw an exception
-            throw new IllegalArgumentException(Strings.ATTRIBUTE_BYTES_NOT_FOUND);
+            throw new IllegalArgumentException(Strings.EXCEPTION_ATTRIBUTE_BYTES_NOT_FOUND);
         } catch (Exception e) {
-            throw new IllegalArgumentException(Strings.ERROR_WHILE_READING_TRIANGLE + e.getMessage());
+            throw new IllegalArgumentException(Strings.EXCEPTION_ERROR_WHILE_READING_TRIANGLE + e.getMessage());
         }
     }
 }

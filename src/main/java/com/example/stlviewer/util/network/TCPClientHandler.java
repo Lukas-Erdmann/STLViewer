@@ -55,7 +55,7 @@ public class TCPClientHandler extends Thread
 
         } catch (IOException e)
         {
-            System.err.println(Strings.AN_EXCEPTION_OCCURRED_PROCESSING_CLIENT_COMMANDS + e.getMessage());
+            System.err.println(Strings.EXCEPTION_PROCESSING_CLIENT_COMMANDS + e.getMessage());
             e.printStackTrace();
         } finally
         {
@@ -64,7 +64,7 @@ public class TCPClientHandler extends Thread
                 clientSocket.close();
             } catch (IOException e)
             {
-                System.err.println(Strings.AN_EXCEPTION_OCCURRED_CLOSING_CLIENT_SOCKET + e.getMessage());
+                System.err.println(Strings.EXCEPTION_CLOSING_CLIENT_SOCKET + e.getMessage());
             }
         }
     }
@@ -92,7 +92,7 @@ public class TCPClientHandler extends Thread
                     output.println(Strings.EXECUTED_COMMAND + command);
                 } catch (Exception exception)
                 {
-                    output.println(Strings.AN_EXCEPTION_OCCURRED_EXECUTING_THE_COMMAND + exception.getMessage());
+                    output.println(Strings.EXCEPTION_EXECUTING_COMMAND + exception.getMessage());
                     exception.printStackTrace();
                 }
             } else

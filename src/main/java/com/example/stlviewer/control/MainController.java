@@ -136,13 +136,13 @@ public class MainController
         {
             this.stlReader.readSTLFile(filePath, polyhedronController, parallelized);
         } catch (FileNotFoundException fileNotFoundException) {
-            LOGGER.log(Level.SEVERE, Strings.FILE_NOT_FOUND + filePath, fileNotFoundException);
+            LOGGER.log(Level.SEVERE, Strings.EXCEPTION_FILE_NOT_FOUND + filePath, fileNotFoundException);
         } catch (IOException ioException) {
-            LOGGER.log(Level.SEVERE, Strings.I_O_ERROR_WHILE_READING_THE_FILE + filePath, ioException);
+            LOGGER.log(Level.SEVERE, Strings.EXCEPTION_IO_ERROR_WHILE_READING_FILE + filePath, ioException);
         } catch (IllegalArgumentException illegalArgumentException) {
-            throw new IllegalArgumentException(Strings.FILE_IS_CORRUPTED_AND_CANNOT_BE_READ + filePath);
+            throw new IllegalArgumentException(Strings.EXCEPTION_FILE_CORRUPTED + filePath);
         } catch (Exception exception) {
-            LOGGER.log(Level.SEVERE, Strings.AN_UNEXPECTED_ERROR_OCCURRED_WHILE_OPENING_THE_FILE + filePath, exception);
+            LOGGER.log(Level.SEVERE, Strings.EXCEPTION_UNEXPECTED_ERROR_WHILE_OPENING_FILE + filePath, exception);
         }
     }
 
@@ -191,7 +191,7 @@ public class MainController
             });
         } catch (Exception exception)
         {
-            throw new RuntimeException(Strings.UNABLE_TO_START_TCP_CONNECTION, exception);
+            throw new RuntimeException(Strings.EXCEPTION_UNABLE_TO_START_TCP_CONNECTION, exception);
         }
     }
 
@@ -250,7 +250,7 @@ public class MainController
             });
         } catch (Exception exception)
         {
-            throw new RuntimeException(Strings.UNABLE_TO_START_P2P_CONNECTION, exception);
+            throw new RuntimeException(Strings.EXCEPTION_UNABLE_TO_START_P2P_CONNECTION, exception);
         }
     }
 

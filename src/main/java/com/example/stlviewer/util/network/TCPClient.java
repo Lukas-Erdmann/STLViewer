@@ -60,7 +60,7 @@ public class TCPClient
             handleUserInput(output, scanner);
         } catch (IOException ioException)
         {
-            System.err.println(Strings.FAILED_CONNECTING_TO_SERVER + ioException.getMessage());
+            System.err.println(Strings.EXCEPTION_FAILED_CONNECTING_TO_SERVER + ioException.getMessage());
         }
     }
 

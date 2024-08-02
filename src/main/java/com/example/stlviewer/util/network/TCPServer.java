@@ -91,7 +91,7 @@ public class TCPServer
                 handleClient(serverSocket.accept());
             } catch (IOException ioException)
             {
-                System.err.println(Strings.ERROR_ACCEPTING_CLIENT_CONNECTION + ioException.getMessage());
+                System.err.println(Strings.EXCEPTION_ACCEPTING_CLIENT_CONNECTION + ioException.getMessage());
             }
         }
     }

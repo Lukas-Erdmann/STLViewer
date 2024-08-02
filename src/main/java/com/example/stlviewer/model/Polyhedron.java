@@ -193,7 +193,7 @@ public class Polyhedron implements Serializable
                 Strings.BOUNDING_BOX_XMAX + MathUtil.roundToThreeDigits(boundingBox[3]) +
                 Strings.BOUNDING_BOX_YMAX + MathUtil.roundToThreeDigits(boundingBox[4]) +
                 Strings.BOUNDING_BOX_ZMAX + MathUtil.roundToThreeDigits(boundingBox[5]) +
-                Strings.BLOCKY_BRACKET_RIGHT;
+                Strings.SQUARE_BRACKET_RIGHT;
     }
 
     /**

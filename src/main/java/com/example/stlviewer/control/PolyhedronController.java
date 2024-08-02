@@ -8,7 +8,6 @@ import com.example.stlviewer.res.Constants;
 import com.example.stlviewer.res.Strings;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -103,7 +102,7 @@ public class PolyhedronController implements Runnable
                         if (executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
                             logMessage(Strings.FINISHED_COMPILING_POLYHEDRON);
                         } else {
-                            throw new InterruptedException(Strings.TIMEOUT_OCCURRED_BEFORE_POLYHEDRON_WAS_FINISHED);
+                            throw new InterruptedException(Strings.EXCEPTION_TIMEOUT_BEFORE_POLYHEDRON_WAS_FINISHED);
                         }
                     } catch (InterruptedException interruptedException) {
                         Thread.currentThread().interrupt();
@@ -528,7 +527,7 @@ public class PolyhedronController implements Runnable
             triangle.setId(idCounter.get());
             if (polyhedron.getTriangles().containsKey(triangle.getId()))
             {
-                throw new IllegalArgumentException(String.format(Strings.TRIANGLE_ID_ALREADY_EXISTS, triangle.getId()));
+                throw new IllegalArgumentException(String.format(Strings.EXCEPTION_TRIANGLE_ID_ALREADY_EXISTS, triangle.getId()));
             } else
             {
 
