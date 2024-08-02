@@ -15,6 +15,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -205,12 +206,15 @@ public class STLViewer extends Application
         return fileChooser.showOpenDialog(stage);
     }
 
-    public void displayFileErrorDialog ()
+    public void displayFileErrorDialog (String message)
     {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(Strings.STLV_ERROR);
         alert.setHeaderText(Strings.STLV_FILE_ERROR);
-        alert.setContentText(Strings.STLV_FILE_ERROR_MESSAGE);
+        // Create a label for the message
+        Label messageLabel = new Label(message);
+        messageLabel.setWrapText(true);
+        alert.getDialogPane().setContent(messageLabel);
         alert.showAndWait();
     }
 

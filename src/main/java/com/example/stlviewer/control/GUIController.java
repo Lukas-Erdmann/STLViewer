@@ -196,7 +196,7 @@ public class GUIController
                 // Print the stack trace if the file could not be loaded
                 loadFileTask.getException().printStackTrace();
                 // Display an error dialog if the file could not be loaded
-                stlViewer.displayFileErrorDialog();
+                stlViewer.displayFileErrorDialog(loadFileTask.getException().getMessage());
             });
 
             new Thread(loadFileTask).start();

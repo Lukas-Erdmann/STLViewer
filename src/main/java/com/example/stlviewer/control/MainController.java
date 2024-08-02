@@ -130,7 +130,7 @@ public class MainController
      *
      * @param polyhedronController     The polyhedron controller to store the data in.
      */
-    public void openFile (String filePath, PolyhedronController polyhedronController)
+    public void openFile (String filePath, PolyhedronController polyhedronController) throws IOException
     {
         // TODO: Rework the Logger usage
         reinitializePolyhedronController();
@@ -140,7 +140,7 @@ public class MainController
         } catch (FileNotFoundException fileNotFoundException) {
             LOGGER.log(Level.SEVERE, Strings.EXCEPTION_FILE_NOT_FOUND + filePath, fileNotFoundException);
         } catch (IOException ioException) {
-            LOGGER.log(Level.SEVERE, Strings.EXCEPTION_IO_ERROR_WHILE_READING_FILE + filePath, ioException);
+            throw new IOException(Strings.EXCEPTION_IO_ERROR_WHILE_READING_FILE + ioException.getMessage());
         } catch (IllegalArgumentException illegalArgumentException) {
             throw new IllegalArgumentException(Strings.EXCEPTION_FILE_CORRUPTED + filePath);
         } catch (Exception exception) {

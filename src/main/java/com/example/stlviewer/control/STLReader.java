@@ -73,12 +73,18 @@ public class STLReader
         RuntimeHandler runtimeHandler = new RuntimeHandler();
         runtimeHandler.startTimer();
 
-        if (parallelized)
+        try
         {
-            readSTLFileParallelized(controller);
-        } else
+            if (parallelized)
+            {
+                readSTLFileParallelized(controller);
+            } else
+            {
+                readSTLFileSequential(controller);
+            }
+        } catch (IOException ioException)
         {
-            readSTLFileSequential(controller);
+            throw new IOException(ioException.getMessage());
         }
         // If the file is corrupted, run additional validation checks and repairs
         if (fileIsCorrupted)
@@ -109,14 +115,20 @@ public class STLReader
      */
     public void readSTLFileSequential (PolyhedronController controller) throws IOException
     {
-        if (isASCII())
+        try
         {
-            logMessage(Strings.SOUT_READING_ASCII_FILE);
-            readSTLASCII(controller, false);
-        } else
+            if (isASCII())
+            {
+                logMessage(Strings.SOUT_READING_ASCII_FILE);
+                readSTLASCII(controller, false);
+            } else
+            {
+                logMessage(Strings.SOUT_READING_BINARY_FILE);
+                readSTLBinary(controller, false);
+            }
+        } catch (IOException ioException)
         {
-            logMessage(Strings.SOUT_READING_BINARY_FILE);
-            readSTLBinary(controller, false);
+            throw new IOException(ioException.getMessage());
         }
 
         // Calculate volume, surface area, and other properties of the polyhedron
@@ -137,14 +149,20 @@ public class STLReader
         Thread readerThread = new Thread(controller);
         readerThread.start();
 
-        if (isASCII())
+        try
         {
-            logMessage(Strings.SOUT_READING_ASCII_FILE);
-            readSTLASCII(controller, true);
-        } else
+            if (isASCII())
+            {
+                logMessage(Strings.SOUT_READING_ASCII_FILE);
+                readSTLASCII(controller, true);
+            } else
+            {
+                logMessage(Strings.SOUT_READING_BINARY_FILE);
+                readSTLBinary(controller, true);
+            }
+        } catch (IOException ioException)
         {
-            logMessage(Strings.SOUT_READING_BINARY_FILE);
-            readSTLBinary(controller, true);
+            throw new IOException(ioException.getMessage());
         }
 
         try
@@ -187,10 +205,10 @@ public class STLReader
             return headerLine.trim().startsWith(Strings.STL_ASCII_START_TAG);
         } catch (FileNotFoundException fileNotFoundException)
         {
-            throw new FileNotFoundException(Strings.EXCEPTION_FILE_NOT_FOUND + filePath);
+            throw new FileNotFoundException(Strings.EXCEPTION_FILE_NOT_FOUND);
         } catch (IOException ioException)
         {
-            throw new IOException(Strings.EXCEPTION_WHILE_READING_FILE + ioException.getMessage());
+            throw new IOException(ioException.getMessage());
         }
     }
 
