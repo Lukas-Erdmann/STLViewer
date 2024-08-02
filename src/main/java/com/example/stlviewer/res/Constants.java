@@ -121,4 +121,7 @@ public interface Constants
     int INFO_LABELS_SPACING = 10;
     int FONT_SIZE_LABEL_TEXT = 14;
     int FONT_SIZE_LABELS_TITLE = 16;
+    double ZOOM_LIMIT_MAX = 10000;
+    int ZOOM_LIMIT_MAJOR_TICK_UNIT = 1000;
+    double BUTTON_WIDTH_FACTOR = 0.75;
 }

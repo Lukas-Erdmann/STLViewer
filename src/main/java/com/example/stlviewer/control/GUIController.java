@@ -702,7 +702,8 @@ public class GUIController
         translation.zProperty().addListener((observable, oldValue, newValue) -> stlViewer.updateViewProperties());
         rotationX.angleProperty().addListener((observable, oldValue, newValue) -> stlViewer.updateViewProperties());
         rotationY.angleProperty().addListener((observable, oldValue, newValue) -> stlViewer.updateViewProperties());
-        // TODO: Find out how to use Listeners to trigger the sendP2PData method
+        zoomLimit.bindBidirectional(stlViewer.getZoomLimitSlider().valueProperty());
+        zoomLimit.addListener((observable, oldValue, newValue) -> sendP2PData(collectP2PData(false)));
     }
 
     // --- P2P methods --- //

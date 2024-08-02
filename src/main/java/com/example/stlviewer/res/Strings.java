@@ -298,6 +298,7 @@ public interface Strings
     String STLV_FILE_ERROR = "File Error";
     String STLV_FILE_ERROR_MESSAGE = "An error occurred while reading the file.";
     String STLV_ERROR = "Error";
+    String STLV_RESET_ZOOM_LIMIT = "Reset Zoom Limit";
     String ARIAL = "Arial";
     String FORMAT_STRING_2F = "%.2f";
     String P2PPACKAGE_TOSTRING = "P2PPackage{";

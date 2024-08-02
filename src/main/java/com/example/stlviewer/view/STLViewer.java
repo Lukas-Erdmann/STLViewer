@@ -76,6 +76,14 @@ public class STLViewer extends Application
      */
     private final Label translationLabel = new Label();
     /**
+     * A Slider for setting the zoom speed limit.
+     */
+    private final Slider zoomLimitSlider = new Slider(Constants.ZOOM_SPEED_MIN, Constants.ZOOM_LIMIT_MAX, Constants.ZOOM_LIMIT_DEFAULT);
+    /**
+     * A Button for resetting the zoom speed limit.
+     */
+    private final Button resetZoomButton = new Button(Strings.STLV_RESET_ZOOM_LIMIT);
+    /**
      * The Group object for the main 3D scene.
      */
     private final Group threeDGroup = new Group();
@@ -617,6 +625,15 @@ public class STLViewer extends Application
         materialDescriptionLabel.setWrapText(true);
         materialLabel.setFont(Font.font(Strings.ARIAL, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT));
 
+        // Configure the slider for the zoom limit
+        zoomLimitSlider.setShowTickLabels(true);
+        zoomLimitSlider.setShowTickMarks(true);
+        zoomLimitSlider.setMajorTickUnit(Constants.ZOOM_LIMIT_MAJOR_TICK_UNIT);
+
+        // Configure the reset zoom button
+        resetZoomButton.setOnAction(_ -> GUIController.setZoomLimit(Constants.ZOOM_LIMIT_DEFAULT));
+        resetZoomButton.setPrefWidth(Constants.INFO_LABELS_WIDTH * Constants.BUTTON_WIDTH_FACTOR);
+
         // Add the labels for the number of triangles, surface area, and volume
         infoLabels.getChildren().addAll(
                 makeLabelArial(Strings.STLV_MODEL_INFORMATION, FontWeight.BOLD, Constants.FONT_SIZE_LABELS_TITLE),
@@ -628,7 +645,9 @@ public class STLViewer extends Application
                 makeLabelArial(Strings.STLV_TRANSLATION_LABEL, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT), translationLabel,
                 makeLabelArial(Strings.STLV_MATERIAL_INFORMATION, FontWeight.BOLD, Constants.FONT_SIZE_LABELS_TITLE),
                 materialLabel, materialDescriptionLabel,
-                makeLabelArial(Strings.STLV_WEIGHT, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT), weightLabel
+                makeLabelArial(Strings.STLV_WEIGHT, FontWeight.NORMAL, Constants.FONT_SIZE_LABEL_TEXT), weightLabel,
+                makeLabelArial(Strings.STLV_ZOOM_LIMIT, FontWeight.NORMAL, Constants.FONT_SIZE_LABELS_TITLE), zoomLimitSlider,
+                resetZoomButton
         );
         return infoLabels;
     }
@@ -652,6 +671,7 @@ public class STLViewer extends Application
                     GUIController.getTranslation().getY(),
                     GUIController.getTranslation().getZ()
             ));
+            zoomLimitSlider.setValue(GUIController.getZoomLimit());
         });
     }
 
@@ -820,5 +840,14 @@ public class STLViewer extends Application
      */
     public void setMaterials(ArrayList<com.example.stlviewer.model.Material> materials) {
         this.materials = materials;
+    }
+
+    /**
+     * Returns the Slider object for the zoom limit.
+     *
+     * @return The Slider object for the zoom limit.
+     */
+    public Slider getZoomLimitSlider() {
+        return zoomLimitSlider;
     }
 }
